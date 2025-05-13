@@ -1,0 +1,1050 @@
+<div class="sidebar-header">
+    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNDAgNjAiPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik01NS40IDE1LjVoMTI5LjJjNi43IDAgMTIuMiA1LjQgMTIuMiAxMi4xdjQuOGMwIDYuNy01LjQgMTIuMS0xMi4yIDEyLjFINTUuNGMtNi43IDAtMTIuMi01LjQtMTIuMi0xMi4xdi00LjhjMC02LjcgNS41LTEyLjEgMTIuMi0xMi4xem0xNi41IDkuOGMtMy4zIDAtNiAyLjctNiA2cy0yLjcgNi02IDZoLTIuMmMwLTYuNiA1LjQtMTIgMTItMTJoMi4yYzAgMy4zIDIuNyA2IDYgNnMyLjcgNiA2IDZoMmMtLjEgMi44LTIuMiA1LjEtNSA1LjloLS4xYy0uOC4yLTEuNi4zLTIuNS4zaC0xNS41Yy0zLjMgMC02LTIuNy02LTZIMzljMy4zIDAgNi0yLjcgNi02czIuNy02IDYtNmgxNi45YzAtMy4zIDIuNy02IDYtNnY2em0zMC42IDBjMy4zIDAgNi0yLjcgNi02aDEzLjRjMy4zIDAgNiAyLjcgNiA2cy0yLjcgNi02IDZoLTYuN2MwIDMuMy0yLjcgNi02IDZoLTEzLjRWMTkuM2g2Ljd6bTQ1LjggMGMzLjMgMCA2LTIuNyA2LTZoMTMuNGMzLjMgMCA2IDIuNyA2IDZzLTIuNyA2LTYgNmgtNi43YzAgMy4zLTIuNyA2LTYgNmgtMTMuNFYxOS4zaDYuN3ptNDUuOSAwYzMuMyAwIDYtMi43IDYtNmgxMy40YzMuMyAwIDYgMi43IDYgNnMtMi43IDYtNiA2aC02LjdjMCAzLjMtMi43IDYtNiA2aC0xMy40VjE5LjNoNi43eiIvPjwvc3ZnPg==" alt="Total Logo">
+    <div id="ThemeLangMode_settings">
+        <button id="ThemeLangMode_themeBtn" class="ThemeLangMode_settingBtn" title="Changer de thème">
+            <i class="fas fa-palette"></i>
+        </button>
+        <button id="ThemeLangMode_darkModeBtn" class="ThemeLangMode_settingBtn" title="Mode jour/nuit">
+            <i class="fas fa-moon"></i>
+        </button>
+        <button id="ThemeLangMode_langBtn" class="ThemeLangMode_settingBtn" title="Changer de langue">
+            <i class="fas fa-globe"></i>
+        </button>
+    </div>
+</div>
+
+<style>
+  /*═══════════════════════════*\
+  🔵 PARTIE 2 - Theme & Language Settings
+\*═══════════════════════════*/
+
+#ThemeLangMode_settings {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.ThemeLangMode_settingBtn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ThemeLangMode_settingBtn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.ThemeLangMode_settingBtn i {
+    font-size: 16px;
+}
+
+.ThemeLangMode_popup {
+    position: absolute;
+    top: 80px;
+    right: 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    z-index: 1050;
+    overflow: hidden;
+    width: 280px;
+    transform: translateY(-20px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.ThemeLangMode_popup.active {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.ThemeLangMode_popup-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ThemeLangMode_popup-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--dark);
+    margin: 0;
+}
+
+.ThemeLangMode_popup-close {
+    background: none;
+    border: none;
+    color: var(--gray);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.ThemeLangMode_popup-close:hover {
+    background-color: #f5f5f5;
+}
+
+.ThemeLangMode_popup-body {
+    padding: 15px 20px;
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.ThemeLangMode_option-group {
+    margin-bottom: 20px;
+}
+
+.ThemeLangMode_option-group:last-child {
+    margin-bottom: 0;
+}
+
+.ThemeLangMode_option-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray);
+    margin-bottom: 10px;
+    display: block;
+}
+
+.ThemeLangMode_themes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.ThemeLangMode_theme-item {
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    height: 60px;
+}
+
+.ThemeLangMode_theme-item.active {
+    border-color: var(--primary);
+}
+
+.ThemeLangMode_theme-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.ThemeLangMode_theme-color {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.ThemeLangMode_theme-primary {
+    flex: 1;
+}
+
+.ThemeLangMode_theme-secondary {
+    flex: 1;
+}
+
+.ThemeLangMode_theme-check {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.ThemeLangMode_theme-item.active .ThemeLangMode_theme-check {
+    opacity: 1;
+}
+
+.ThemeLangMode_theme-name {
+    text-align: center;
+    font-size: 11px;
+    margin-top: 5px;
+    font-weight: 500;
+    color: var(--dark);
+}
+
+.ThemeLangMode_toggle-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-bottom: 5px;
+}
+
+.ThemeLangMode_toggle-label {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    color: var(--dark);
+}
+
+.ThemeLangMode_toggle-icon {
+    margin-right: 10px;
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.ThemeLangMode_toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.ThemeLangMode_toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.ThemeLangMode_toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 34px;
+    transition: .4s;
+}
+
+.ThemeLangMode_toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+.ThemeLangMode_toggle-switch input:checked + .ThemeLangMode_toggle-slider {
+    background-color: var(--primary);
+}
+
+.ThemeLangMode_toggle-switch input:checked + .ThemeLangMode_toggle-slider:before {
+    transform: translateX(20px);
+}
+
+.ThemeLangMode_languages {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.ThemeLangMode_lang-item {
+    padding: 10px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+}
+
+.ThemeLangMode_lang-item:hover {
+    background: #f0f0f0;
+}
+
+.ThemeLangMode_lang-item.active {
+    border-color: var(--primary);
+    background: rgba(230, 0, 0, 0.05);
+}
+
+.ThemeLangMode_lang-flag {
+    margin-right: 8px;
+    font-size: 18px;
+}
+
+.ThemeLangMode_lang-name {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Adaptation pour le mode sombre */
+[data-theme-mode="dark"] {
+    --light: #222;
+    --dark: #f8f9fa;
+    --gray: #adb5bd;
+    background-color: #121212;
+    color: #f8f9fa;
+}
+/* Améliorations complètes pour le mode sombre */
+[data-theme-mode="dark"] {
+    /* Fond de page principal */
+    background-color: #121212;
+    color: #f8f9fa;
+}
+
+/* Tableaux en mode sombre - règles renforcées avec spécificité élevée */
+[data-theme-mode="dark"] table.table,
+[data-theme-mode="dark"] .table {
+    color: #f8f9fa !important;
+    background-color: #1e1e1e !important;
+}
+
+[data-theme-mode="dark"] .table thead th {
+    background-color: #252525 !important;
+    color: #f8f9fa !important;
+    border-color: #333 !important;
+}
+
+[data-theme-mode="dark"] .table tbody tr,
+[data-theme-mode="dark"] .table tbody td {
+    background-color: #1e1e1e !important;
+    color: #f8f9fa !important;
+    border-color: #333 !important;
+}
+
+[data-theme-mode="dark"] .table-responsive {
+    background-color: #1e1e1e !important;
+}
+
+[data-theme-mode="dark"] .table-hover tbody tr:hover {
+    background-color: #2a2a2a !important;
+}
+
+/* Correction pour toutes les modales */
+[data-theme-mode="dark"] .modal-content {
+    background-color: #1e1e1e !important;
+    color: #f8f9fa !important;
+    border-color: #333 !important;
+}
+
+[data-theme-mode="dark"] .modal-header,
+[data-theme-mode="dark"] .modal-footer {
+    border-color: #333 !important;
+}
+
+[data-theme-mode="dark"] .modal-header:not(.bg-primary):not([class*="bg-"]) {
+    background-color: #252525 !important;
+}
+
+[data-theme-mode="dark"] .modal-footer {
+    background-color: #1e1e1e !important;
+}
+
+[data-theme-mode="dark"] .modal-body {
+    background-color: #1e1e1e !important;
+    color: #f8f9fa !important;
+}
+
+/* Notifications en mode sombre */
+[data-theme-mode="dark"] .notification {
+    background-color: #252525 !important;
+    color: #f8f9fa !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme-mode="dark"] .notification-message {
+    color: #e0e0e0 !important;
+}
+
+[data-theme-mode="dark"] .notification-close {
+    color: #b0b0b0 !important;
+}
+
+/* Correction pour le contenu principal */
+[data-theme-mode="dark"] #content,
+[data-theme-mode="dark"] .content-section {
+    background-color: #121212 !important;
+    color: #f8f9fa !important;
+}
+
+/* Section "À propos" */
+[data-theme-mode="dark"] #about {
+    background-color: #121212 !important;
+    color: #f8f9fa !important;
+}
+
+[data-theme-mode="dark"] .about-section {
+    background-color: #1e1e1e !important;
+    color: #f8f9fa !important;
+}
+
+/* Amélioration des formulaires dans modales et général */
+[data-theme-mode="dark"] input.form-control[readonly],
+[data-theme-mode="dark"] input.form-control:read-only {
+    background-color: #2a2a2a !important;
+    color: #adb5bd !important;
+    border-color: #444 !important;
+}
+
+/* Corrections pour les cartes stat */
+[data-theme-mode="dark"] .stat-card.bg-white {
+    background-color: #1e1e1e !important;
+    color: #f8f9fa !important;
+}
+
+[data-theme-mode="dark"] .stat-value {
+    color: #f8f9fa !important;
+}
+
+[data-theme-mode="dark"] .stat-label {
+    color: #adb5bd !important;
+}
+
+/* Correction pour toutes les zones textuelles */
+[data-theme-mode="dark"] p, 
+[data-theme-mode="dark"] h1, 
+[data-theme-mode="dark"] h2, 
+[data-theme-mode="dark"] h3, 
+[data-theme-mode="dark"] h4, 
+[data-theme-mode="dark"] h5, 
+[data-theme-mode="dark"] h6,
+[data-theme-mode="dark"] .lead,
+[data-theme-mode="dark"] .text-center,
+[data-theme-mode="dark"] .text-muted {
+    color: #f8f9fa !important;
+}
+
+[data-theme-mode="dark"] .text-muted {
+    color: #adb5bd !important;
+}
+
+/* Style pour le contenu des alertes et zones d'information */
+[data-theme-mode="dark"] .card-body {
+    background-color: #1e1e1e !important;
+    color: #f8f9fa !important;
+}
+
+/* Bordures des tableaux */
+[data-theme-mode="dark"] .table td, 
+[data-theme-mode="dark"] .table th {
+    border-color: #333 !important;
+}
+
+/* Style pour les btn-close des modales en mode sombre */
+[data-theme-mode="dark"] .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Style pour les champs input/select/textarea en général */
+[data-theme-mode="dark"] .form-control,
+[data-theme-mode="dark"] .form-select,
+[data-theme-mode="dark"] .form-control:focus,
+[data-theme-mode="dark"] .form-select:focus {
+    background-color: #2a2a2a !important;
+    color: #f8f9fa !important;
+    border-color: #444 !important;
+}
+
+/* Boutons secondaires en mode sombre */
+[data-theme-mode="dark"] .btn-secondary {
+    background-color: #424242 !important;
+    border-color: #494949 !important;
+    color: #f8f9fa !important;
+}
+
+[data-theme-mode="dark"] .btn-secondary:hover {
+    background-color: #4a4a4a !important;
+    border-color: #525252 !important;
+}
+
+/* Assurer que le fond de body/html est également sombre */
+[data-theme-mode="dark"] body,
+[data-theme-mode="dark"] html {
+    background-color: #121212 !important;
+}
+
+
+/* Surcharge spécifique pour le mode sombre */
+[data-theme-mode="dark"] .card,
+[data-theme-mode="dark"] .stat-card,
+[data-theme-mode="dark"] .admin-item,
+[data-theme-mode="dark"] .profile-section,
+[data-theme-mode="dark"] .ThemeLangMode_popup {
+    background-color: #1e1e1e;
+    color: #f8f9fa;
+}
+
+[data-theme-mode="dark"] .card-header {
+    background-color: #282828;
+    color: #f8f9fa;
+    border-bottom-color: #333;
+}
+
+[data-theme-mode="dark"] .table {
+    color: #f8f9fa;
+}
+
+[data-theme-mode="dark"] .form-control,
+[data-theme-mode="dark"] .form-select {
+    background-color: #333;
+    border-color: #444;
+    color: #f8f9fa;
+}
+
+[data-theme-mode="dark"] .form-control::placeholder {
+    color: #adb5bd;
+}
+
+[data-theme-mode="dark"] .btn-secondary {
+    background-color: #444;
+    border-color: #555;
+}
+
+[data-theme-mode="dark"] .alert-info {
+    background-color: #1a3a53;
+    color: #9ed2f1;
+    border-color: #236693;
+}
+
+[data-theme-mode="dark"] .ThemeLangMode_toggle-group {
+    background-color: #2a2a2a;
+}
+
+[data-theme-mode="dark"] .ThemeLangMode_lang-item {
+    background-color: #2a2a2a;
+}
+
+[data-theme-mode="dark"] .ThemeLangMode_lang-item:hover {
+    background-color: #333;
+}
+
+[data-theme-mode="dark"] .ThemeLangMode_lang-item.active {
+    background-color: rgba(230, 0, 0, 0.15);
+}
+
+[data-theme-mode="dark"] .ThemeLangMode_popup-close:hover {
+    background-color: #333;
+}
+
+[data-theme-mode="dark"] .table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme-mode="dark"] .badge-in-stock {
+    background-color: rgba(0, 163, 106, 0.15);
+}
+
+[data-theme-mode="dark"] .badge-low-stock {
+    background-color: rgba(247, 185, 36, 0.15);
+}
+
+[data-theme-mode="dark"] .badge-out-of-stock {
+    background-color: rgba(244, 67, 54, 0.15);
+}
+
+/* Couleurs spécifiques aux thèmes */
+[data-theme="default"] {
+    --primary: #e60000;
+    --primary-dark: #c00000;
+    --secondary: #003366;
+}
+
+[data-theme="blue"] {
+    --primary: #1976d2;
+    --primary-dark: #0d47a1;
+    --secondary: #263238;
+}
+
+[data-theme="green"] {
+    --primary: #2e7d32;
+    --primary-dark: #1b5e20;
+    --secondary: #37474f;
+}
+
+[data-theme="purple"] {
+    --primary: #7b1fa2;
+    --primary-dark: #4a148c;
+    --secondary: #212121;
+}
+
+[data-theme="orange"] {
+    --primary: #e65100;
+    --primary-dark: #bf360c;
+    --secondary: #263238;
+}
+
+</style>
+
+<!-- À la fermeture de app-container -->
+
+<!-- Modales pour les réglages de thème/langue -->
+<div id="ThemeLangMode_themePopup" class="ThemeLangMode_popup">
+    <div class="ThemeLangMode_popup-header">
+        <h5 class="ThemeLangMode_popup-title">Choisir un thème</h5>
+        <button class="ThemeLangMode_popup-close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ThemeLangMode_popup-body">
+        <div class="ThemeLangMode_option-group">
+            <label class="ThemeLangMode_option-label">Apparence</label>
+            <div class="ThemeLangMode_toggle-group">
+                <div class="ThemeLangMode_toggle-label">
+                    <i class="fas fa-moon ThemeLangMode_toggle-icon"></i>
+                    Mode sombre
+                </div>
+                <label class="ThemeLangMode_toggle-switch">
+                    <input type="checkbox" id="ThemeLangMode_darkModeToggle">
+                    <span class="ThemeLangMode_toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="ThemeLangMode_option-group">
+            <label class="ThemeLangMode_option-label">Couleurs du thème</label>
+            <div class="ThemeLangMode_themes">
+                <div class="ThemeLangMode_theme-item active" data-theme="default">
+                    <div class="ThemeLangMode_theme-color">
+                        <div class="ThemeLangMode_theme-primary" style="background-color: #e60000;"></div>
+                        <div class="ThemeLangMode_theme-secondary" style="background-color: #003366;"></div>
+                    </div>
+                    <div class="ThemeLangMode_theme-check"><i class="fas fa-check"></i></div>
+                    <div class="ThemeLangMode_theme-name">Total</div>
+                </div>
+                <div class="ThemeLangMode_theme-item" data-theme="blue">
+                    <div class="ThemeLangMode_theme-color">
+                        <div class="ThemeLangMode_theme-primary" style="background-color: #1976d2;"></div>
+                        <div class="ThemeLangMode_theme-secondary" style="background-color: #263238;"></div>
+                    </div>
+                    <div class="ThemeLangMode_theme-check"><i class="fas fa-check"></i></div>
+                    <div class="ThemeLangMode_theme-name">Bleu</div>
+                </div>
+                <div class="ThemeLangMode_theme-item" data-theme="green">
+                    <div class="ThemeLangMode_theme-color">
+                        <div class="ThemeLangMode_theme-primary" style="background-color: #2e7d32;"></div>
+                        <div class="ThemeLangMode_theme-secondary" style="background-color: #37474f;"></div>
+                    </div>
+                    <div class="ThemeLangMode_theme-check"><i class="fas fa-check"></i></div>
+                    <div class="ThemeLangMode_theme-name">Vert</div>
+                </div>
+                <div class="ThemeLangMode_theme-item" data-theme="purple">
+                    <div class="ThemeLangMode_theme-color">
+                        <div class="ThemeLangMode_theme-primary" style="background-color: #7b1fa2;"></div>
+                        <div class="ThemeLangMode_theme-secondary" style="background-color: #212121;"></div>
+                    </div>
+                    <div class="ThemeLangMode_theme-check"><i class="fas fa-check"></i></div>
+                    <div class="ThemeLangMode_theme-name">Violet</div>
+                </div>
+                <div class="ThemeLangMode_theme-item" data-theme="orange">
+                    <div class="ThemeLangMode_theme-color">
+                        <div class="ThemeLangMode_theme-primary" style="background-color: #e65100;"></div>
+                        <div class="ThemeLangMode_theme-secondary" style="background-color: #263238;"></div>
+                    </div>
+                    <div class="ThemeLangMode_theme-check"><i class="fas fa-check"></i></div>
+                    <div class="ThemeLangMode_theme-name">Orange</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="ThemeLangMode_langPopup" class="ThemeLangMode_popup">
+    <div class="ThemeLangMode_popup-header">
+        <h5 class="ThemeLangMode_popup-title">Choisir une langue</h5>
+        <button class="ThemeLangMode_popup-close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ThemeLangMode_popup-body">
+        <div class="ThemeLangMode_option-group">
+            <div class="ThemeLangMode_languages">
+                <div class="ThemeLangMode_lang-item active" data-lang="fr">
+                    <span class="ThemeLangMode_lang-flag">🇫🇷</span>
+                    <span class="ThemeLangMode_lang-name">Français</span>
+                </div>
+                <div class="ThemeLangMode_lang-item" data-lang="en">
+                    <span class="ThemeLangMode_lang-flag">🇬🇧</span>
+                    <span class="ThemeLangMode_lang-name">English</span>
+                </div>
+                <div class="ThemeLangMode_lang-item" data-lang="zh">
+                    <span class="ThemeLangMode_lang-flag">🇨🇳</span>
+                    <span class="ThemeLangMode_lang-name">中文</span>
+                </div>
+                <div class="ThemeLangMode_lang-item" data-lang="hi">
+                    <span class="ThemeLangMode_lang-flag">🇮🇳</span>
+                    <span class="ThemeLangMode_lang-name">हिन्दी</span>
+                </div>
+                <div class="ThemeLangMode_lang-item" data-lang="ln">
+                    <span class="ThemeLangMode_lang-flag">🇨🇩</span>
+                    <span class="ThemeLangMode_lang-name">Lingala</span>
+                </div>
+                <div class="ThemeLangMode_lang-item" data-lang="sw">
+                    <span class="ThemeLangMode_lang-flag">🇨🇩</span>
+                    <span class="ThemeLangMode_lang-name">Swahili</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+  // ThemeLangMode.js - Gestion des thèmes, langues et modes (jour/nuit)
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialisation
+    initThemeLangMode();
+});
+
+function initThemeLangMode() {
+    // Chargement des préférences stockées
+    loadPreferences();
+    
+    // Initialisation des boutons et popups
+    setupThemeButton();
+    setupDarkModeButton();
+    setupLanguageButton();
+    
+    // Initialisation des événements pour les options des popups
+    setupThemeOptions();
+    setupLanguageOptions();
+    
+    // Initialisation du comportement des popups
+    setupPopupBehavior();
+}
+
+function loadPreferences() {
+    // Chargement du thème
+    const theme = localStorage.getItem('theme') || 'default';
+    document.documentElement.setAttribute('data-theme', theme);
+    
+    // Chargement du mode sombre/clair
+    const darkMode = localStorage.getItem('darkMode') === 'true';
+    if (darkMode) {
+        document.documentElement.setAttribute('data-theme-mode', 'dark');
+        document.getElementById('ThemeLangMode_darkModeBtn').innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+        document.documentElement.removeAttribute('data-theme-mode');
+        document.getElementById('ThemeLangMode_darkModeBtn').innerHTML = '<i class="fas fa-moon"></i>';
+    }
+    
+    // Mise à jour des UI elements pour refléter les préférences stockées
+    const darkModeToggle = document.getElementById('ThemeLangMode_darkModeToggle');
+    if (darkModeToggle) {
+        darkModeToggle.checked = darkMode;
+    }
+    
+    // Sélection du thème dans l'UI
+    const themeItems = document.querySelectorAll('.ThemeLangMode_theme-item');
+    themeItems.forEach(item => {
+        if (item.getAttribute('data-theme') === theme) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+    
+    // Chargement de la langue
+    const language = localStorage.getItem('language') || 'fr';
+    document.documentElement.setAttribute('lang', language);
+    
+    // Sélection de la langue dans l'UI
+    const langItems = document.querySelectorAll('.ThemeLangMode_lang-item');
+    langItems.forEach(item => {
+        if (item.getAttribute('data-lang') === language) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+}
+
+function setupThemeButton() {
+    const themeBtn = document.getElementById('ThemeLangMode_themeBtn');
+    const themePopup = document.getElementById('ThemeLangMode_themePopup');
+    
+    themeBtn.addEventListener('click', function() {
+        closeAllPopups();
+        themePopup.classList.toggle('active');
+    });
+}
+
+function setupDarkModeButton() {
+    const darkModeBtn = document.getElementById('ThemeLangMode_darkModeBtn');
+    const darkModeToggle = document.getElementById('ThemeLangMode_darkModeToggle');
+    
+    darkModeBtn.addEventListener('click', function() {
+        toggleDarkMode();
+    });
+    
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('change', function() {
+            toggleDarkMode();
+        });
+    }
+}
+
+function toggleDarkMode() {
+    const isDarkMode = document.documentElement.getAttribute('data-theme-mode') === 'dark';
+    const darkModeToggle = document.getElementById('ThemeLangMode_darkModeToggle');
+    
+    if (isDarkMode) {
+        document.documentElement.removeAttribute('data-theme-mode');
+        document.getElementById('ThemeLangMode_darkModeBtn').innerHTML = '<i class="fas fa-moon"></i>';
+        if (darkModeToggle) darkModeToggle.checked = false;
+        localStorage.setItem('darkMode', 'false');
+    } else {
+        document.documentElement.setAttribute('data-theme-mode', 'dark');
+        document.getElementById('ThemeLangMode_darkModeBtn').innerHTML = '<i class="fas fa-sun"></i>';
+        if (darkModeToggle) darkModeToggle.checked = true;
+        localStorage.setItem('darkMode', 'true');
+    }
+}
+
+function setupLanguageButton() {
+    const langBtn = document.getElementById('ThemeLangMode_langBtn');
+    const langPopup = document.getElementById('ThemeLangMode_langPopup');
+    
+    langBtn.addEventListener('click', function() {
+        closeAllPopups();
+        langPopup.classList.toggle('active');
+    });
+}
+
+function setupThemeOptions() {
+    const themeItems = document.querySelectorAll('.ThemeLangMode_theme-item');
+    
+    themeItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const theme = this.getAttribute('data-theme');
+            
+            // Mise à jour de l'UI
+            themeItems.forEach(el => el.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Application du thème
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            // Fermeture du popup
+            setTimeout(() => {
+                closeAllPopups();
+            }, 300);
+        });
+    });
+}
+
+function setupLanguageOptions() {
+    const langItems = document.querySelectorAll('.ThemeLangMode_lang-item');
+    
+    langItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const lang = this.getAttribute('data-lang');
+            
+            // Mise à jour de l'UI
+            langItems.forEach(el => el.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Application de la langue (simulation pour l'instant)
+            document.documentElement.setAttribute('lang', lang);
+            localStorage.setItem('language', lang);
+            
+            // Fermeture du popup
+            setTimeout(() => {
+                closeAllPopups();
+            }, 300);
+            
+            // Note: Pour une vraie implémentation multilingue, il faudrait
+            // charger les fichiers de traduction ici et mettre à jour le contenu
+        });
+    });
+}
+
+function setupPopupBehavior() {
+    // Fermeture des popups lorsqu'on clique sur le bouton de fermeture
+    const closeButtons = document.querySelectorAll('.ThemeLangMode_popup-close');
+    closeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            closeAllPopups();
+        });
+    });
+    
+    // Fermeture des popups lorsqu'on clique à l'extérieur
+    document.addEventListener('click', function(event) {
+        const popups = document.querySelectorAll('.ThemeLangMode_popup');
+        const settingBtns = document.querySelectorAll('.ThemeLangMode_settingBtn');
+        
+        let isClickInsidePopup = false;
+        let isClickOnButton = false;
+        
+        popups.forEach(popup => {
+            if (popup.contains(event.target)) {
+                isClickInsidePopup = true;
+            }
+        });
+        
+        settingBtns.forEach(btn => {
+            if (btn.contains(event.target)) {
+                isClickOnButton = true;
+            }
+        });
+        
+        if (!isClickInsidePopup && !isClickOnButton) {
+            closeAllPopups();
+        }
+    });
+}
+
+function closeAllPopups() {
+    const popups = document.querySelectorAll('.ThemeLangMode_popup');
+    popups.forEach(popup => {
+        popup.classList.remove('active');
+    });
+}
+
+</script>
+
+<script src="ThemeLangMode.js"></script>
+
+
+
+<!-- Autres modif optionnel -->
+
+<!-- modals en bas du sidebar 1-->
+<style>
+  .ThemeLangMode_popup {
+    position: fixed;
+    top: calc(var(--sidebar-header-height) + 10px);
+    left: 20px;
+    right: auto;
+    transform: none;
+    max-height: calc(100vh - var(--sidebar-header-height) - 30px);
+    overflow-y: auto;
+    z-index: 1050;
+}
+
+:root {
+    --sidebar-header-height: 120px; /* Ajustez cette valeur selon la hauteur réelle de votre sidebar-header */
+}
+</style>
+
+<!-- modals en bas du sidebar 2-->
+.ThemeLangMode_popup {
+    position: fixed;
+    top: auto;
+    right: 20px;
+    left: auto;
+    margin-top: 0;
+    z-index: 1050;
+    overflow: hidden;
+    width: 280px;
+    transform: translateY(-20px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Cette règle utilise JavaScript pour placer dynamiquement les popups sous le header */
+.ThemeLangMode_popup.active {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Ajouter ce script à votre page pour positionner les popups correctement */
+<script>
+function positionPopups() {
+    const sidebarHeader = document.querySelector('.sidebar-header');
+    if (!sidebarHeader) return;
+    
+    const headerRect = sidebarHeader.getBoundingClientRect();
+    const popups = document.querySelectorAll('.ThemeLangMode_popup');
+    
+    popups.forEach(popup => {
+        popup.style.top = `${headerRect.bottom}px`;
+    });
+}
+
+// Positionner les popups au chargement
+document.addEventListener('DOMContentLoaded', positionPopups);
+
+// Repositionner lors du redimensionnement de la fenêtre
+window.addEventListener('resize', positionPopups);
+
+// Repositionner lors de l'ouverture d'un popup
+document.querySelectorAll('.ThemeLangMode_settingBtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        setTimeout(positionPopups, 10);
+    });
+});
+</script>
+
+<!-- modals en bas du sidebar 3-->
+<style>
+  .ThemeLangMode_popup {
+    position: fixed;
+    top: auto;
+    right: 20px;
+    left: auto;
+    bottom: auto;
+    margin-top: 0;
+    transform: none;
+    z-index: 1050;
+}
+
+#ThemeLangMode_themePopup, #ThemeLangMode_langPopup {
+    position: fixed;
+    /* Ces propriétés permettent de positionner juste après le sidebar-header */
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    /* La position sera calculée dynamiquement avec JavaScript */
+}
+
+</style>
+<script>
+  // Fonction pour positionner les popups juste en dessous du sidebar-header
+function positionPopups() {
+    const sidebarHeader = document.querySelector('.sidebar-header');
+    const themePopup = document.getElementById('ThemeLangMode_themePopup');
+    const langPopup = document.getElementById('ThemeLangMode_langPopup');
+    
+    if (sidebarHeader && themePopup && langPopup) {
+        const headerRect = sidebarHeader.getBoundingClientRect();
+        const topPosition = headerRect.bottom;
+        
+        // Positionner les popups juste en dessous du header
+        themePopup.style.top = topPosition + 'px';
+        langPopup.style.top = topPosition + 'px';
+    }
+}
+
+// Exécuter au chargement et lors du redimensionnement
+window.addEventListener('load', positionPopups);
+window.addEventListener('resize', positionPopups);
+
+// Si les popups sont ouverts via des boutons, repositionner à l'ouverture
+document.getElementById('ThemeLangMode_themeBtn').addEventListener('click', positionPopups);
+document.getElementById('ThemeLangMode_langBtn').addEventListener('click', positionPopups);
+
+</script>
+
+

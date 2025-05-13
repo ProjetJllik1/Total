@@ -1,0 +1,1961 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Total - Gestion d'Inventaire</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+    <script src="https://cdn.rawgit.com/cozmo/jsQR/master/dist/jsQR.js"></script>
+<!-- Lien vers le fichier CSS -->
+<link rel="stylesheet" href="styles.css">
+<style>
+/* Styles pour l'impression */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #print-items, #print-items * {
+        visibility: visible;
+    }
+    #print-items {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .no-print {
+        display: none !important;
+    }
+}
+
+/* Conteneur pour les éléments à imprimer */
+#print-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-start;
+}
+
+/* Styles pour chaque élément à imprimer */
+.print-item {
+    text-align: center;
+    border: 1px dashed #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Tailles des codes et adaptation générale */
+.code-size-xs .print-item {
+    width: 100px;
+    height: 130px;
+}
+.code-size-sm .print-item {
+    width: 140px;
+    height: 180px;
+}
+.code-size-md .print-item {
+    width: 180px;
+    height: 220px;
+}
+.code-size-lg .print-item {
+    width: 220px;
+    height: 260px;
+}
+.code-size-xl .print-item {
+    width: 260px;
+    height: 300px;
+}
+
+/* Tailles du texte et des éléments */
+.code-size-xs .print-item h6 {
+    font-size: 8px;
+    margin: 2px 0;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.code-size-sm .print-item h6 {
+    font-size: 10px;
+    margin: 3px 0;
+    max-width: 130px;
+}
+.code-size-md .print-item h6 {
+    font-size: 12px;
+    margin: 4px 0;
+    max-width: 170px;
+}
+.code-size-lg .print-item h6 {
+    font-size: 14px;
+    margin: 5px 0;
+    max-width: 210px;
+}
+.code-size-xl .print-item h6 {
+    font-size: 16px;
+    margin: 6px 0;
+    max-width: 250px;
+}
+
+/* Prix */
+.code-size-xs .print-item p {
+    font-size: 8px;
+    margin: 2px 0;
+}
+.code-size-sm .print-item p {
+    font-size: 10px;
+    margin: 3px 0;
+}
+.code-size-md .print-item p {
+    font-size: 12px;
+    margin: 4px 0;
+}
+.code-size-lg .print-item p {
+    font-size: 14px;
+    margin: 5px 0;
+}
+.code-size-xl .print-item p {
+    font-size: 16px;
+    margin: 6px 0;
+}
+
+/* Conteneurs des codes */
+.barcode-container, .qrcode-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: auto;
+}
+
+/* Tailles des codes-barres */
+.code-size-xs .barcode-container svg {
+    width: 80px !important;
+    height: 40px !important;
+}
+.code-size-sm .barcode-container svg {
+    width: 120px !important;
+    height: 50px !important;
+}
+.code-size-md .barcode-container svg {
+    width: 160px !important;
+    height: 60px !important;
+}
+.code-size-lg .barcode-container svg {
+    width: 200px !important;
+    height: 70px !important;
+}
+.code-size-xl .barcode-container svg {
+    width: 240px !important;
+    height: 80px !important;
+}
+
+/* Tailles des QR codes */
+.code-size-xs .qrcode-container img {
+    width: 60px !important;
+    height: 60px !important;
+}
+.code-size-sm .qrcode-container img {
+    width: 90px !important;
+    height: 90px !important;
+}
+.code-size-md .qrcode-container img {
+    width: 120px !important;
+    height: 120px !important;
+}
+.code-size-lg .qrcode-container img {
+    width: 150px !important;
+    height: 150px !important;
+}
+.code-size-xl .qrcode-container img {
+    width: 180px !important;
+    height: 180px !important;
+}
+
+@media print {
+    .print-item {
+        page-break-inside: avoid;
+        display: inline-block;
+        margin: 10px;
+    }
+    
+    #print-items {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+    
+    /* Cacher tous les éléments sauf la zone d'impression */
+    body > *:not(#temp-print-container) {
+        display: none !important;
+    }
+    
+    /* Afficher le conteneur d'impression */
+    #temp-print-container {
+        display: block !important;
+        width: 100% !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+    }
+}
+</style>
+ 
+</head>
+<body>
+<!-- Système d'authentification -->
+<div id="auth-container" class="auth-container" style="display: none;">
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNDAgNjAiPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik01NS40IDE1LjVoMTI5LjJjNi43IDAgMTIuMiA1LjQgMTIuMiAxMi4xdjQuOGMwIDYuNy01LjQgMTIuMS0xMi4yIDEyLjFINTUuNGMtNi43IDAtMTIuMi01LjQtMTIuMi0xMi4xdi00LjhjMC02LjcgNS41LTEyLjEgMTIuMi0xMi4xem0xNi41IDkuOGMtMy4zIDAtNiAyLjctNiA2cy0yLjcgNi02IDZoLTIuMmMwLTYuNiA1LjQtMTIgMTItMTJoMi4yYzAgMy4zIDIuNyA2IDYgNnMyLjcgNiA2IDZoMmMtLjEgMi44LTIuMiA1LjEtNSA1LjloLS4xYy0uOC4yLTEuNi4zLTIuNS4zaC0xNS41Yy0zLjMgMC02LTIuNy02LTZIMzljMy4zIDAgNi0yLjcgNi02czIuNy02IDYtNmgxNi45YzAtMy4zIDIuNy02IDYtNnY2em0zMC42IDBjMy4zIDAgNi0yLjcgNi02aDEzLjRjMy4zIDAgNiAyLjcgNiA2cy0yLjcgNi02IDZoLTYuN2MwIDMuMy0yLjcgNi02IDZoLTEzLjRWMTkuM2g2Ljd6bTQ1LjggMGMzLjMgMCA2LTIuNyA2LTZoMTMuNGMzLjMgMCA2IDIuNyA2IDZzLTIuNyA2LTYgNmgtNi43YzAgMy4zLTIuNyA2LTYgNmgtMTMuNFYxOS4zaDYuN3ptNDUuOSAwYzMuMyAwIDYtMi43IDYtNmgxMy40YzMuMyAwIDYgMi43IDYgNnMtMi43IDYtNiA2aC02LjdjMCAzLjMtMi43IDYtNiA2aC0xMy40VjE5LjNoNi43eiIvPjwvc3ZnPg==" alt="Total Logo">
+            <h4>Gestion d'Inventaire</h4>
+        </div>
+        
+        <!-- Formulaire de première connexion -->
+        <div id="first-login" class="auth-body">
+            <h5 class="auth-title">Première connexion</h5>
+            <form id="first-login-form" class="auth-form">
+                <div class="mb-3">
+                    <label for="admin-username" class="form-label">Nom d'utilisateur</label>
+                    <input type="text" class="form-control" id="admin-username" required>
+                </div>
+                
+                <div class="mb-3 password-field">
+                    <label for="admin-password" class="form-label">Mot de passe</label>
+                    <input type="password" class="form-control" id="admin-password" required>
+                    <span class="password-toggle" onclick="togglePasswordVisibility('admin-password', this)">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                    
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="password-strength-bar"></div>
+                    </div>
+                    
+                    <div class="password-feedback">
+                        <span id="password-strength-text">Force: Faible</span>
+                        <span id="password-length">0/12</span>
+                    </div>
+                    
+                    <div class="password-rules">
+                        <div class="password-rule" id="rule-length">
+                            <span class="rule-icon"><i class="fas fa-times-circle text-danger"></i></span>
+                            Au moins 12 caractères
+                        </div>
+                        <div class="password-rule" id="rule-uppercase">
+                            <span class="rule-icon"><i class="fas fa-times-circle text-danger"></i></span>
+                            Au moins une majuscule
+                        </div>
+                        <div class="password-rule" id="rule-lowercase">
+                            <span class="rule-icon"><i class="fas fa-times-circle text-danger"></i></span>
+                            Au moins une minuscule
+                        </div>
+                        <div class="password-rule" id="rule-number">
+                            <span class="rule-icon"><i class="fas fa-times-circle text-danger"></i></span>
+                            Au moins un chiffre
+                        </div>
+                        <div class="password-rule" id="rule-special">
+                            <span class="rule-icon"><i class="fas fa-times-circle text-danger"></i></span>
+                            Au moins un caractère spécial
+                        </div>
+                    </div>
+                    
+                    <div class="password-tip">
+                        <i class="fas fa-lightbulb"></i> Astuce: Utilisez une phrase mémorable avec des chiffres et symboles. Par exemple: "J'aime14café!tous-les-matins"
+                    </div>
+                </div>
+                
+                <div class="mb-3 password-field">
+                    <label for="admin-password-confirm" class="form-label">Confirmer le mot de passe</label>
+                    <input type="password" class="form-control" id="admin-password-confirm" required>
+                    <span class="password-toggle" onclick="togglePasswordVisibility('admin-password-confirm', this)">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 auth-btn mt-4">
+                    Créer le compte administrateur
+                </button>
+            </form>
+        </div>
+        
+        <!-- Formulaire de connexion standard -->
+        <div id="login" class="auth-body" style="display: none;">
+            <h5 class="auth-title">Connexion</h5>
+            <form id="login-form" class="auth-form">
+                <div class="mb-3">
+                    <label for="login-username" class="form-label">Nom d'utilisateur</label>
+                    <input type="text" class="form-control" id="login-username" required>
+                </div>
+                
+                <div class="mb-3 password-field">
+                    <label for="login-password" class="form-label">Mot de passe</label>
+                    <input type="password" class="form-control" id="login-password" required>
+                    <span class="password-toggle" onclick="togglePasswordVisibility('login-password', this)">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 auth-btn mt-4">
+                    Se connecter
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+    <button id="mobile-toggle-btn">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="app-container">
+        <nav id="sidebar">
+            <div class="sidebar-header">
+    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNDAgNjAiPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik01NS40IDE1LjVoMTI5LjJjNi43IDAgMTIuMiA1LjQgMTIuMiAxMi4xdjQuOGMwIDYuNy01LjQgMTIuMS0xMi4yIDEyLjFINTUuNGMtNi43IDAtMTIuMi01LjQtMTIuMi0xMi4xdi00LjhjMC02LjcgNS41LTEyLjEgMTIuMi0xMi4xem0xNi41IDkuOGMtMy4zIDAtNiAyLjctNiA2cy0yLjcgNi02IDZoLTIuMmMwLTYuNiA1LjQtMTIgMTItMTJoMi4yYzAgMy4zIDIuNyA2IDYgNnMyLjcgNiA2IDZoMmMtLjEgMi44LTIuMiA1LjEtNSA1LjloLS4xYy0uOC4yLTEuNi4zLTIuNS4zaC0xNS41Yy0zLjMgMC02LTIuNy02LTZIMzljMy4zIDAgNi0yLjcgNi02czIuNy02IDYtNmgxNi45YzAtMy4zIDIuNy02IDYtNnY2em0zMC42IDBjMy4zIDAgNi0yLjcgNi02aDEzLjRjMy4zIDAgNiAyLjcgNiA2cy0yLjcgNi02IDZoLTYuN2MwIDMuMy0yLjcgNi02IDZoLTEzLjRWMTkuM2g2Ljd6bTQ1LjggMGMzLjMgMCA2LTIuNyA2LTZoMTMuNGMzLjMgMCA2IDIuNyA2IDZzLTIuNyA2LTYgNmgtNi43YzAgMy4zLTIuNyA2LTYgNmgtMTMuNFYxOS4zaDYuN3ptNDUuOSAwYzMuMyAwIDYtMi43IDYtNmgxMy40YzMuMyAwIDYgMi43IDYgNnMtMi43IDYtNiA2aC02LjdjMCAzLjMtMi43IDYtNiA2aC0xMy40VjE5LjNoNi43eiIvPjwvc3ZnPg==" alt="Total Logo">
+    <div id="ThemeLangMode_settings">
+        <button id="ThemeLangMode_themeBtn" class="ThemeLangMode_settingBtn" title="Changer de thème">
+            <i class="fas fa-palette"></i>
+        </button>
+        <button id="ThemeLangMode_darkModeBtn" class="ThemeLangMode_settingBtn" title="Mode jour/nuit">
+            <i class="fas fa-moon"></i>
+        </button>
+        <button id="ThemeLangMode_langBtn" class="ThemeLangMode_settingBtn" title="Changer de langue">
+            <i class="fas fa-globe"></i>
+        </button>
+    </div>
+</div>
+            <ul class="nav flex-column">
+                <li class="nav-item active" data-section="dashboard">
+                    <a href="#"><i class="fas fa-tachometer-alt"></i> Tableau de bord</a>
+                </li>
+                <li class="nav-item" data-section="inventory">
+                    <a href="#"><i class="fas fa-box-open"></i> Inventaire</a>
+                </li>
+                <li class="nav-item" data-section="add-product">
+                    <a href="#"><i class="fas fa-plus-circle"></i> Ajouter un produit</a>
+                </li>
+                <li class="nav-item" data-section="scan">
+                    <a href="#"><i class="fas fa-barcode"></i> Scanner un code</a>
+                </li>
+                <li class="nav-item" data-section="print-codes">
+                    <a href="#"><i class="fas fa-print"></i> Imprimer des codes</a>
+                </li>
+                <li class="nav-item" data-section="alerts">
+                    <a href="#"><i class="fas fa-bell"></i> Alertes</a>
+                </li>
+                <li class="nav-item" data-section="admin-management">
+    <a href="#"><i class="fas fa-users-cog"></i> Gestion Admin</a>
+</li>
+<li class="nav-item" data-section="History_Inventory_section">
+    <a href="#"><i class="fas fa-history"></i> Historique</a>
+</li>
+
+                <li class="nav-item" data-section="about">
+                    <a href="#"><i class="fas fa-info-circle"></i> À propos</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div id="content">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section">
+                <h2 class="mb-4"><i class="fas fa-tachometer-alt me-2"></i> Tableau de bord</h2>
+                
+                <div class="dashboard-stats">
+                    <div class="stat-card bg-white">
+                        <i class="fas fa-box-open text-primary"></i>
+                        <div>
+                            <div class="stat-value" id="total-products">0</div>
+                            <div class="stat-label">Produits en stock</div>
+                        </div>
+                    </div>
+                    <div class="stat-card bg-white">
+                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                        <div>
+                            <div class="stat-value" id="low-stock">0</div>
+                            <div class="stat-label">Stock faible</div>
+                        </div>
+                    </div>
+                    <div class="stat-card bg-white">
+                        <i class="fas fa-times-circle text-danger"></i>
+                        <div>
+                            <div class="stat-value" id="out-of-stock">0</div>
+                            <div class="stat-label">Rupture de stock</div>
+                        </div>
+                    </div>
+                    <div class="stat-card bg-white">
+                        <i class="fas fa-chart-line text-success"></i>
+                        <div>
+                            <div class="stat-value" id="total-value">0 €</div>
+                            <div class="stat-label">Valeur du stock</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card products-card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span>Produits récents</span>
+                                <button class="btn btn-sm btn-primary" id="view-all-products">Voir tout</button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table" id="recent-products-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Nom</th>
+                                                <th>Prix</th>
+                                                <th>Qté</th>
+                                                <th>Emplacement</th>
+                                                <th>Statut</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="5" class="text-center">Aucun produit trouvé</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                Alertes de stock
+                            </div>
+                            <div class="card-body" id="stock-alerts">
+                                <p class="text-center text-muted">Aucune alerte</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory Section -->
+            <div id="inventory" class="content-section" style="display: none;">
+                <h2 class="mb-4"><i class="fas fa-box-open me-2"></i> Inventaire</h2>
+                
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Liste des produits</span>
+                        <div>
+                            <button class="btn btn-sm btn-success" id="export-inventory">
+                                <i class="fas fa-file-excel me-1"></i> Exporter
+                            </button>
+                            <button class="btn btn-sm btn-primary" id="add-product-btn">
+                                <i class="fas fa-plus me-1"></i> Ajouter
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-bar">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="search-inventory" placeholder="Rechercher un produit...">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="inventory-table">
+                                <thead>
+                                    <tr>
+                                        <th>Code Produit</th>
+                                        <th>Nom</th>
+                                        <th>Prix</th>
+                                        <th>Quantité</th>
+                                        <th>Emplacement</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" class="text-center">Aucun produit trouvé</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Product Section -->
+            <div id="add-product" class="content-section" style="display: none;">
+                <h2 class="mb-4"><i class="fas fa-plus-circle me-2"></i> Ajouter un produit</h2>
+                
+                <div class="card">
+                    <div class="card-header">
+                        Informations du produit
+                    </div>
+                    <div class="card-body">
+                        <form id="add-product-form">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="product-name" class="form-label">Nom du produit*</label>
+                                    <input type="text" class="form-control" id="product-name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="product-code-type" class="form-label">Type de code*</label>
+                                    <select class="form-select" id="product-code-type" required>
+                                        <option value="generate">Générer un nouveau code</option>
+                                        <option value="scan">Scanner un code existant</option>
+                                        <option value="manual">Entrer un code manuellement</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3" id="code-scan-container" style="display: none;">
+                                <div class="col-md-12">
+                                    <label class="form-label">Scanner le code</label>
+                                    <div class="d-flex justify-content-center">
+                                        <button type="button" class="btn btn-primary" id="start-scan">
+                                            <i class="fas fa-camera me-2"></i> Activer la caméra
+                                        </button>
+                                    </div>
+                                    <div id="scanner-container" class="mt-3 d-none">
+                                        <video id="scanner-video" style="width: 100%; max-height: 300px; object-fit: cover;"></video>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3" id="code-manual-container" style="display: none;">
+                                <div class="col-md-12">
+                                    <label for="product-code-manual" class="form-label">Code du produit*</label>
+                                    <input type="text" class="form-control" id="product-code-manual" placeholder="Entrez le code produit">
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="product-category" class="form-label">Catégorie</label>
+                                    <select class="form-select" id="product-category">
+                                        <option value="electronique">Électronique</option>
+                                        <option value="outillage">Outillage</option>
+                                        <option value="panneaux-solaires">Panneaux solaires</option>
+                                        <option value="antennes">Antennes TV</option>
+                                        <option value="motos">Pièces moto</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="product-price" class="form-label">Prix (€)*</label>
+                                    <input type="number" class="form-control" id="product-price" min="0" step="0.01" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="product-quantity" class="form-label">Quantité*</label>
+                                    <input type="number" class="form-control" id="product-quantity" min="0" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="product-location" class="form-label">Emplacement*</label>
+                                    <input type="text" class="form-control" id="product-location" placeholder="Ex: Rayon 2, étagère 3" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <label for="product-description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="product-description" rows="3"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="min-stock" class="form-label">Stock minimum avant alerte</label>
+                                    <input type="number" class="form-control" id="min-stock" min="0" value="5">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="supplier" class="form-label">Fournisseur</label>
+                                    <input type="text" class="form-control" id="supplier">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="generate-both-codes" checked>
+                                    <label class="form-check-label" for="generate-both-codes">
+                                        Générer à la fois un QR code et un code-barres
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="code-container" id="code-preview-container" style="display: none;">
+                                <h5>Aperçu des codes générés</h5>
+                                <div class="row">
+                                    <div class="col-md-6 text-center">
+                                        <div class="code-preview">
+                                            <h6>Code-barres</h6>
+                                            <svg id="barcode-preview"></svg>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 text-center">
+                                        <div class="code-preview">
+                                            <h6>QR Code</h6>
+                                            <div id="qrcode-preview"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-secondary" id="reset-form">
+                                    <i class="fas fa-undo me-1"></i> Réinitialiser
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="save-product">
+                                    <i class="fas fa-save me-1"></i> Enregistrer le produit
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scan Section -->
+            <div id="scan" class="content-section" style="display: none;">
+                <h2 class="mb-4"><i class="fas fa-barcode me-2"></i> Scanner un code</h2>
+                
+                <div class="card">
+                    <div class="card-header">
+                        Scanner un code-barres ou un QR code
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-12 text-center">
+                                <button class="btn btn-primary" id="activate-scanner">
+                                    <i class="fas fa-camera me-2"></i> Activer la caméra
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="scanner-area" style="display: none;">
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div style="max-width: 500px; margin: 0 auto; position: relative;">
+                                        <video id="scanner" style="width: 100%; border: 2px solid #ddd; border-radius: 10px;"></video>
+                                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 2px solid #e60000; border-radius: 10px; pointer-events: none;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i> Placez le code-barres ou QR code face à la caméra
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="scan-result" style="display: none;">
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle me-2"></i> Code scanné avec succès!
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">
+                                    Résultat du scan
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h5>Informations sur le produit</h5>
+                                            <table class="table">
+                                                <tr>
+                                                    <th>Code Produit</th>
+                                                    <td id="scanned-code"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Nom</th>
+                                                    <td id="scanned-name"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Prix</th>
+                                                    <td id="scanned-price"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Quantité en stock</th>
+                                                    <td id="scanned-quantity"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Emplacement</th>
+                                                    <td id="scanned-location"></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5>Actions</h5>
+                                            <div class="d-grid gap-2">
+                                                <button class="btn btn-primary mb-2" id="update-scanned">
+                                                    <i class="fas fa-edit me-1"></i> Modifier
+                                                </button>
+                                                <button class="btn btn-success mb-2" id="sell-scanned">
+                                                    <i class="fas fa-shopping-cart me-1"></i> Vendre
+                                                </button>
+                                                <button class="btn btn-warning mb-2" id="print-scanned-codes">
+                                                    <i class="fas fa-print me-1"></i> Imprimer les codes
+                                                </button>
+                                                <button class="btn btn-danger" id="delete-scanned">
+                                                    <i class="fas fa-trash me-1"></i> Supprimer
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-md-12 text-center">
+                                    <button class="btn btn-primary" id="scan-another">
+                                        <i class="fas fa-redo me-1"></i> Scanner un autre code
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+<!-- Print Codes Section -->
+<div id="print-codes" class="content-section" style="display: none;">
+    <h2 class="mb-4"><i class="fas fa-print me-2"></i> Imprimer des codes</h2>
+    
+    <div class="card">
+        <div class="card-header">
+            Sélectionner les produits à imprimer
+        </div>
+        <div class="card-body">
+            <div class="mb-4">
+                <input type="text" class="form-control" id="search-print" placeholder="Rechercher un produit...">
+            </div>
+            
+            <div class="table-responsive mb-4">
+                <table class="table table-hover" id="print-products-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all-print"></th>
+                            <th>Code Produit</th>
+                            <th>Nom</th>
+                            <th>Prix</th>
+                            <th>Quantité</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" class="text-center">Aucun produit trouvé</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="row mb-4">
+                <!-- Options pour les types de codes -->
+                <div class="col-md-6">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="print-barcode" checked>
+                        <label class="form-check-label" for="print-barcode">Codes-barres</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="print-qrcode" checked>
+                        <label class="form-check-label" for="print-qrcode">QR Codes</label>
+                    </div>
+                </div>
+                
+                <!-- Contrôles pour configurer l'impression -->
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-6">
+                            <label for="barcode-repetitions" class="form-label">Répétitions codes-barres</label>
+                            <input type="number" min="1" max="50" class="form-control" id="barcode-repetitions" value="1">
+                        </div>
+                        <div class="col-6">
+                            <label for="qrcode-repetitions" class="form-label">Répétitions QR codes</label>
+                            <input type="number" min="1" max="50" class="form-control" id="qrcode-repetitions" value="1">
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <label for="code-size" class="form-label">Taille des codes</label>
+                            <select class="form-select" id="code-size">
+                                <option value="xs">Trop petite</option>
+                                <option value="sm">Petite</option>
+                                <option value="md" selected>Moyenne</option>
+                                <option value="lg">Grande</option>
+                                <option value="xl">Trop grande</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-12 text-end">
+                    <button class="btn btn-primary" id="generate-print">
+                        <i class="fas fa-magic me-1"></i> Générer l'aperçu
+                    </button>
+                    <button class="btn btn-success" id="print-generated" disabled>
+                        <i class="fas fa-print me-1"></i> Imprimer
+                    </button>
+                </div>
+            </div>
+            
+            <div id="print-preview">
+                <h5 class="mb-3">Aperçu avant impression</h5>
+                <div class="print-section" id="print-items">
+                    <p class="text-center text-muted w-100">Aucun code à afficher. Veuillez sélectionner des produits et générer l'aperçu.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+            <!-- Alerts Section -->
+            <div id="alerts" class="content-section" style="display: none;">
+                <h2 class="mb-4"><i class="fas fa-bell me-2"></i> Alertes</h2>
+                
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Alertes de stock</span>
+                        <div>
+                            <button class="btn btn-sm btn-primary" id="mark-all-read">
+                                <i class="fas fa-check-double me-1"></i> Tout marquer comme lu
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="alerts-table">
+                                <thead>
+                                    <tr>
+                                        <th>Produit</th>
+                                        <th>Type d'alerte</th>
+                                        <th>Quantité</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="5" class="text-center">Aucune alerte trouvée</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header">
+                        Configuration des alertes
+                    </div>
+                    <div class="card-body">
+                        <form id="alerts-config-form">
+                            <div class="mb-3">
+                                <label for="default-min-stock" class="form-label">Stock minimum par défaut</label>
+                                <input type="number" class="form-control" id="default-min-stock" min="0" value="5">
+                                <div class="form-text">Les produits dont la quantité est inférieure à cette valeur généreront une alerte.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="enable-email-alerts" checked>
+                                    <label class="form-check-label" for="enable-email-alerts">Recevoir les alertes par email</label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3" id="email-alerts-config">
+                                <label for="alert-email" class="form-label">Email pour les alertes</label>
+                                <input type="email" class="form-control" id="alert-email" placeholder="admin@total.com">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Enregistrer les paramètres
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Section -->
+            <div id="about" class="content-section" style="display: none;">
+                <h2 class="mb-4"><i class="fas fa-info-circle me-2"></i> À propos</h2>
+                
+                <div class="about-section">
+                    <div class="row mb-5">
+                        <div class="col-lg-12 text-center">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNDAgNjAiPjxwYXRoIGZpbGw9IiNlNjAwMDAiIGQ9Ik01NS40IDE1LjVoMTI5LjJjNi43IDAgMTIuMiA1LjQgMTIuMiAxMi4xdjQuOGMwIDYuNy01LjQgMTIuMS0xMi4yIDEyLjFINTUuNGMtNi43IDAtMTIuMi01LjQtMTIuMi0xMi4xdi00LjhjMC02LjcgNS41LTEyLjEgMTIuMi0xMi4xem0xNi41IDkuOGMtMy4zIDAtNiAyLjctNiA2cy0yLjcgNi02IDZoLTIuMmMwLTYuNiA1LjQtMTIgMTItMTJoMi4yYzAgMy4zIDIuNyA2IDYgNnMyLjcgNiA2IDZoMmMtLjEgMi44LTIuMiA1LjEtNSA1LjloLS4xYy0uOC4yLTEuNi4zLTIuNS4zaC0xNS41Yy0zLjMgMC02LTIuNy02LTZIMzljMy4zIDAgNi0yLjcgNi02czIuNy02IDYtNmgxNi45YzAtMy4zIDIuNy02IDYtNnY2em0zMC42IDBjMy4zIDAgNi0yLjcgNi02aDEzLjRjMy4zIDAgNiAyLjcgNiA2cy0yLjcgNi02IDZoLTYuN2MwIDMuMy0yLjcgNi02IDZoLTEzLjRWMTkuM2g2Ljd6bTQ1LjggMGMzLjMgMCA2LTIuNyA2LTZoMTMuNGMzLjMgMCA2IDIuNyA2IDZzLTIuNyA2LTYgNmgtNi43YzAgMy4zLTIuNyA2LTYgNmgtMTMuNFYxOS4zaDYuN3ptNDUuOSAwYzMuMyAwIDYtMi43IDYtNmgxMy40YzMuMyAwIDYgMi43IDYgNnMtMi43IDYtNiA2aC02LjdjMCAzLjMtMi43IDYtNiA2aC0xMy40VjE5LjNoNi43eiIvPjwvc3ZnPg==" alt="Total Logo" style="max-width: 250px; margin-bottom: 20px;">
+                            <h3>Application de Gestion d'Inventaire</h3>
+                            <p class="lead">Version 1.0</p>
+                            <p class="mb-4">Cette application a été développée pour Total afin de faciliter la gestion d'inventaire des produits électroniques et équipements en utilisant les codes-barres et QR codes.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-5">
+                        <div class="col-lg-12">
+                            <h4 class="text-center mb-4">Fonctionnalités</h4>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-barcode fa-3x mb-3 text-primary"></i>
+                                            <h5>Génération de codes</h5>
+                                            <p>Génération automatique de codes-barres et QR codes pour chaque produit.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-search fa-3x mb-3 text-primary"></i>
+                                            <h5>Scan et Recherche</h5>
+                                            <p>Scannez les codes pour obtenir rapidement les informations sur les produits.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-bell fa-3x mb-3 text-primary"></i>
+                                            <h5>Alertes de stock</h5>
+                                            <p>Recevez des notifications lorsque les produits sont en rupture ou en stock faible.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h4 class="text-center mb-4">Notre équipe</h4>
+                            <div class="row">
+                                <div class="col-md-4 mb-4">
+                                    <div class="team-member">
+                                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2U2MDAwMCIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjgwIiByPSI0MCIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0xNjAsMTYwYzAsMC01MC02MC0xMjAsMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==" alt="Photo de profil">
+                                        <h5>Étudiant 1</h5>
+                                        <p>Développeur Frontend</p>
+                                        <div class="social-links">
+                                            <a href="#" title="Email"><i class="fas fa-envelope"></i></a>
+                                            <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                                            <a href="#" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                                            <a href="#" title="Téléphone"><i class="fas fa-phone"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-4">
+                                    <div class="team-member">
+                                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzAwMzM2NiIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjgwIiByPSI0MCIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0xNjAsMTYwYzAsMC01MC02MC0xMjAsMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==" alt="Photo de profil">
+                                        <h5>Étudiant 2</h5>
+                                        <p>Développeur Backend</p>
+                                        <div class="social-links">
+                                            <a href="#" title="Email"><i class="fas fa-envelope"></i></a>
+                                            <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                                            <a href="#" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                                            <a href="#" title="Téléphone"><i class="fas fa-phone"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-4">
+                                    <div class="team-member">
+                                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzI4YTc0NSIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjgwIiByPSI0MCIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0xNjAsMTYwYzAsMC01MC02MC0xMjAsMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==" alt="Photo de profil">
+                                        <h5>Étudiant 3</h5>
+                                        <p>Designer UI/UX</p>
+                                        <div class="social-links">
+                                            <a href="#" title="Email"><i class="fas fa-envelope"></i></a>
+                                            <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                                            <a href="#" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                                            <a href="#" title="Téléphone"><i class="fas fa-phone"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-4">
+                                    <div class="team-member">
+                                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y3YjkyNCIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjgwIiByPSI0MCIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0xNjAsMTYwYzAsMC01MC02MC0xMjAsMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==" alt="Photo de profil">
+                                        <h5>Étudiant 4</h5>
+                                        <p>Testeur QA</p>
+                                        <div class="social-links">
+                                            <a href="#" title="Email"><i class="fas fa-envelope"></i></a>
+                                            <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                                            <a href="#" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                                            <a href="#" title="Téléphone"><i class="fas fa-phone"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-4">
+                                    <div class="team-member">
+                                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzE3YTJiOCIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjgwIiByPSI0MCIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0xNjAsMTYwYzAsMC01MC02MC0xMjAsMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==" alt="Photo de profil">
+                                        <h5>Étudiant 5</h5>
+                                        <p>Chef de Projet</p>
+                                        <div class="social-links">
+                                            <a href="#" title="Email"><i class="fas fa-envelope"></i></a>
+                                            <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                                            <a href="#" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                                            <a href="#" title="Téléphone"><i class="fas fa-phone"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-5">
+                        <div class="col-lg-12 text-center">
+                            <p>© 2025 - Projet d'études - Tous droits réservés</p>
+                            <p>Pour toute assistance, contactez l'équipe de développement via les coordonnées ci-dessus.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+        <!-- Admin Management Section -->
+<div id="admin-management" class="content-section" style="display: none;">
+    <h2 class="mb-4"><i class="fas fa-users-cog me-2"></i> Gestion des administrateurs</h2>
+    
+    <div class="row">
+        <!-- Section profile admin -->
+        <div class="col-md-4">
+            <div class="profile-section">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h4 id="current-admin-name">Admin Principal</h4>
+                        <p>
+                            <span class="admin-badge primary">
+                                <i class="fas fa-crown"></i> Admin Principal
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="custom-divider"></div>
+                
+                <div class="profile-settings">
+                    <div class="settings-option" id="change-password-option">
+                        <i class="fas fa-key"></i> Changer mon mot de passe
+                    </div>
+                    <div class="settings-option" id="change-username-option">
+                        <i class="fas fa-user-edit"></i> Modifier mon nom d'utilisateur
+                    </div>
+                    <div class="settings-option" id="logout-option">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ajout d'un nouvel administrateur -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <i class="fas fa-user-plus me-2"></i> Ajouter un administrateur
+                </div>
+                <div class="card-body">
+                    <form id="add-admin-form">
+                        <div class="mb-3">
+                            <label for="new-admin-username" class="form-label">Nom d'utilisateur</label>
+                            <input type="text" class="form-control" id="new-admin-username" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="new-admin-password" class="form-label">Mot de passe temporaire</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="new-admin-password" required>
+                                <button class="btn btn-outline-secondary" type="button" id="generate-password">
+                                    <i class="fas fa-dice"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="temp-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            N'oubliez pas de supprimer les comptes administrateurs temporaires après utilisation.
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 mt-3">
+                            <i class="fas fa-plus-circle me-2"></i> Ajouter l'administrateur
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Liste des administrateurs -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-users me-2"></i> Liste des administrateurs
+                </div>
+                <div class="card-body">
+                    <div class="admin-list" id="admin-list">
+                        <!-- Les administrateurs seront générés ici dynamiquement -->
+                        <div class="admin-item">
+                            <div class="admin-header">
+                                <div class="admin-info">
+                                    <span class="admin-name">Admin Principal</span>
+                                    <span class="admin-badge primary">
+                                        <i class="fas fa-crown"></i> Principal
+                                    </span>
+                                    <span class="online-status online" title="En ligne"></span>
+                                </div>
+                                <div class="admin-actions">
+                                    <div class="admin-btn edit" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="admin-details">
+                                <div class="admin-detail">
+                                    <i class="fas fa-clock"></i> Dernière connexion: Aujourd'hui 10:25
+                                </div>
+                                <div class="admin-detail">
+                                    <i class="fas fa-calendar-alt"></i> Créé le: 25/04/2025
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="admin-item">
+                            <div class="admin-header">
+                                <div class="admin-info">
+                                    <span class="admin-name">Jean Dupont</span>
+                                    <span class="admin-badge standard">
+                                        <i class="fas fa-user-shield"></i> Standard
+                                    </span>
+                                    <span class="online-status offline" title="Hors ligne"></span>
+                                </div>
+                                <div class="admin-actions">
+                                    <div class="admin-btn edit" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div class="admin-btn delete" title="Supprimer">
+                                        <i class="fas fa-trash"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="admin-details">
+                                <div class="admin-detail">
+                                    <i class="fas fa-clock"></i> Dernière connexion: 24/04/2025 15:40
+                                </div>
+                                <div class="admin-detail">
+                                    <i class="fas fa-calendar-alt"></i> Créé le: 23/04/2025
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        
+        
+        <!-- Section Historique -->
+<div id="History_Inventory_section" class="content-section" style="display: none;">
+    <h2 class="mb-4"><i class="fas fa-history me-2"></i> Historique des actions</h2>
+    
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-filter me-2"></i> Filtres</span>
+            <button class="btn btn-sm btn-primary" id="History_Inventory_toggleFilters">
+                <i class="fas fa-sliders-h me-1"></i> Options de filtrage
+            </button>
+        </div>
+        <div class="card-body" id="History_Inventory_filtersContainer" style="display: none;">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" id="History_Inventory_searchInput" placeholder="Rechercher une action, un produit, un admin...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="History_Inventory_customSelect mb-3">
+                        <div class="History_Inventory_selectedOption" id="History_Inventory_periodSelector">
+                            <i class="fas fa-calendar-alt me-2"></i> Période: Tout
+                            <i class="fas fa-chevron-down float-end mt-1"></i>
+                        </div>
+                        <div class="History_Inventory_options" id="History_Inventory_periodOptions">
+                            <div class="History_Inventory_option" data-value="all"><i class="fas fa-infinity me-2"></i> Tout</div>
+                            <div class="History_Inventory_option" data-value="today"><i class="fas fa-calendar-day me-2"></i> Aujourd'hui</div>
+                            <div class="History_Inventory_option" data-value="week"><i class="fas fa-calendar-week me-2"></i> Cette semaine</div>
+                            <div class="History_Inventory_option" data-value="month"><i class="fas fa-calendar-alt me-2"></i> Ce mois</div>
+                            <div class="History_Inventory_option" data-value="year"><i class="fas fa-calendar me-2"></i> Cette année</div>
+                            <div class="History_Inventory_option" data-value="custom"><i class="fas fa-cog me-2"></i> Personnalisé...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="History_Inventory_advancedFilters" style="display: none;">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="History_Inventory_customSelect">
+                            <div class="History_Inventory_selectedOption" id="History_Inventory_typeSelector">
+                                <i class="fas fa-tasks me-2"></i> Type d'action: Tous
+                                <i class="fas fa-chevron-down float-end mt-1"></i>
+                            </div>
+                            <div class="History_Inventory_options" id="History_Inventory_typeOptions">
+                                <div class="History_Inventory_option" data-value="all"><i class="fas fa-asterisk me-2"></i> Tous</div>
+                                <div class="History_Inventory_option" data-value="add"><i class="fas fa-plus-circle me-2"></i> Ajout</div>
+                                <div class="History_Inventory_option" data-value="delete"><i class="fas fa-trash me-2"></i> Suppression</div>
+                                <div class="History_Inventory_option" data-value="modify"><i class="fas fa-edit me-2"></i> Modification</div>
+                                <div class="History_Inventory_option" data-value="sale"><i class="fas fa-shopping-cart me-2"></i> Vente</div>
+                                <div class="History_Inventory_option" data-value="print"><i class="fas fa-print me-2"></i> Impression</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="History_Inventory_customSelect">
+                            <div class="History_Inventory_selectedOption" id="History_Inventory_adminSelector">
+                                <i class="fas fa-user-shield me-2"></i> Admin: Tous
+                                <i class="fas fa-chevron-down float-end mt-1"></i>
+                            </div>
+                            <div class="History_Inventory_options" id="History_Inventory_adminOptions">
+                                <div class="History_Inventory_option" data-value="all"><i class="fas fa-users me-2"></i> Tous</div>
+                                <div class="History_Inventory_option" data-value="admin1"><i class="fas fa-user me-2"></i> Admin Principal</div>
+                                <div class="History_Inventory_option" data-value="admin2"><i class="fas fa-user me-2"></i> Jean Dupont</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="History_Inventory_customSelect">
+                            <div class="History_Inventory_selectedOption" id="History_Inventory_daySelector">
+                                <i class="fas fa-calendar-day me-2"></i> Jour: Tous
+                                <i class="fas fa-chevron-down float-end mt-1"></i>
+                            </div>
+                            <div class="History_Inventory_options" id="History_Inventory_dayOptions">
+                                <div class="History_Inventory_option" data-value="all"><i class="fas fa-calendar me-2"></i> Tous</div>
+                                <div class="History_Inventory_option" data-value="monday"><i class="fas fa-calendar-day me-2"></i> Lundi</div>
+                                <div class="History_Inventory_option" data-value="tuesday"><i class="fas fa-calendar-day me-2"></i> Mardi</div>
+                                <div class="History_Inventory_option" data-value="wednesday"><i class="fas fa-calendar-day me-2"></i> Mercredi</div>
+                                <div class="History_Inventory_option" data-value="thursday"><i class="fas fa-calendar-day me-2"></i> Jeudi</div>
+                                <div class="History_Inventory_option" data-value="friday"><i class="fas fa-calendar-day me-2"></i> Vendredi</div>
+                                <div class="History_Inventory_option" data-value="saturday"><i class="fas fa-calendar-day me-2"></i> Samedi</div>
+                                <div class="History_Inventory_option" data-value="sunday"><i class="fas fa-calendar-day me-2"></i> Dimanche</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3" id="History_Inventory_customDateContainer" style="display: none;">
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="fas fa-calendar-alt me-1"></i> Date début</label>
+                        <input type="date" class="form-control" id="History_Inventory_startDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="fas fa-calendar-alt me-1"></i> Date fin</label>
+                        <input type="date" class="form-control" id="History_Inventory_endDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="fas fa-calendar-month me-1"></i> Mois</label>
+                        <div class="History_Inventory_customSelect">
+                            <div class="History_Inventory_selectedOption" id="History_Inventory_monthSelector">
+                                <i class="fas fa-calendar-alt me-2"></i> Sélectionner
+                                <i class="fas fa-chevron-down float-end mt-1"></i>
+                            </div>
+                            <div class="History_Inventory_options" id="History_Inventory_monthOptions">
+                                <div class="History_Inventory_option" data-value="0"><i class="fas fa-calendar-day me-2"></i> Janvier</div>
+                                <div class="History_Inventory_option" data-value="1"><i class="fas fa-calendar-day me-2"></i> Février</div>
+                                <div class="History_Inventory_option" data-value="2"><i class="fas fa-calendar-day me-2"></i> Mars</div>
+                                <div class="History_Inventory_option" data-value="3"><i class="fas fa-calendar-day me-2"></i> Avril</div>
+                                <div class="History_Inventory_option" data-value="4"><i class="fas fa-calendar-day me-2"></i> Mai</div>
+                                <div class="History_Inventory_option" data-value="5"><i class="fas fa-calendar-day me-2"></i> Juin</div>
+                                <div class="History_Inventory_option" data-value="6"><i class="fas fa-calendar-day me-2"></i> Juillet</div>
+                                <div class="History_Inventory_option" data-value="7"><i class="fas fa-calendar-day me-2"></i> Août</div>
+                                <div class="History_Inventory_option" data-value="8"><i class="fas fa-calendar-day me-2"></i> Septembre</div>
+                                <div class="History_Inventory_option" data-value="9"><i class="fas fa-calendar-day me-2"></i> Octobre</div>
+                                <div class="History_Inventory_option" data-value="10"><i class="fas fa-calendar-day me-2"></i> Novembre</div>
+                                <div class="History_Inventory_option" data-value="11"><i class="fas fa-calendar-day me-2"></i> Décembre</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="fas fa-calendar-year me-1"></i> Année</label>
+                        <div class="History_Inventory_customSelect">
+                            <div class="History_Inventory_selectedOption" id="History_Inventory_yearSelector">
+                                <i class="fas fa-calendar me-2"></i> 2025
+                                <i class="fas fa-chevron-down float-end mt-1"></i>
+                            </div>
+                            <div class="History_Inventory_options" id="History_Inventory_yearOptions">
+                                <div class="History_Inventory_option" data-value="2025"><i class="fas fa-calendar me-2"></i> 2025</div>
+                                <div class="History_Inventory_option" data-value="2024"><i class="fas fa-calendar me-2"></i> 2024</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <button class="btn btn-primary" id="History_Inventory_applyFilters">
+                        <i class="fas fa-filter me-1"></i> Appliquer les filtres
+                    </button>
+                    <button class="btn btn-outline-secondary" id="History_Inventory_resetFilters">
+                        <i class="fas fa-undo me-1"></i> Réinitialiser
+                    </button>
+                    <button class="btn btn-outline-primary" id="History_Inventory_showAdvancedFilters">
+                        <i class="fas fa-cogs me-1"></i> Filtres avancés
+                    </button>
+                </div>
+                <div class="col-md-6 text-end">
+                    <div class="btn-group">
+                        <button class="btn btn-outline-danger" id="History_Inventory_deleteBtn">
+                            <i class="fas fa-trash me-1"></i> Supprimer
+                        </button>
+                        <button class="btn btn-outline-danger dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                            <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#" id="History_Inventory_deleteAll"><i class="fas fa-trash-alt me-2"></i> Tout</a></li>
+                            <li><a class="dropdown-item" href="#" id="History_Inventory_deleteFiltered"><i class="fas fa-filter me-2"></i> Sélection filtrée</a></li>
+                            <li><a class="dropdown-item" href="#" id="History_Inventory_deleteWeek"><i class="fas fa-calendar-week me-2"></i> Cette semaine</a></li>
+                            <li><a class="dropdown-item" href="#" id="History_Inventory_deleteMonth"><i class="fas fa-calendar-alt me-2"></i> Ce mois</a></li>
+                            <li><a class="dropdown-item" href="#" id="History_Inventory_deleteYear"><i class="fas fa-calendar me-2"></i> Cette année</a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-outline-success" id="History_Inventory_exportBtn">
+                        <i class="fas fa-file-export me-1"></i> Exporter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-list-ul me-2"></i> Historique des actions</span>
+            <div id="History_Inventory_totalEntries" class="badge bg-primary">0 entrées</div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table" id="History_Inventory_table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="History_Inventory_selectAll"></th>
+                            <th><i class="fas fa-calendar-alt me-1"></i> Date & Heure</th>
+                            <th><i class="fas fa-tag me-1"></i> Action</th>
+                            <th><i class="fas fa-box me-1"></i> Produit</th>
+                            <th><i class="fas fa-info-circle me-1"></i> Détails</th>
+                            <th><i class="fas fa-user-shield me-1"></i> Admin</th>
+                        </tr>
+                    </thead>
+                    <tbody id="History_Inventory_tableBody">
+                        <!-- Les entrées historiques seront générées ici dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="History_Inventory_paginationInfo">
+                    Affichage de <span id="History_Inventory_startEntry">1</span> à <span id="History_Inventory_endEntry">10</span> sur <span id="History_Inventory_totalEntriesFooter">0</span> entrées
+                </div>
+                <div class="History_Inventory_pagination">
+                    <button class="History_Inventory_paginationBtn" id="History_Inventory_firstPage" disabled>
+                        <i class="fas fa-angle-double-left"></i>
+                    </button>
+                    <button class="History_Inventory_paginationBtn" id="History_Inventory_prevPage" disabled>
+                        <i class="fas fa-angle-left"></i>
+                    </button>
+                    <div class="History_Inventory_pageNumbers" id="History_Inventory_pageNumbers">
+                        <span class="History_Inventory_currentPage">1</span>
+                    </div>
+                    <button class="History_Inventory_paginationBtn" id="History_Inventory_nextPage">
+                        <i class="fas fa-angle-right"></i>
+                    </button>
+                    <button class="History_Inventory_paginationBtn" id="History_Inventory_lastPage">
+                        <i class="fas fa-angle-double-right"></i>
+                    </button>
+                </div>
+                <div class="History_Inventory_pageSize">
+                    <span>Afficher</span>
+                    <div class="History_Inventory_customSelect History_Inventory_pageSizeSelect">
+                        <div class="History_Inventory_selectedOption" id="History_Inventory_pageSizeSelector">
+                            10 <i class="fas fa-chevron-down ms-1"></i>
+                        </div>
+                        <div class="History_Inventory_options" id="History_Inventory_pageSizeOptions">
+                            <div class="History_Inventory_option" data-value="10">10</div>
+                            <div class="History_Inventory_option" data-value="25">25</div>
+                            <div class="History_Inventory_option" data-value="50">50</div>
+                            <div class="History_Inventory_option" data-value="100">100</div>
+                        </div>
+                    </div>
+                    <span>entrées</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modals pour l'historique -->
+    <div class="modal fade" id="History_Inventory_deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i> Confirmation de suppression</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer <span id="History_Inventory_deleteCount">ces</span> entrées de l'historique ?</p>
+                    <p><strong>Attention :</strong> Cette action est irréversible.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger" id="History_Inventory_confirmDelete">
+                        <i class="fas fa-trash me-1"></i> Supprimer définitivement
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="History_Inventory_detailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i> Détails de l'action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="History_Inventory_detailGroup">
+                                <div class="History_Inventory_detailLabel"><i class="fas fa-calendar-alt me-2"></i> Date et heure</div>
+                                <div class="History_Inventory_detailValue" id="History_Inventory_detailDateTime">27/04/2025 14:30:45</div>
+                            </div>
+                            <div class="History_Inventory_detailGroup">
+                                <div class="History_Inventory_detailLabel"><i class="fas fa-tag me-2"></i> Type d'action</div>
+                                <div class="History_Inventory_detailValue" id="History_Inventory_detailAction">
+                                    <span class="History_Inventory_actionBadge History_Inventory_actionModify">
+                                        <i class="fas fa-edit me-1"></i> Modification
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="History_Inventory_detailGroup">
+                                <div class="History_Inventory_detailLabel"><i class="fas fa-box me-2"></i> Produit concerné</div>
+                                <div class="History_Inventory_detailValue" id="History_Inventory_detailProduct">Antenne TV extérieure (ANT-TV-001)</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="History_Inventory_detailGroup">
+                                <div class="History_Inventory_detailLabel"><i class="fas fa-user-shield me-2"></i> Administrateur</div>
+                                <div class="History_Inventory_detailValue" id="History_Inventory_detailAdmin">
+                                    <div class="History_Inventory_adminInfo">
+                                        <div class="History_Inventory_adminAvatar" style="background-color: #4A00E0">AP</div>
+                                        <div>
+                                            <div class="History_Inventory_adminName">Admin Principal</div>
+                                            <span class="admin-badge primary">
+                                                <i class="fas fa-crown me-1"></i> Principal
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="History_Inventory_detailGroup">
+                                <div class="History_Inventory_detailLabel"><i class="fas fa-fingerprint me-2"></i> ID de référence</div>
+                                <div class="History_Inventory_detailValue" id="History_Inventory_detailID">ACT-202504271430-MOD-001</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="History_Inventory_detailDivider"></div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="History_Inventory_detailGroup">
+                                <div class="History_Inventory_detailLabel"><i class="fas fa-info-circle me-2"></i> Détails de l'action</div>
+                                <div class="History_Inventory_detailValue" id="History_Inventory_detailInfo">
+                                    <div class="History_Inventory_modificationDetails" id="History_Inventory_detailModifications">
+                                        <div class="History_Inventory_modificationTitle">Modifications apportées :</div>
+                                        <div class="History_Inventory_modificationItem">
+                                            <div class="History_Inventory_modificationField">Prix</div>
+                                            <div class="History_Inventory_modificationChange">
+                                                <span class="History_Inventory_oldValue">45,99 €</span>
+                                                <i class="fas fa-arrow-right mx-2"></i>
+                                                <span class="History_Inventory_newValue">49,99 €</span>
+                                            </div>
+                                        </div>
+                                        <div class="History_Inventory_modificationItem">
+                                            <div class="History_Inventory_modificationField">Quantité</div>
+                                            <div class="History_Inventory_modificationChange">
+                                                <span class="History_Inventory_oldValue">12</span>
+                                                <i class="fas fa-arrow-right mx-2"></i>
+                                                <span class="History_Inventory_newValue">15</span>
+                                            </div>
+                                        </div>
+                                        <div class="History_Inventory_modificationItem">
+                                            <div class="History_Inventory_modificationField">Emplacement</div>
+                                            <div class="History_Inventory_modificationChange">
+                                                <span class="History_Inventory_oldValue">Rayon 1, Étagère B</span>
+                                                <i class="fas fa-arrow-right mx-2"></i>
+                                                <span class="History_Inventory_newValue">Rayon 1, Étagère A</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        </div>
+    
+    
+    <!-- Modales pour les réglages de thème/langue -->
+<div id="ThemeLangMode_themePopup" class="ThemeLangMode_popup">
+    <div class="ThemeLangMode_popup-header">
+        <h5 class="ThemeLangMode_popup-title">Choisir un thème</h5>
+        <button class="ThemeLangMode_popup-close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ThemeLangMode_popup-body">
+        <div class="ThemeLangMode_option-group">
+            <label class="ThemeLangMode_option-label">Apparence</label>
+            <div class="ThemeLangMode_toggle-group">
+                <div class="ThemeLangMode_toggle-label">
+                    <i class="fas fa-moon ThemeLangMode_toggle-icon"></i>
+                    Mode sombre
+                </div>
+                <label class="ThemeLangMode_toggle-switch">
+                    <input type="checkbox" id="ThemeLangMode_darkModeToggle">
+                    <span class="ThemeLangMode_toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="ThemeLangMode_option-group">
+            <label class="ThemeLangMode_option-label">Couleurs du thème</label>
+            <div class="ThemeLangMode_themes">
+                <div class="ThemeLangMode_theme-item active" data-theme="default">
+                    <div class="ThemeLangMode_theme-color">
+                        <div class="ThemeLangMode_theme-primary" style="background-color: #e60000;"></div>
+                        <div class="ThemeLangMode_theme-secondary" style="background-color: #003366;"></div>
+                    </div>
+                    <div class="ThemeLangMode_theme-check"><i class="fas fa-check"></i></div>
+                    <div class="ThemeLangMode_theme-name">Total</div>
+                </div>
+                <div class="ThemeLangMode_theme-item" data-theme="blue">
+                    <div class="ThemeLangMode_theme-color">
+                        <div class="ThemeLangMode_theme-primary" style="background-color: #1976d2;"></div>
+                        <div class="ThemeLangMode_theme-secondary" style="background-color: #263238;"></div>
+                    </div>
+                    <div class="ThemeLangMode_theme-check"><i class="fas fa-check"></i></div>
+                    <div class="ThemeLangMode_theme-name">Bleu</div>
+                </div>
+                <div class="ThemeLangMode_theme-item" data-theme="green">
+                    <div class="ThemeLangMode_theme-color">
+                        <div class="ThemeLangMode_theme-primary" style="background-color: #2e7d32;"></div>
+                        <div class="ThemeLangMode_theme-secondary" style="background-color: #37474f;"></div>
+                    </div>
+                    <div class="ThemeLangMode_theme-check"><i class="fas fa-check"></i></div>
+                    <div class="ThemeLangMode_theme-name">Vert</div>
+                </div>
+                <div class="ThemeLangMode_theme-item" data-theme="purple">
+                    <div class="ThemeLangMode_theme-color">
+                        <div class="ThemeLangMode_theme-primary" style="background-color: #7b1fa2;"></div>
+                        <div class="ThemeLangMode_theme-secondary" style="background-color: #212121;"></div>
+                    </div>
+                    <div class="ThemeLangMode_theme-check"><i class="fas fa-check"></i></div>
+                    <div class="ThemeLangMode_theme-name">Violet</div>
+                </div>
+                <div class="ThemeLangMode_theme-item" data-theme="orange">
+                    <div class="ThemeLangMode_theme-color">
+                        <div class="ThemeLangMode_theme-primary" style="background-color: #e65100;"></div>
+                        <div class="ThemeLangMode_theme-secondary" style="background-color: #263238;"></div>
+                    </div>
+                    <div class="ThemeLangMode_theme-check"><i class="fas fa-check"></i></div>
+                    <div class="ThemeLangMode_theme-name">Orange</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="ThemeLangMode_langPopup" class="ThemeLangMode_popup">
+    <div class="ThemeLangMode_popup-header">
+        <h5 class="ThemeLangMode_popup-title">Choisir une langue</h5>
+        <button class="ThemeLangMode_popup-close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ThemeLangMode_popup-body">
+        <div class="ThemeLangMode_option-group">
+            <div class="ThemeLangMode_languages">
+                <div class="ThemeLangMode_lang-item active" data-lang="fr">
+                    <span class="ThemeLangMode_lang-flag">🇫🇷</span>
+                    <span class="ThemeLangMode_lang-name">Français</span>
+                </div>
+                <div class="ThemeLangMode_lang-item" data-lang="en">
+                    <span class="ThemeLangMode_lang-flag">🇬🇧</span>
+                    <span class="ThemeLangMode_lang-name">English</span>
+                </div>
+                <div class="ThemeLangMode_lang-item" data-lang="zh">
+                    <span class="ThemeLangMode_lang-flag">🇨🇳</span>
+                    <span class="ThemeLangMode_lang-name">中文</span>
+                </div>
+                <div class="ThemeLangMode_lang-item" data-lang="hi">
+                    <span class="ThemeLangMode_lang-flag">🇮🇳</span>
+                    <span class="ThemeLangMode_lang-name">हिन्दी</span>
+                </div>
+                <div class="ThemeLangMode_lang-item" data-lang="ln">
+                    <span class="ThemeLangMode_lang-flag">🇨🇩</span>
+                    <span class="ThemeLangMode_lang-name">Lingala</span>
+                </div>
+                <div class="ThemeLangMode_lang-item" data-lang="sw">
+                    <span class="ThemeLangMode_lang-flag">🇨🇩</span>
+                    <span class="ThemeLangMode_lang-name">Swahili</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    
+    </div>
+
+    <!-- Notification Center -->
+    <div id="notification-center"></div>
+
+    <!-- Modals -->
+    <!-- Product Modal -->
+    <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Détails du produit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <form id="edit-product-form">
+                                <input type="hidden" id="edit-product-id">
+                                <div class="mb-3">
+                                    <label for="edit-product-name" class="form-label">Nom du produit</label>
+                                    <input type="text" class="form-control" id="edit-product-name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-product-category" class="form-label">Catégorie</label>
+                                    <select class="form-select" id="edit-product-category">
+                                        <option value="electronique">Électronique</option>
+                                        <option value="outillage">Outillage</option>
+                                        <option value="panneaux-solaires">Panneaux solaires</option>
+                                        <option value="antennes">Antennes TV</option>
+                                        <option value="motos">Pièces moto</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-product-price" class="form-label">Prix (€)</label>
+                                    <input type="number" class="form-control" id="edit-product-price" min="0" step="0.01" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-product-quantity" class="form-label">Quantité</label>
+                                    <input type="number" class="form-control" id="edit-product-quantity" min="0" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-product-location" class="form-label">Emplacement</label>
+                                    <input type="text" class="form-control" id="edit-product-location" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-product-description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="edit-product-description" rows="3"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-min-stock" class="form-label">Stock minimum avant alerte</label>
+                                    <input type="number" class="form-control" id="edit-min-stock" min="0">
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5>Codes produit</h5>
+                                <div class="code-preview mb-3">
+                                    <h6>Code-barres</h6>
+                                    <svg id="edit-barcode-preview"></svg>
+                                </div>
+                                <div class="code-preview">
+                                    <h6>QR Code</h6>
+                                    <div id="edit-qrcode-preview"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h5>Historique des mouvements</h5>
+                                <div id="product-history" style="max-height: 200px; overflow-y: auto;">
+                                    <p class="text-center text-muted">Aucun mouvement enregistré</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="delete-product-btn">Supprimer</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary" id="save-edit-product">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sell Product Modal -->
+    <div class="modal fade" id="sellModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Vendre un produit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="sell-product-form">
+                        <input type="hidden" id="sell-product-id">
+                        <div class="mb-3">
+                            <label class="form-label">Produit</label>
+                            <input type="text" class="form-control" id="sell-product-name" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Prix unitaire</label>
+                            <input type="text" class="form-control" id="sell-product-price" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Stock disponible</label>
+                            <input type="text" class="form-control" id="sell-stock-available" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sell-quantity" class="form-label">Quantité à vendre</label>
+                            <input type="number" class="form-control" id="sell-quantity" min="1" value="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Prix total</label>
+                            <input type="text" class="form-control" id="sell-total-price" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="confirm-sell">Confirmer la vente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmer la suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer le produit <strong id="delete-product-name"></strong> ?</p>
+                    <p class="text-danger">Cette action est irréversible.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Modale Changement de mot de passe -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: var(--primary); color: white;">
+                <h5 class="modal-title">Changement de mot de passe</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="change-password-form">
+                    <div class="mb-3 password-field">
+                        <label for="current-password" class="form-label">Mot de passe actuel</label>
+                        <input type="password" class="form-control" id="current-password" required>
+                        <span class="password-toggle" onclick="togglePasswordVisibility('current-password', this)">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                    
+                    <div class="mb-3 password-field">
+                        <label for="new-password" class="form-label">Nouveau mot de passe</label>
+                        <input type="password" class="form-control" id="new-password" required>
+                        <span class="password-toggle" onclick="togglePasswordVisibility('new-password', this)">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                        
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="new-password-strength-bar"></div>
+                        </div>
+                        
+                        <div class="password-feedback">
+                            <span id="new-password-strength-text">Force: Faible</span>
+                            <span id="new-password-length">0/12</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 password-field">
+                        <label for="confirm-new-password" class="form-label">Confirmer le nouveau mot de passe</label>
+                        <input type="password" class="form-control" id="confirm-new-password" required>
+                        <span class="password-toggle" onclick="togglePasswordVisibility('confirm-new-password', this)">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="save-new-password">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modale Modification de nom d'utilisateur -->
+<div class="modal fade" id="changeUsernameModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: var(--primary); color: white;">
+                <h5 class="modal-title">Modifier le nom d'utilisateur</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="change-username-form">
+                    <div class="mb-3">
+                        <label for="current-username" class="form-label">Nom d'utilisateur actuel</label>
+                        <input type="text" class="form-control" id="current-username" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="new-username" class="form-label">Nouveau nom d'utilisateur</label>
+                        <input type="text" class="form-control" id="new-username" required>
+                    </div>
+                    
+                    <div class="mb-3 password-field">
+                        <label for="confirm-password" class="form-label">Confirmez votre mot de passe</label>
+                        <input type="password" class="form-control" id="confirm-password" required>
+                        <span class="password-toggle" onclick="togglePasswordVisibility('confirm-password', this)">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="save-new-username">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modale Édition d'administrateur -->
+<div class="modal fade" id="editAdminModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: var(--primary); color: white;">
+                <h5 class="modal-title">Modifier l'administrateur</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-admin-form">
+                    <input type="hidden" id="edit-admin-id">
+                    <div class="mb-3">
+                        <label for="edit-admin-username" class="form-label">Nom d'utilisateur</label>
+                        <input type="text" class="form-control" id="edit-admin-username" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Options</label>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="reset-admin-password">
+                            <label class="form-check-label" for="reset-admin-password">
+                                Réinitialiser le mot de passe
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" id="reset-password-container" style="display: none;">
+                        <label for="reset-password" class="form-label">Nouveau mot de passe</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="reset-password">
+                            <button class="btn btn-outline-secondary" type="button" id="generate-reset-password">
+                                <i class="fas fa-dice"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="save-edit-admin">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modale de confirmation de suppression d'admin -->
+<div class="modal fade" id="deleteAdminModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: var(--danger); color: white;">
+                <h5 class="modal-title">Confirmer la suppression</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer l'administrateur <strong id="delete-admin-name"></strong> ?</p>
+                <p class="text-danger">Cette action est irréversible.</p>
+                <div class="mb-3 password-field">
+                    <label for="delete-confirm-password" class="form-label">Entrez votre mot de passe pour confirmer</label>
+                    <input type="password" class="form-control" id="delete-confirm-password" required>
+                    <span class="password-toggle" onclick="togglePasswordVisibility('delete-confirm-password', this)">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-admin">Supprimer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modale de déconnexion -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: var(--primary); color: white;">
+                <h5 class="modal-title">Déconnexion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir vous déconnecter ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="confirm-logout">Déconnexion</button>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+<!-- Script Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Lien vers le fichier JavaScript -->
+<script src="scripts.js"></script>
+
+</body>
+</html>
