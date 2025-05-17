@@ -335,6 +335,9 @@
                 <li class="nav-item active" data-section="dashboard">
                     <a href="#"><i class="fas fa-tachometer-alt"></i> Tableau de bord</a>
                 </li>
+<li class="nav-item" data-section="AnalInvenIa-dashboard">
+    <a href="#"><i class="fas fa-robot"></i> Analyse IA</a>
+</li>
                 <li class="nav-item" data-section="inventory">
                     <a href="#"><i class="fas fa-box-open"></i> Inventaire</a>
                 </li>
@@ -353,6 +356,10 @@
                 <li class="nav-item" data-section="admin-management">
     <a href="#"><i class="fas fa-users-cog"></i> Gestion Admin</a>
 </li>
+<li class="nav-item" data-section="currency-settings">
+    <a href="#"><i class="fas fa-money-bill-wave"></i> Gestion des devises</a>
+</li>
+
 <li class="nav-item" data-section="History_Inventory_section">
     <a href="#"><i class="fas fa-history"></i> Historique</a>
 </li>
@@ -440,6 +447,735 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Section Analyse IA -->
+<div id="AnalInvenIa-dashboard" class="content-section" style="display: none;">
+    <h2 class="mb-4"><i class="fas fa-robot me-2"></i> Analyse IA de l'inventaire</h2>
+    
+    <div class="AnalInvenIa-intro-card">
+        <div class="AnalInvenIa-intro-icon">
+            <i class="fas fa-brain"></i>
+        </div>
+        <div class="AnalInvenIa-intro-content">
+            <h3>Assistant d'analyse intelligent</h3>
+            <p>Notre IA analyse en profondeur votre inventaire pour vous fournir des insights précis, des prévisions fiables et des recommandations personnalisées pour optimiser votre gestion de stock et maximiser vos profits.</p>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-filter me-2"></i> Paramètres d'analyse</span>
+            <div class="AnalInvenIa-header-actions">
+                <button class="btn btn-sm btn-outline-secondary" id="AnalInvenIa-resetParams">
+                    <i class="fas fa-undo-alt me-1"></i> Réinitialiser
+                </button>
+                <button class="btn btn-sm btn-primary" id="AnalInvenIa-runAnalysis">
+                    <i class="fas fa-play me-1"></i> Lancer l'analyse
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><i class="fas fa-calendar-alt me-2"></i>Période d'analyse</label>
+                        <div class="AnalInvenIa-tabs">
+                            <div class="AnalInvenIa-tab active" data-filter="1">
+                                <i class="fas fa-clock"></i> Intervalles
+                            </div>
+                            <div class="AnalInvenIa-tab" data-filter="2">
+                                <i class="fas fa-history"></i> Relatif
+                            </div>
+                            <div class="AnalInvenIa-tab" data-filter="3">
+                                <i class="fas fa-calendar-day"></i> Personnalisé
+                            </div>
+                        </div>
+                        
+                        <!-- Filtre 1: Intervalles -->
+                        <div class="AnalInvenIa-filter-content active" id="AnalInvenIa-filter1">
+                            <div class="AnalInvenIa-select-container">
+                                <div class="AnalInvenIa-select" id="AnalInvenIa-intervalSelect">
+                                    <div class="AnalInvenIa-select-value">
+                                        <i class="fas fa-calendar-day me-2"></i>Journalier (par jours)
+                                    </div>
+                                    <i class="fas fa-chevron-down AnalInvenIa-select-arrow"></i>
+                                    <div class="AnalInvenIa-select-dropdown">
+                                        <div class="AnalInvenIa-select-option" data-value="hour">
+                                            <i class="fas fa-hourglass me-2"></i>Par heure, minutes, secondes
+                                        </div>
+                                        <div class="AnalInvenIa-select-option" data-value="day">
+                                            <i class="fas fa-calendar-day me-2"></i>Journalier (par jours)
+                                        </div>
+                                        <div class="AnalInvenIa-select-option" data-value="week">
+                                            <i class="fas fa-calendar-week me-2"></i>Semestriel (par semaine)
+                                        </div>
+                                        <div class="AnalInvenIa-select-option" data-value="month">
+                                            <i class="fas fa-calendar-alt me-2"></i>Mensuel (par mois)
+                                        </div>
+                                        <div class="AnalInvenIa-select-option" data-value="year">
+                                            <i class="fas fa-calendar me-2"></i>Annuel (par année)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Filtre 2: Période relative -->
+                        <div class="AnalInvenIa-filter-content" id="AnalInvenIa-filter2">
+                            <div class="AnalInvenIa-select-container">
+                                <div class="AnalInvenIa-select" id="AnalInvenIa-relativeSelect">
+                                    <div class="AnalInvenIa-select-value">
+                                        <i class="fas fa-calendar-day me-2"></i>Aujourd'hui
+                                    </div>
+                                    <i class="fas fa-chevron-down AnalInvenIa-select-arrow"></i>
+                                    <div class="AnalInvenIa-select-dropdown">
+                                        <div class="AnalInvenIa-select-option" data-value="now">
+                                            <i class="fas fa-bolt me-2"></i>À l'instant
+                                        </div>
+                                        <div class="AnalInvenIa-select-option" data-value="today">
+                                            <i class="fas fa-calendar-day me-2"></i>Aujourd'hui
+                                        </div>
+                                        <div class="AnalInvenIa-select-option" data-value="yesterday">
+                                            <i class="fas fa-calendar-day me-2"></i>Hier
+                                        </div>
+                                        <div class="AnalInvenIa-select-option" data-value="thisWeek">
+                                            <i class="fas fa-calendar-week me-2"></i>Cette semaine
+                                        </div>
+                                        <div class="AnalInvenIa-select-option" data-value="lastWeek">
+                                            <i class="fas fa-calendar-week me-2"></i>La semaine dernière
+                                        </div>
+                                        <div class="AnalInvenIa-select-option" data-value="thisMonth">
+                                            <i class="fas fa-calendar-alt me-2"></i>Ce mois-ci
+                                        </div>
+                                        <div class="AnalInvenIa-select-option" data-value="lastMonth">
+                                            <i class="fas fa-calendar-alt me-2"></i>Le mois dernier
+                                        </div>
+                                        <div class="AnalInvenIa-select-option" data-value="thisYear">
+                                            <i class="fas fa-calendar me-2"></i>Cette année
+                                        </div>
+                                        <div class="AnalInvenIa-select-option" data-value="lastYear">
+                                            <i class="fas fa-calendar me-2"></i>L'année dernière
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Filtre 3: Date personnalisée -->
+                        <div class="AnalInvenIa-filter-content" id="AnalInvenIa-filter3">
+                            <div class="AnalInvenIa-tabs AnalInvenIa-tabs-small">
+                                <div class="AnalInvenIa-tab active" data-customfilter="range">
+                                    <i class="fas fa-calendar-alt"></i> Plage
+                                </div>
+                                <div class="AnalInvenIa-tab" data-customfilter="year">
+                                    <i class="fas fa-calendar"></i> Année
+                                </div>
+                                <div class="AnalInvenIa-tab" data-customfilter="month">
+                                    <i class="fas fa-calendar-alt"></i> Mois
+                                </div>
+                                <div class="AnalInvenIa-tab" data-customfilter="day">
+                                    <i class="fas fa-calendar-day"></i> Jour
+                                </div>
+                            </div>
+                            
+                            <div class="AnalInvenIa-custom-filter active" id="AnalInvenIa-customRange">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="AnalInvenIa-form-group">
+                                            <label><i class="fas fa-calendar-alt me-1"></i> De</label>
+                                            <input type="date" class="form-control" id="AnalInvenIa-startDate">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="AnalInvenIa-form-group">
+                                            <label><i class="fas fa-calendar-alt me-1"></i> À</label>
+                                            <input type="date" class="form-control" id="AnalInvenIa-endDate">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="AnalInvenIa-custom-filter" id="AnalInvenIa-customYear">
+                                <div class="AnalInvenIa-select-container">
+                                    <div class="AnalInvenIa-select" id="AnalInvenIa-yearSelect">
+                                        <div class="AnalInvenIa-select-value">
+                                            <i class="fas fa-calendar me-2"></i>2025
+                                        </div>
+                                        <i class="fas fa-chevron-down AnalInvenIa-select-arrow"></i>
+                                        <div class="AnalInvenIa-select-dropdown">
+                                            <div class="AnalInvenIa-select-option" data-value="2025">
+                                                <i class="fas fa-calendar me-2"></i>2025
+                                            </div>
+                                            <div class="AnalInvenIa-select-option" data-value="2024">
+                                                <i class="fas fa-calendar me-2"></i>2024
+                                            </div>
+                                            <div class="AnalInvenIa-select-option" data-value="2023">
+                                                <i class="fas fa-calendar me-2"></i>2023
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="AnalInvenIa-custom-filter" id="AnalInvenIa-customMonth">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="AnalInvenIa-select-container">
+                                            <div class="AnalInvenIa-select" id="AnalInvenIa-monthSelect">
+                                                <div class="AnalInvenIa-select-value">
+                                                    <i class="fas fa-calendar-alt me-2"></i>Mai
+                                                </div>
+                                                <i class="fas fa-chevron-down AnalInvenIa-select-arrow"></i>
+                                                <div class="AnalInvenIa-select-dropdown">
+                                                    <div class="AnalInvenIa-select-option" data-value="0">Janvier</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="1">Février</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="2">Mars</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="3">Avril</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="4">Mai</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="5">Juin</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="6">Juillet</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="7">Août</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="8">Septembre</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="9">Octobre</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="10">Novembre</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="11">Décembre</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="AnalInvenIa-select-container">
+                                            <div class="AnalInvenIa-select" id="AnalInvenIa-yearForMonthSelect">
+                                                <div class="AnalInvenIa-select-value">
+                                                    <i class="fas fa-calendar me-2"></i>2025
+                                                </div>
+                                                <i class="fas fa-chevron-down AnalInvenIa-select-arrow"></i>
+                                                <div class="AnalInvenIa-select-dropdown">
+                                                    <div class="AnalInvenIa-select-option" data-value="2025">2025</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="2024">2024</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="2023">2023</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="AnalInvenIa-custom-filter" id="AnalInvenIa-customDay">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="AnalInvenIa-form-group">
+                                            <label><i class="fas fa-calendar-day me-1"></i> Jour</label>
+                                            <input type="number" class="form-control" id="AnalInvenIa-day" min="1" max="31" value="17">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="AnalInvenIa-select-container">
+                                            <label><i class="fas fa-calendar-alt me-1"></i> Mois</label>
+                                            <div class="AnalInvenIa-select" id="AnalInvenIa-monthForDaySelect">
+                                                <div class="AnalInvenIa-select-value">Mai</div>
+                                                <i class="fas fa-chevron-down AnalInvenIa-select-arrow"></i>
+                                                <div class="AnalInvenIa-select-dropdown">
+                                                    <div class="AnalInvenIa-select-option" data-value="0">Janvier</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="1">Février</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="2">Mars</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="3">Avril</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="4">Mai</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="5">Juin</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="6">Juillet</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="7">Août</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="8">Septembre</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="9">Octobre</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="10">Novembre</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="11">Décembre</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="AnalInvenIa-select-container">
+                                            <label><i class="fas fa-calendar me-1"></i> Année</label>
+                                            <div class="AnalInvenIa-select" id="AnalInvenIa-yearForDaySelect">
+                                                <div class="AnalInvenIa-select-value">2025</div>
+                                                <i class="fas fa-chevron-down AnalInvenIa-select-arrow"></i>
+                                                <div class="AnalInvenIa-select-dropdown">
+                                                    <div class="AnalInvenIa-select-option" data-value="2025">2025</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="2024">2024</div>
+                                                    <div class="AnalInvenIa-select-option" data-value="2023">2023</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><i class="fas fa-search me-2"></i>Portée d'analyse</label>
+                        <div class="AnalInvenIa-scope-selector">
+                            <div class="AnalInvenIa-scope-option active" data-scope="global">
+                                <div class="AnalInvenIa-scope-icon">
+                                    <i class="fas fa-globe"></i>
+                                </div>
+                                <div class="AnalInvenIa-scope-label">Global</div>
+                                <div class="AnalInvenIa-scope-desc">Tous les produits</div>
+                            </div>
+                            <div class="AnalInvenIa-scope-option" data-scope="category">
+                                <div class="AnalInvenIa-scope-icon">
+                                    <i class="fas fa-folder"></i>
+                                </div>
+                                <div class="AnalInvenIa-scope-label">Catégorie</div>
+                                <div class="AnalInvenIa-scope-desc">Une catégorie spécifique</div>
+                            </div>
+                            <div class="AnalInvenIa-scope-option" data-scope="product">
+                                <div class="AnalInvenIa-scope-icon">
+                                    <i class="fas fa-box"></i>
+                                </div>
+                                <div class="AnalInvenIa-scope-label">Produit</div>
+                                <div class="AnalInvenIa-scope-desc">Un produit spécifique</div>
+                            </div>
+                        </div>
+                        
+                        <div id="AnalInvenIa-categorySelector" class="mt-3" style="display: none;">
+                            <div class="AnalInvenIa-select-container">
+                                <div class="AnalInvenIa-select" id="AnalInvenIa-categorySelect">
+                                    <div class="AnalInvenIa-select-value">
+                                        <i class="fas fa-folder me-2"></i>Sélectionner une catégorie
+                                    </div>
+                                    <i class="fas fa-chevron-down AnalInvenIa-select-arrow"></i>
+                                    <div class="AnalInvenIa-select-dropdown">
+                                        <div class="AnalInvenIa-select-option" data-value="electronics">
+                                            <i class="fas fa-tv me-2"></i>Électronique
+                                        </div>
+                                        <div class="AnalInvenIa-select-option" data-value="furniture">
+                                            <i class="fas fa-couch me-2"></i>Mobilier
+                                        </div>
+                                        <div class="AnalInvenIa-select-option" data-value="clothing">
+                                            <i class="fas fa-tshirt me-2"></i>Vêtements
+                                        </div>
+                                        <div class="AnalInvenIa-select-option" data-value="food">
+                                            <i class="fas fa-utensils me-2"></i>Alimentaire
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="AnalInvenIa-productSelector" class="mt-3" style="display: none;">
+                            <div class="AnalInvenIa-search-container">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" class="form-control" id="AnalInvenIa-productSearch" placeholder="Rechercher un produit...">
+                                </div>
+                                <div id="AnalInvenIa-productResults" class="AnalInvenIa-search-results">
+                                    <!-- Les résultats seront ajoutés dynamiquement -->
+                                </div>
+                            </div>
+                            <div class="AnalInvenIa-selected-product mt-2" style="display: none;">
+                                <div class="AnalInvenIa-product-badge">
+                                    <i class="fas fa-box me-2"></i>
+                                    <span id="AnalInvenIa-selectedProductName">Nom du produit</span>
+                                    <button class="AnalInvenIa-remove-product">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="AnalInvenIa-analysis-footer">
+                <div class="AnalInvenIa-analysis-status">
+                    <i class="fas fa-circle-info me-2"></i>
+                    Configurez les paramètres et lancez l'analyse pour obtenir des insights intelligents sur votre inventaire.
+                </div>
+                <div class="AnalInvenIa-analysis-actions">
+                    <button class="btn btn-primary" id="AnalInvenIa-runBtn">
+                        <i class="fas fa-robot me-2"></i> Lancer l'analyse IA
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Résultats d'analyse -->
+    <div id="AnalInvenIa-results" style="display: none;">
+        <div class="AnalInvenIa-results-header">
+            <div class="AnalInvenIa-results-title">
+                <i class="fas fa-chart-line me-2"></i>
+                <span id="AnalInvenIa-analysisTitle">Analyse globale de l'inventaire</span>
+                <span class="AnalInvenIa-period-badge" id="AnalInvenIa-analysisPeriod">Mai 2025</span>
+            </div>
+            <div class="AnalInvenIa-results-actions">
+                <button class="btn btn-sm btn-outline-secondary" id="AnalInvenIa-printResults">
+                    <i class="fas fa-print me-1"></i> Imprimer
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" id="AnalInvenIa-exportResults">
+                    <i class="fas fa-file-pdf me-1"></i> Exporter PDF
+                </button>
+                <button class="btn btn-sm btn-outline-primary" id="AnalInvenIa-newAnalysis">
+                    <i class="fas fa-sliders-h me-1"></i> Nouvelle analyse
+                </button>
+            </div>
+        </div>
+        
+        <div class="AnalInvenIa-insights-nav">
+            <div class="AnalInvenIa-insight-tab active" data-tab="overview">
+                <i class="fas fa-eye"></i>
+                <span>Aperçu</span>
+            </div>
+            <div class="AnalInvenIa-insight-tab" data-tab="stats">
+                <i class="fas fa-chart-pie"></i>
+                <span>Statistiques</span>
+            </div>
+            <div class="AnalInvenIa-insight-tab" data-tab="products">
+                <i class="fas fa-box-open"></i>
+                <span>Produits</span>
+            </div>
+            <div class="AnalInvenIa-insight-tab" data-tab="predictions">
+                <i class="fas fa-crystal-ball"></i>
+                <span>Prévisions</span>
+            </div>
+            <div class="AnalInvenIa-insight-tab" data-tab="recommendations">
+                <i class="fas fa-lightbulb"></i>
+                <span>Recommandations</span>
+            </div>
+            <div class="AnalInvenIa-insight-tab" data-tab="reports">
+                <i class="fas fa-file-alt"></i>
+                <span>Rapports</span>
+            </div>
+        </div>
+        
+        <!-- Tab: Aperçu -->
+        <div class="AnalInvenIa-insight-content active" id="AnalInvenIa-tab-overview">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="AnalInvenIa-kpi-card">
+                        <div class="AnalInvenIa-kpi-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="AnalInvenIa-kpi-content">
+                            <div class="AnalInvenIa-kpi-value"><span id="AnalInvenIa-totalValue">24 850</span> €</div>
+                            <div class="AnalInvenIa-kpi-label">Valeur totale du stock</div>
+                            <div class="AnalInvenIa-kpi-trend positive">
+                                <i class="fas fa-arrow-up me-1"></i> +8,5% par rapport au mois dernier
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="AnalInvenIa-kpi-card">
+                        <div class="AnalInvenIa-kpi-icon">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <div class="AnalInvenIa-kpi-content">
+                            <div class="AnalInvenIa-kpi-value"><span id="AnalInvenIa-salesValue">12 450</span> €</div>
+                            <div class="AnalInvenIa-kpi-label">Ventes réalisées</div>
+                            <div class="AnalInvenIa-kpi-trend positive">
+                                <i class="fas fa-arrow-up me-1"></i> +12,3% par rapport au mois dernier
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="AnalInvenIa-kpi-card">
+                        <div class="AnalInvenIa-kpi-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="AnalInvenIa-kpi-content">
+                            <div class="AnalInvenIa-kpi-value"><span id="AnalInvenIa-stockIssues">5</span></div>
+                            <div class="AnalInvenIa-kpi-label">Problèmes détectés</div>
+                            <div class="AnalInvenIa-kpi-trend neutral">
+                                <i class="fas fa-equals me-1"></i> Identique au mois dernier
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-chart-line me-2"></i> Évolution des ventes</span>
+                            <div class="AnalInvenIa-chart-controls">
+                                <button class="AnalInvenIa-chart-control active" data-period="week">7J</button>
+                                <button class="AnalInvenIa-chart-control" data-period="month">30J</button>
+                                <button class="AnalInvenIa-chart-control" data-period="year">1A</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="AnalInvenIa-chart-container">
+                                <canvas id="AnalInvenIa-salesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-lightbulb me-2"></i> Recommandations principales
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="AnalInvenIa-recommendation-list">
+                                <div class="AnalInvenIa-recommendation-item">
+                                    <div class="AnalInvenIa-recommendation-icon">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </div>
+                                    <div class="AnalInvenIa-recommendation-content">
+                                        <div class="AnalInvenIa-recommendation-title">Augmenter le stock de Smartphone XL+</div>
+                                        <div class="AnalInvenIa-recommendation-description">
+                                            Les ventes augmentent de 15% chaque mois depuis 3 mois.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="AnalInvenIa-recommendation-item">
+                                    <div class="AnalInvenIa-recommendation-icon">
+                                        <i class="fas fa-percentage"></i>
+                                    </div>
+                                    <div class="AnalInvenIa-recommendation-content">
+                                        <div class="AnalInvenIa-recommendation-title">Augmenter le prix des Écouteurs sans fil Pro</div>
+                                        <div class="AnalInvenIa-recommendation-description">
+                                            Forte demande avec une élasticité-prix favorable. Potentiel +15% sans impact sur les ventes.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="AnalInvenIa-recommendation-item">
+                                    <div class="AnalInvenIa-recommendation-icon">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </div>
+                                    <div class="AnalInvenIa-recommendation-content">
+                                        <div class="AnalInvenIa-recommendation-title">Réduire le stock de Casques gaming standard</div>
+                                        <div class="AnalInvenIa-recommendation-description">
+                                            Rotation lente, 35 unités en stock depuis plus de 60 jours.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer text-end">
+                            <button class="btn btn-sm btn-outline-primary" id="AnalInvenIa-viewAllRecommendations">
+                                Voir toutes les recommandations <i class="fas fa-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-trophy me-2"></i> Top produits
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="AnalInvenIa-tab-container">
+                                <div class="AnalInvenIa-tabs AnalInvenIa-tabs-small">
+                                    <div class="AnalInvenIa-tab active" data-toptab="bestsellers">
+                                        <i class="fas fa-chart-line"></i> Meilleures ventes
+                                    </div>
+                                    <div class="AnalInvenIa-tab" data-toptab="profitable">
+                                        <i class="fas fa-hand-holding-usd"></i> Plus rentables
+                                    </div>
+                                    <div class="AnalInvenIa-tab" data-toptab="critical">
+                                        <i class="fas fa-exclamation-triangle"></i> État critique
+                                    </div>
+                                </div>
+                                <div class="AnalInvenIa-top-products active" id="AnalInvenIa-bestsellers">
+                                    <div class="AnalInvenIa-product-ranking">
+                                        <div class="AnalInvenIa-product-rank">1</div>
+                                        <div class="AnalInvenIa-product-info">
+                                            <div class="AnalInvenIa-product-name">Smartphone XL+</div>
+                                            <div class="AnalInvenIa-product-stats">
+                                                <span class="AnalInvenIa-product-stat">
+                                                    <i class="fas fa-box me-1"></i> Stock: 32
+                                                </span>
+                                                <span class="AnalInvenIa-product-stat">
+                                                    <i class="fas fa-shopping-cart me-1"></i> Vendus: 78
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="AnalInvenIa-product-trend positive">
+                                            <i class="fas fa-arrow-up"></i> 15%
+                                        </div>
+                                    </div>
+                                    <div class="AnalInvenIa-product-ranking">
+                                        <div class="AnalInvenIa-product-rank">2</div>
+                                        <div class="AnalInvenIa-product-info">
+                                            <div class="AnalInvenIa-product-name">Écouteurs sans fil Pro</div>
+                                            <div class="AnalInvenIa-product-stats">
+                                                <span class="AnalInvenIa-product-stat">
+                                                    <i class="fas fa-box me-1"></i> Stock: 45
+                                                </span>
+                                                <span class="AnalInvenIa-product-stat">
+                                                    <i class="fas fa-shopping-cart me-1"></i> Vendus: 64
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="AnalInvenIa-product-trend positive">
+                                            <i class="fas fa-arrow-up"></i> 12%
+                                        </div>
+                                    </div>
+                                    <div class="AnalInvenIa-product-ranking">
+                                        <div class="AnalInvenIa-product-rank">3</div>
+                                        <div class="AnalInvenIa-product-info">
+                                            <div class="AnalInvenIa-product-name">Montre connectée Sport</div>
+                                            <div class="AnalInvenIa-product-stats">
+                                                <span class="AnalInvenIa-product-stat">
+                                                    <i class="fas fa-box me-1"></i> Stock: 28
+                                                </span>
+                                                <span class="AnalInvenIa-product-stat">
+                                                    <i class="fas fa-shopping-cart me-1"></i> Vendus: 52
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="AnalInvenIa-product-trend positive">
+                                            <i class="fas fa-arrow-up"></i> 8%
+                                        </div>
+                                    </div>
+                                    <div class="AnalInvenIa-product-ranking">
+                                        <div class="AnalInvenIa-product-rank">4</div>
+                                        <div class="AnalInvenIa-product-info">
+                                            <div class="AnalInvenIa-product-name">Enceinte portable waterproof</div>
+                                            <div class="AnalInvenIa-product-stats">
+                                                <span class="AnalInvenIa-product-stat">
+                                                    <i class="fas fa-box me-1"></i> Stock: 40
+                                                </span>
+                                                <span class="AnalInvenIa-product-stat">
+                                                    <i class="fas fa-shopping-cart me-1"></i> Vendus: 49
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="AnalInvenIa-product-trend neutral">
+                                            <i class="fas fa-equals"></i> 0%
+                                        </div>
+                                    </div>
+                                    <div class="AnalInvenIa-product-ranking">
+                                        <div class="AnalInvenIa-product-rank">5</div>
+                                        <div class="AnalInvenIa-product-info">
+                                            <div class="AnalInvenIa-product-name">Batterie externe 20000mAh</div>
+                                            <div class="AnalInvenIa-product-stats">
+                                                <span class="AnalInvenIa-product-stat">
+                                                    <i class="fas fa-box me-1"></i> Stock: 60
+                                                </span>
+                                                <span class="AnalInvenIa-product-stat">
+                                                    <i class="fas fa-shopping-cart me-1"></i> Vendus: 42
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="AnalInvenIa-product-trend negative">
+                                            <i class="fas fa-arrow-down"></i> 5%
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="AnalInvenIa-top-products" id="AnalInvenIa-profitable">
+                                    <!-- Contenu pour les produits rentables -->
+                                </div>
+                                <div class="AnalInvenIa-top-products" id="AnalInvenIa-critical">
+                                    <!-- Contenu pour les produits en état critique -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer text-end">
+                            <button class="btn btn-sm btn-outline-primary" id="AnalInvenIa-viewAllProducts">
+                                Voir tous les produits <i class="fas fa-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-bullseye me-2"></i> Prévisions principales
+                        </div>
+                        <div class="card-body">
+                            <div class="AnalInvenIa-prediction-container">
+                                <div class="AnalInvenIa-prediction-header">
+                                    <div class="AnalInvenIa-prediction-title">Prévisions de ventes par catégorie</div>
+                                    <div class="AnalInvenIa-prediction-period">
+                                        <i class="fas fa-calendar-alt me-2"></i>Prochain mois
+                                    </div>
+                                </div>
+                                <div class="AnalInvenIa-chart-container">
+                                    <canvas id="AnalInvenIa-categoryPredictionChart"></canvas>
+                                </div>
+                                <div class="AnalInvenIa-prediction-insight">
+                                    <i class="fas fa-lightbulb me-2"></i>
+                                    <span>L'IA prévoit une forte hausse des ventes d'électronique (+18%) pour le mois prochain.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer text-end">
+                            <button class="btn btn-sm btn-outline-primary" id="AnalInvenIa-viewAllPredictions">
+                                Voir toutes les prévisions <i class="fas fa-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="AnalInvenIa-report-summary">
+                <div class="AnalInvenIa-report-header">
+                    <div class="AnalInvenIa-report-title">
+                        <i class="fas fa-brain me-2"></i> Synthèse IA
+                    </div>
+                    <button class="AnalInvenIa-report-expand" id="AnalInvenIa-toggleSummary">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="AnalInvenIa-report-content" id="AnalInvenIa-summaryContent">
+                    <p><strong>Performance globale : Excellente</strong></p>
+                    <p>L'analyse de vos données d'inventaire pour le mois de Mai 2025 montre une tendance positive avec une augmentation des ventes de 12,3% par rapport au mois précédent. La valeur totale de votre stock a augmenté de 8,5%, indiquant un bon équilibre entre les entrées et sorties de stock.</p>
+                    <p>Les <strong>points forts</strong> de votre inventaire :</p>
+                    <p>• La catégorie Électronique continue de dominer vos ventes avec une croissance constante</p>
+                    <p>• Votre rotation de stock s'est améliorée de 5% ce mois-ci</p>
+                    <p>• Le produit "Smartphone XL+" montre une excellente performance avec une hausse de ventes de 15%</p>
+                    <p>Les <strong>points d'attention</strong> :</p>
+                    <p>• 3 produits sont en surstockage, représentant une valeur immobilisée de 5 420€</p>
+                    <p>• 2 produits populaires risquent une rupture de stock dans les 10 prochains jours</p>
+                    <p>• La catégorie "Accessoires gaming" montre une tendance à la baisse (-8%)</p>
+                    <p>Notre IA recommande de concentrer vos efforts sur l'optimisation des niveaux de stock pour les produits à forte rotation et de réévaluer votre stratégie pour les produits en surstockage.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Autres onglets -->
+        <div class="AnalInvenIa-insight-content" id="AnalInvenIa-tab-stats">
+            <!-- Contenu pour l'onglet Statistiques -->
+        </div>
+        <div class="AnalInvenIa-insight-content" id="AnalInvenIa-tab-products">
+            <!-- Contenu pour l'onglet Produits -->
+        </div>
+        <div class="AnalInvenIa-insight-content" id="AnalInvenIa-tab-predictions">
+            <!-- Contenu pour l'onglet Prévisions -->
+        </div>
+        <div class="AnalInvenIa-insight-content" id="AnalInvenIa-tab-recommendations">
+            <!-- Contenu pour l'onglet Recommandations -->
+        </div>
+        <div class="AnalInvenIa-insight-content" id="AnalInvenIa-tab-reports">
+            <!-- Contenu pour l'onglet Rapports -->
+        </div>
+        
+    </div>
+    
+    <!-- Loader d'analyse -->
+    <div id="AnalInvenIa-analyzeLoader" style="display: none;">
+        <div class="AnalInvenIa-loader-container">
+            <div class="AnalInvenIa-loader-content">
+                <div class="AnalInvenIa-loader-animation">
+                    <div class="AnalInvenIa-loader-brain">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="AnalInvenIa-loader-pulse"></div>
+                </div>
+                <div class="AnalInvenIa-loader-text">
+                    <h3>Analyse IA en cours...</h3>
+                    <p id="AnalInvenIa-loaderStatus">Analyse des données d'inventaire</p>
+                    <div class="AnalInvenIa-loader-progress">
+                        <div class="AnalInvenIa-loader-progress-bar" id="AnalInvenIa-loaderProgressBar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
             <!-- Inventory Section -->
             <div id="inventory" class="content-section" style="display: none;">
@@ -545,10 +1281,17 @@
                                         <option value="motos">Pièces moto</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
-                                    <label for="product-price" class="form-label">Prix (€)*</label>
-                                    <input type="number" class="form-control" id="product-price" min="0" step="0.01" required>
-                                </div>
+<div class="col-md-6">
+    <label for="product-price" class="form-label">Prix*</label>
+    <div class="input-group">
+        <input type="number" class="form-control" id="product-price" min="0" step="0.01" required>
+        <select class="form-select" id="product-price-currency" style="max-width: 100px;">
+            <option value="usd">USD</option>
+            <option value="cdf">CDF</option>
+        </select>
+    </div>
+</div>
+
                             </div>
                             
                             <div class="row mb-3">
@@ -889,6 +1632,133 @@
                     </div>
                 </div>
             </div>
+<!-- Currency Settings Section -->
+<div id="currency-settings" class="content-section" style="display: none;">
+    <h2 class="mb-4"><i class="fas fa-money-bill-wave me-2"></i> Gestion des devises</h2>
+    
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Configuration des devises</span>
+                    <div class="badge bg-primary rounded-pill" id="rate-update-time">Mise à jour: --</div>
+                </div>
+                <div class="card-body">
+                    <form id="currency-settings-form">
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">Taux de change</h5>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="refresh-rate">
+                                    <i class="fas fa-sync-alt me-1"></i> Rafraîchir
+                                </button>
+                            </div>
+                            
+                            <div class="rate-display mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="currency-icon-container me-3">
+                                        <i class="fas fa-dollar-sign text-success"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between">
+                                            <div>1 USD = <span id="rate-display-usd-to-cdf">--</span> CDF</div>
+                                            <div class="text-muted small">Dollar vers Franc</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="rate-display">
+                                <div class="d-flex align-items-center">
+                                    <div class="currency-icon-container me-3">
+                                        <i class="fas fa-money-bill-wave text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between">
+                                            <div>1 CDF = <span id="rate-display-cdf-to-usd">--</span> USD</div>
+                                            <div class="text-muted small">Franc vers Dollar</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Taux personnalisé (1 USD = ? CDF)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="custom-rate" placeholder="Ex: 2500" min="0" step="0.01">
+                                <button type="button" class="btn btn-primary" id="apply-custom-rate">Appliquer</button>
+                            </div>
+                            <div class="form-text">Laissez vide pour utiliser le taux en ligne</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Affichage par défaut des prix</label>
+                            <div class="currency-toggle">
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="currency-display" id="display-cdf" value="cdf" autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="display-cdf">Franc congolais (CDF)</label>
+                                    
+                                    <input type="radio" class="btn-check" name="currency-display" id="display-usd" value="usd" autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="display-usd">Dollar américain (USD)</label>
+                                    
+                                    <input type="radio" class="btn-check" name="currency-display" id="display-both" value="both" autocomplete="off" checked>
+                                    <label class="btn btn-outline-primary" for="display-both">Les deux</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Enregistrer les paramètres
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    Convertisseur de devises
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label class="form-label">Convertir un montant</label>
+                        <div class="converter-container">
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="convert-amount-usd" placeholder="Montant en USD" min="0" step="0.01">
+                                        <span class="input-group-text">$</span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="convert-amount-cdf" placeholder="Montant en CDF" min="0" step="0.01">
+                                        <span class="input-group-text">FC</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="fas fa-info-circle fa-2x"></i>
+                            </div>
+                            <div>
+                                <h5 class="alert-heading">Information</h5>
+                                <p class="mb-0">Cette configuration affectera l'affichage des prix dans tout l'inventaire. Les montants seront automatiquement convertis selon le taux défini.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
             <!-- About Section -->
             <div id="about" class="content-section" style="display: none;">
@@ -1657,10 +2527,17 @@
                                         <option value="motos">Pièces moto</option>
                                     </select>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="edit-product-price" class="form-label">Prix (€)</label>
-                                    <input type="number" class="form-control" id="edit-product-price" min="0" step="0.01" required>
-                                </div>
+<div class="mb-3">
+    <label for="edit-product-price" class="form-label">Prix</label>
+    <div class="input-group">
+        <input type="number" class="form-control" id="edit-product-price" min="0" step="0.01" required>
+        <select class="form-select" id="edit-product-price-currency" style="max-width: 100px;">
+            <option value="usd">USD</option>
+            <option value="cdf">CDF</option>
+        </select>
+    </div>
+</div>
+
                                 <div class="mb-3">
                                     <label for="edit-product-quantity" class="form-label">Quantité</label>
                                     <input type="number" class="form-control" id="edit-product-quantity" min="0" required>
