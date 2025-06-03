@@ -217,6 +217,24 @@
         <div class="auth-header">
             <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNDAgNjAiPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik01NS40IDE1LjVoMTI5LjJjNi43IDAgMTIuMiA1LjQgMTIuMiAxMi4xdjQuOGMwIDYuNy01LjQgMTIuMS0xMi4yIDEyLjFINTUuNGMtNi43IDAtMTIuMi01LjQtMTIuMi0xMi4xdi00LjhjMC02LjcgNS41LTEyLjEgMTIuMi0xMi4xem0xNi41IDkuOGMtMy4zIDAtNiAyLjctNiA2cy0yLjcgNi02IDZoLTIuMmMwLTYuNiA1LjQtMTIgMTItMTJoMi4yYzAgMy4zIDIuNyA2IDYgNnMyLjcgNiA2IDZoMmMtLjEgMi44LTIuMiA1LjEtNSA1LjloLS4xYy0uOC4yLTEuNi4zLTIuNS4zaC0xNS41Yy0zLjMgMC02LTIuNy02LTZIMzljMy4zIDAgNi0yLjcgNi02czIuNy02IDYtNmgxNi45YzAtMy4zIDIuNy02IDYtNnY2em0zMC42IDBjMy4zIDAgNi0yLjcgNi02aDEzLjRjMy4zIDAgNiAyLjcgNiA2cy0yLjcgNi02IDZoLTYuN2MwIDMuMy0yLjcgNi02IDZoLTEzLjRWMTkuM2g2Ljd6bTQ1LjggMGMzLjMgMCA2LTIuNyA2LTZoMTMuNGMzLjMgMCA2IDIuNyA2IDZzLTIuNyA2LTYgNmgtNi43YzAgMy4zLTIuNyA2LTYgNmgtMTMuNFYxOS4zaDYuN3ptNDUuOSAwYzMuMyAwIDYtMi43IDYtNmgxMy40YzMuMyAwIDYgMi43IDYgNnMtMi43IDYtNiA2aC02LjdjMCAzLjMtMi43IDYtNiA2aC0xMy40VjE5LjNoNi43eiIvPjwvc3ZnPg==" alt="Total Logo">
             <h4>Gestion d'Inventaire</h4>
+            
+            <!-- Ajout des paramètres dans le header d'authentification -->
+            <div id="auth-ThemeLangMode_settings" class="auth-settings-container">
+                <div class="settings-buttons-container">
+                    <button id="auth-ThemeLangMode_themeBtn" class="ThemeLangMode_settingBtn" title="Changer de thème">
+                        <i class="fas fa-palette"></i>
+                        <span class="setting-btn-label">Thème</span>
+                    </button>
+                    <button id="auth-ThemeLangMode_darkModeBtn" class="ThemeLangMode_settingBtn" title="Mode jour/nuit">
+                        <i class="fas fa-moon"></i>
+                        <span class="setting-btn-label">Mode</span>
+                    </button>
+                    <button id="auth-ThemeLangMode_langBtn" class="ThemeLangMode_settingBtn" title="Changer de langue">
+                        <i class="fas fa-globe"></i>
+                        <span class="setting-btn-label">Langue</span>
+                    </button>
+                </div>
+            </div>
         </div>
         
         <!-- Formulaire de première connexion -->
@@ -309,66 +327,185 @@
             </form>
         </div>
     </div>
+    
+    <!-- Ajout des popups dans le conteneur d'authentification -->
+    <div id="auth-ThemeLangMode_themePopup" class="ThemeLangMode_popup auth-popup">
+        <div class="ThemeLangMode_popup-header">
+            <h5 class="ThemeLangMode_popup-title">Choisir un thème</h5>
+            <button class="ThemeLangMode_popup-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="ThemeLangMode_popup-body">
+            <div class="ThemeLangMode_option-group">
+                <label class="ThemeLangMode_option-label">Apparence</label>
+                <div class="ThemeLangMode_toggle-group">
+                    <div class="ThemeLangMode_toggle-label">
+                        <i class="fas fa-moon ThemeLangMode_toggle-icon"></i>
+                        Mode sombre
+                    </div>
+                    <label class="ThemeLangMode_toggle-switch">
+                        <input type="checkbox" id="auth-ThemeLangMode_darkModeToggle">
+                        <span class="ThemeLangMode_toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="ThemeLangMode_option-group">
+                <label class="ThemeLangMode_option-label">Couleurs du thème</label>
+                <div class="ThemeLangMode_themes">
+                    <div class="ThemeLangMode_theme-item active" data-theme="default">
+                        <div class="ThemeLangMode_theme-color">
+                            <div class="ThemeLangMode_theme-primary" style="background-color: #e60000;"></div>
+                            <div class="ThemeLangMode_theme-secondary" style="background-color: #003366;"></div>
+                        </div>
+                        <div class="ThemeLangMode_theme-check"><i class="fas fa-check"></i></div>
+                        <div class="ThemeLangMode_theme-name">Total</div>
+                    </div>
+                    <div class="ThemeLangMode_theme-item" data-theme="blue">
+                        <div class="ThemeLangMode_theme-color">
+                            <div class="ThemeLangMode_theme-primary" style="background-color: #1976d2;"></div>
+                            <div class="ThemeLangMode_theme-secondary" style="background-color: #263238;"></div>
+                        </div>
+                        <div class="ThemeLangMode_theme-check"><i class="fas fa-check"></i></div>
+                        <div class="ThemeLangMode_theme-name">Bleu</div>
+                    </div>
+                    <div class="ThemeLangMode_theme-item" data-theme="green">
+                        <div class="ThemeLangMode_theme-color">
+                            <div class="ThemeLangMode_theme-primary" style="background-color: #2e7d32;"></div>
+                            <div class="ThemeLangMode_theme-secondary" style="background-color: #37474f;"></div>
+                        </div>
+                        <div class="ThemeLangMode_theme-check"><i class="fas fa-check"></i></div>
+                        <div class="ThemeLangMode_theme-name">Vert</div>
+                    </div>
+                    <div class="ThemeLangMode_theme-item" data-theme="purple">
+                        <div class="ThemeLangMode_theme-color">
+                            <div class="ThemeLangMode_theme-primary" style="background-color: #7b1fa2;"></div>
+                            <div class="ThemeLangMode_theme-secondary" style="background-color: #212121;"></div>
+                        </div>
+                        <div class="ThemeLangMode_theme-check"><i class="fas fa-check"></i></div>
+                        <div class="ThemeLangMode_theme-name">Violet</div>
+                    </div>
+                    <div class="ThemeLangMode_theme-item" data-theme="orange">
+                        <div class="ThemeLangMode_theme-color">
+                            <div class="ThemeLangMode_theme-primary" style="background-color: #e65100;"></div>
+                            <div class="ThemeLangMode_theme-secondary" style="background-color: #263238;"></div>
+                        </div>
+                        <div class="ThemeLangMode_theme-check"><i class="fas fa-check"></i></div>
+                        <div class="ThemeLangMode_theme-name">Orange</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="auth-ThemeLangMode_langPopup" class="ThemeLangMode_popup auth-popup">
+        <div class="ThemeLangMode_popup-header">
+            <h5 class="ThemeLangMode_popup-title">Choisir une langue</h5>
+            <button class="ThemeLangMode_popup-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="ThemeLangMode_popup-body">
+            <div class="ThemeLangMode_option-group">
+                <div class="ThemeLangMode_languages">
+                    <div class="ThemeLangMode_lang-item active" data-lang="fr">
+                        <span class="ThemeLangMode_lang-flag">🇫🇷</span>
+                        <span class="ThemeLangMode_lang-name">Français</span>
+                    </div>
+                    <div class="ThemeLangMode_lang-item" data-lang="en">
+                        <span class="ThemeLangMode_lang-flag">🇬🇧</span>
+                        <span class="ThemeLangMode_lang-name">English</span>
+                    </div>
+                    <div class="ThemeLangMode_lang-item" data-lang="zh">
+                        <span class="ThemeLangMode_lang-flag">🇨🇳</span>
+                        <span class="ThemeLangMode_lang-name">中文</span>
+                    </div>
+                    <div class="ThemeLangMode_lang-item" data-lang="hi">
+                        <span class="ThemeLangMode_lang-flag">🇮🇳</span>
+                        <span class="ThemeLangMode_lang-name">हिन्दी</span>
+                    </div>
+                    <div class="ThemeLangMode_lang-item" data-lang="ln">
+                        <span class="ThemeLangMode_lang-flag">🇨🇩</span>
+                        <span class="ThemeLangMode_lang-name">Lingala</span>
+                    </div>
+                    <div class="ThemeLangMode_lang-item" data-lang="sw">
+                        <span class="ThemeLangMode_lang-flag">🇨🇩</span>
+                        <span class="ThemeLangMode_lang-name">Swahili</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
 
     <button id="mobile-toggle-btn">
         <i class="fas fa-bars"></i>
     </button>
 
     <div id="app-container">
-        <nav id="sidebar">
-            <div class="sidebar-header">
-    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNDAgNjAiPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik01NS40IDE1LjVoMTI5LjJjNi43IDAgMTIuMiA1LjQgMTIuMiAxMi4xdjQuOGMwIDYuNy01LjQgMTIuMS0xMi4yIDEyLjFINTUuNGMtNi43IDAtMTIuMi01LjQtMTIuMi0xMi4xdi00LjhjMC02LjcgNS41LTEyLjEgMTIuMi0xMi4xem0xNi41IDkuOGMtMy4zIDAtNiAyLjctNiA2cy0yLjcgNi02IDZoLTIuMmMwLTYuNiA1LjQtMTIgMTItMTJoMi4yYzAgMy4zIDIuNyA2IDYgNnMyLjcgNiA2IDZoMmMtLjEgMi44LTIuMiA1LjEtNSA1LjloLS4xYy0uOC4yLTEuNi4zLTIuNS4zaC0xNS41Yy0zLjMgMC02LTIuNy02LTZIMzljMy4zIDAgNi0yLjcgNi02czIuNy02IDYtNmgxNi45YzAtMy4zIDIuNy02IDYtNnY2em0zMC42IDBjMy4zIDAgNi0yLjcgNi02aDEzLjRjMy4zIDAgNiAyLjcgNiA2cy0yLjcgNi02IDZoLTYuN2MwIDMuMy0yLjcgNi02IDZoLTEzLjRWMTkuM2g2Ljd6bTQ1LjggMGMzLjMgMCA2LTIuNyA2LTZoMTMuNGMzLjMgMCA2IDIuNyA2IDZzLTIuNyA2LTYgNmgtNi43YzAgMy4zLTIuNyA2LTYgNmgtMTMuNFYxOS4zaDYuN3ptNDUuOSAwYzMuMyAwIDYtMi43IDYtNmgxMy40YzMuMyAwIDYgMi43IDYgNnMtMi43IDYtNiA2aC02LjdjMCAzLjMtMi43IDYtNiA2aC0xMy40VjE5LjNoNi43eiIvPjwvc3ZnPg==" alt="Total Logo">
-    <div id="ThemeLangMode_settings">
-        <button id="ThemeLangMode_themeBtn" class="ThemeLangMode_settingBtn" title="Changer de thème">
-            <i class="fas fa-palette"></i>
-        </button>
-        <button id="ThemeLangMode_darkModeBtn" class="ThemeLangMode_settingBtn" title="Mode jour/nuit">
-            <i class="fas fa-moon"></i>
-        </button>
-        <button id="ThemeLangMode_langBtn" class="ThemeLangMode_settingBtn" title="Changer de langue">
-            <i class="fas fa-globe"></i>
-        </button>
+ <nav id="sidebar">
+    <div class="sidebar-header">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNDAgNjAiPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik01NS40IDE1LjVoMTI5LjJjNi43IDAgMTIuMiA1LjQgMTIuMiAxMi4xdjQuOGMwIDYuNy01LjQgMTIuMS0xMi4yIDEyLjFINTUuNGMtNi43IDAtMTIuMi01LjQtMTIuMi0xMi4xdi00LjhjMC02LjcgNS41LTEyLjEgMTIuMi0xMi4xem0xNi41IDkuOGMtMy4zIDAtNiAyLjctNiA2cy0yLjcgNi02IDZoLTIuMmMwLTYuNiA1LjQtMTIgMTItMTJoMi4yYzAgMy4zIDIuNyA2IDYgNnMyLjcgNiA2IDZoMmMtLjEgMi44LTIuMiA1LjEtNSA1LjloLS4xYy0uOC4yLTEuNi4zLTIuNS4zaC0xNS41Yy0zLjMgMC02LTIuNy02LTZIMzljMy4zIDAgNi0yLjcgNi02czIuNy02IDYtNmgxNi45YzAtMy4zIDIuNy02IDYtNnY2em0zMC42IDBjMy4zIDAgNi0yLjcgNi02aDEzLjRjMy4zIDAgNiAyLjcgNiA2cy0yLjcgNi02IDZoLTYuN2MwIDMuMy0yLjcgNi02IDZoLTEzLjRWMTkuM2g2Ljd6bTQ1LjggMGMzLjMgMCA2LTIuNyA2LTZoMTMuNGMzLjMgMCA2IDIuNyA2IDZzLTIuNyA2LTYgNmgtNi43YzAgMy4zLTIuNyA2LTYgNmgtMTMuNFYxOS4zaDYuN3ptNDUuOSAwYzMuMyAwIDYtMi43IDYtNmgxMy40YzMuMyAwIDYgMi43IDYgNnMtMi43IDYtNiA2aC02LjdjMCAzLjMtMi43IDYtNiA2aC0xMy40VjE5LjNoNi43eiIvPjwvc3ZnPg==" alt="Total Logo">
+        <div id="ThemeLangMode_settings">
+            <div class="settings-label">Paramètres</div>
+            <div class="settings-buttons-container">
+                <button id="ThemeLangMode_themeBtn" class="ThemeLangMode_settingBtn" title="Changer de thème">
+                    <i class="fas fa-palette"></i>
+                    <span class="setting-btn-label">Thème</span>
+                </button>
+                <button id="ThemeLangMode_darkModeBtn" class="ThemeLangMode_settingBtn" title="Mode jour/nuit">
+                    <i class="fas fa-moon"></i>
+                    <span class="setting-btn-label">Mode</span>
+                </button>
+                <button id="ThemeLangMode_langBtn" class="ThemeLangMode_settingBtn" title="Changer de langue">
+                    <i class="fas fa-globe"></i>
+                    <span class="setting-btn-label">Langue</span>
+                </button>
+                <button id="ThemeLangMode_advancedBtn" class="ThemeLangMode_settingBtn" title="Paramètres avancés">
+                    <i class="fas fa-cog"></i>
+                    <span class="setting-btn-label">Avancé</span>
+                </button>
+            </div>
+        </div>
     </div>
-</div>
-            <ul class="nav flex-column">
-                <li class="nav-item active" data-section="dashboard">
-                    <a href="#"><i class="fas fa-tachometer-alt"></i> Tableau de bord</a>
-                </li>
-<li class="nav-item" data-section="AnalInvenIa-dashboard">
-    <a href="#"><i class="fas fa-robot"></i> Analyse IA</a>
-</li>
-                <li class="nav-item" data-section="inventory">
-                    <a href="#"><i class="fas fa-box-open"></i> Inventaire</a>
-                </li>
-                <li class="nav-item" data-section="add-product">
-                    <a href="#"><i class="fas fa-plus-circle"></i> Ajouter un produit</a>
-                </li>
-                <li class="nav-item" data-section="scan">
-                    <a href="#"><i class="fas fa-barcode"></i> Scanner un code</a>
-                </li>
-                <li class="nav-item" data-section="print-codes">
-                    <a href="#"><i class="fas fa-print"></i> Imprimer des codes</a>
-                </li>
-                <li class="nav-item" data-section="alerts">
-                    <a href="#"><i class="fas fa-bell"></i> Alertes</a>
-                </li>
-                <li class="nav-item" data-section="admin-management">
-    <a href="#"><i class="fas fa-users-cog"></i> Gestion Admin</a>
-</li>
-<li class="nav-item" data-section="currency-settings">
-    <a href="#"><i class="fas fa-money-bill-wave"></i> Gestion des devises</a>
-</li>
-
-<li class="nav-item" data-section="History_Inventory_section">
-    <a href="#"><i class="fas fa-history"></i> Historique</a>
-</li>
-
-                <li class="nav-item" data-section="about">
-                    <a href="#"><i class="fas fa-info-circle"></i> À propos</a>
-                </li>
-            </ul>
-        </nav>
+    <div class="nav-container">
+        <ul class="nav flex-column">
+            <li class="nav-item active" data-section="dashboard">
+                <a href="#"><i class="fas fa-tachometer-alt"></i> Tableau de bord</a>
+            </li>
+            <li class="nav-item" data-section="AnalInvenIa-dashboard">
+                <a href="#"><i class="fas fa-robot"></i> Analyse IA</a>
+            </li>
+            <li class="nav-item" data-section="inventory">
+                <a href="#"><i class="fas fa-box-open"></i> Inventaire</a>
+            </li>
+            <li class="nav-item" data-section="add-product">
+                <a href="#"><i class="fas fa-plus-circle"></i> Ajouter un produit</a>
+            </li>
+            <li class="nav-item" data-section="scan">
+                <a href="#"><i class="fas fa-barcode"></i> Scanner un code</a>
+            </li>
+            <li class="nav-item" data-section="newonInventSalesPoint">
+                <a href="#"><i class="fas fa-cash-register"></i> Point de Vente</a>
+            </li>
+            <li class="nav-item" data-section="print-codes">
+                <a href="#"><i class="fas fa-print"></i> Imprimer des codes</a>
+            </li>
+            <li class="nav-item" data-section="alerts">
+                <a href="#"><i class="fas fa-bell"></i> Alertes</a>
+            </li>
+            <li class="nav-item" data-section="admin-management">
+                <a href="#"><i class="fas fa-users-cog"></i> Gestion Admin</a>
+            </li>
+            <li class="nav-item" data-section="currency-settings">
+                <a href="#"><i class="fas fa-money-bill-wave"></i> Gestion des devises</a>
+            </li>
+            <li class="nav-item" data-section="History_Inventory_section">
+                <a href="#"><i class="fas fa-history"></i> Historique</a>
+            </li>
+            <li class="nav-item" data-section="about">
+                <a href="#"><i class="fas fa-info-circle"></i> À propos</a>
+            </li>
+        </ul>
+    </div>
+</nav>
 
         <div id="content">
             <!-- Dashboard Section -->
@@ -1137,9 +1274,264 @@
         </div>
         
         <!-- Autres onglets -->
-        <div class="AnalInvenIa-insight-content" id="AnalInvenIa-tab-stats">
-            <!-- Contenu pour l'onglet Statistiques -->
+<div class="AnalInvenIa-insight-content" id="AnalInvenIa-tab-stats">
+    <div class="AnalInvenIa-section-header">
+        <h3><i class="fas fa-chart-pie me-2"></i>Statistiques détaillées</h3>
+        <div class="AnalInvenIa-time-selector">
+            <button class="AnalInvenIa-time-btn active" data-time="month">Mois</button>
+            <button class="AnalInvenIa-time-btn" data-time="quarter">Trimestre</button>
+            <button class="AnalInvenIa-time-btn" data-time="year">Année</button>
         </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-chart-bar me-2"></i> Ventes par catégorie</span>
+                    <button class="btn btn-sm btn-outline-secondary AnalInvenIa-expand-btn">
+                        <i class="fas fa-expand-alt"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="AnalInvenIa-chart-container">
+                        <canvas id="AnalInvenIa-categorySalesChart"></canvas>
+                    </div>
+                    <div class="AnalInvenIa-chart-insight">
+                        <div class="AnalInvenIa-insight-text">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <span>La catégorie "Électronique" représente 45% de vos ventes totales.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-chart-line me-2"></i> Évolution des ventes</span>
+                    <button class="btn btn-sm btn-outline-secondary AnalInvenIa-expand-btn">
+                        <i class="fas fa-expand-alt"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="AnalInvenIa-chart-container">
+                        <canvas id="AnalInvenIa-salesTrendChart"></canvas>
+                    </div>
+                    <div class="AnalInvenIa-chart-insight">
+                        <div class="AnalInvenIa-insight-text">
+                            <i class="fas fa-arrow-up me-2 text-success"></i>
+                            <span>Tendance en hausse de 12% par rapport à la période précédente.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-shopping-basket me-2"></i> Répartition des stocks
+                </div>
+                <div class="card-body">
+                    <div class="AnalInvenIa-chart-container">
+                        <canvas id="AnalInvenIa-stockDistributionChart"></canvas>
+                    </div>
+                    <div class="AnalInvenIa-stock-legend mt-3">
+                        <div class="AnalInvenIa-legend-item">
+                            <span class="AnalInvenIa-legend-color" style="background-color: #28a745;"></span>
+                            <span class="AnalInvenIa-legend-text">Stock optimal (65%)</span>
+                        </div>
+                        <div class="AnalInvenIa-legend-item">
+                            <span class="AnalInvenIa-legend-color" style="background-color: #ffc107;"></span>
+                            <span class="AnalInvenIa-legend-text">Stock faible (20%)</span>
+                        </div>
+                        <div class="AnalInvenIa-legend-item">
+                            <span class="AnalInvenIa-legend-color" style="background-color: #dc3545;"></span>
+                            <span class="AnalInvenIa-legend-text">Rupture (5%)</span>
+                        </div>
+                        <div class="AnalInvenIa-legend-item">
+                            <span class="AnalInvenIa-legend-color" style="background-color: #17a2b8;"></span>
+                            <span class="AnalInvenIa-legend-text">Surstockage (10%)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-chart-area me-2"></i> Performance des produits</span>
+                    <div class="AnalInvenIa-filter-icon">
+                        <i class="fas fa-filter" data-bs-toggle="tooltip" title="Filtrer"></i>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="AnalInvenIa-product-performance-table">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Produit</th>
+                                    <th>Ventes</th>
+                                    <th>Stock</th>
+                                    <th>Rotation</th>
+                                    <th>Tendance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Smartphone XL+</td>
+                                    <td>78</td>
+                                    <td>32</td>
+                                    <td>
+                                        <div class="AnalInvenIa-rotation-indicator high">
+                                            <i class="fas fa-circle"></i> Élevée
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="AnalInvenIa-trend-indicator positive">
+                                            <i class="fas fa-arrow-up"></i> 15%
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Écouteurs sans fil Pro</td>
+                                    <td>64</td>
+                                    <td>45</td>
+                                    <td>
+                                        <div class="AnalInvenIa-rotation-indicator medium">
+                                            <i class="fas fa-circle"></i> Moyenne
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="AnalInvenIa-trend-indicator positive">
+                                            <i class="fas fa-arrow-up"></i> 12%
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Casques gaming standard</td>
+                                    <td>21</td>
+                                    <td>35</td>
+                                    <td>
+                                        <div class="AnalInvenIa-rotation-indicator low">
+                                            <i class="fas fa-circle"></i> Faible
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="AnalInvenIa-trend-indicator negative">
+                                            <i class="fas fa-arrow-down"></i> 8%
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Montre connectée Sport</td>
+                                    <td>52</td>
+                                    <td>28</td>
+                                    <td>
+                                        <div class="AnalInvenIa-rotation-indicator high">
+                                            <i class="fas fa-circle"></i> Élevée
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="AnalInvenIa-trend-indicator positive">
+                                            <i class="fas fa-arrow-up"></i> 8%
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Enceinte portable waterproof</td>
+                                    <td>49</td>
+                                    <td>40</td>
+                                    <td>
+                                        <div class="AnalInvenIa-rotation-indicator medium">
+                                            <i class="fas fa-circle"></i> Moyenne
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="AnalInvenIa-trend-indicator neutral">
+                                            <i class="fas fa-equals"></i> 0%
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <button class="btn btn-sm btn-outline-primary">
+                        Voir toutes les statistiques <i class="fas fa-arrow-right ms-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-chart-bar me-2"></i> Analyse comparative</span>
+                    <div class="AnalInvenIa-period-selector">
+                        <button class="AnalInvenIa-period-btn active" data-period="month">Mois</button>
+                        <button class="AnalInvenIa-period-btn" data-period="quarter">Trimestre</button>
+                        <button class="AnalInvenIa-period-btn" data-period="year">Année</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="AnalInvenIa-comparative-chart">
+                        <div class="AnalInvenIa-chart-container">
+                            <canvas id="AnalInvenIa-comparativeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="AnalInvenIa-chart-insights mt-3">
+                        <div class="AnalInvenIa-insight-card">
+                            <div class="AnalInvenIa-insight-icon">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                            <div class="AnalInvenIa-insight-content">
+                                <h5>+15% de ventes</h5>
+                                <p>par rapport à la période précédente</p>
+                            </div>
+                        </div>
+                        <div class="AnalInvenIa-insight-card">
+                            <div class="AnalInvenIa-insight-icon">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="AnalInvenIa-insight-content">
+                                <h5>+8% de rotation de stock</h5>
+                                <p>amélioration de l'efficacité</p>
+                            </div>
+                        </div>
+                        <div class="AnalInvenIa-insight-card">
+                            <div class="AnalInvenIa-insight-icon negative">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="AnalInvenIa-insight-content">
+                                <h5>-5% de profit marginal</h5>
+                                <p>cause: hausse des coûts logistiques</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="AnalInvenIa-export-actions">
+        <button class="btn btn-outline-secondary">
+            <i class="fas fa-print me-2"></i> Imprimer les statistiques
+        </button>
+        <button class="btn btn-outline-secondary">
+            <i class="fas fa-file-excel me-2"></i> Exporter Excel
+        </button>
+        <button class="btn btn-outline-secondary">
+            <i class="fas fa-file-pdf me-2"></i> Exporter PDF
+        </button>
+    </div>
+</div>
         <div class="AnalInvenIa-insight-content" id="AnalInvenIa-tab-products">
             <!-- Contenu pour l'onglet Produits -->
         </div>
@@ -1149,9 +1541,289 @@
         <div class="AnalInvenIa-insight-content" id="AnalInvenIa-tab-recommendations">
             <!-- Contenu pour l'onglet Recommandations -->
         </div>
-        <div class="AnalInvenIa-insight-content" id="AnalInvenIa-tab-reports">
-            <!-- Contenu pour l'onglet Rapports -->
+<div class="AnalInvenIa-insight-content" id="AnalInvenIa-tab-reports">
+    <div class="AnalInvenIa-reports-header">
+        <h3><i class="fas fa-file-alt me-2"></i>Rapports d'inventaire</h3>
+        <div class="AnalInvenIa-reports-actions">
+            <button class="btn btn-outline-primary" id="AnalInvenIa-generateReport">
+                <i class="fas fa-plus me-2"></i> Générer un rapport
+            </button>
         </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="AnalInvenIa-report-filters">
+                <div class="AnalInvenIa-filter-group">
+                    <label><i class="fas fa-filter me-1"></i> Type de rapport</label>
+                    <div class="AnalInvenIa-select-container">
+                        <div class="AnalInvenIa-select" id="AnalInvenIa-reportTypeSelect">
+                            <div class="AnalInvenIa-select-value">Tous les rapports</div>
+                            <i class="fas fa-chevron-down AnalInvenIa-select-arrow"></i>
+                            <div class="AnalInvenIa-select-dropdown">
+                                <div class="AnalInvenIa-select-option" data-value="all">Tous les rapports</div>
+                                <div class="AnalInvenIa-select-option" data-value="inventory">État de stock</div>
+                                <div class="AnalInvenIa-select-option" data-value="sales">Ventes et bénéfices</div>
+                                <div class="AnalInvenIa-select-option" data-value="forecast">Prévisions</div>
+                                <div class="AnalInvenIa-select-option" data-value="audit">Audit d'inventaire</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="AnalInvenIa-filter-group">
+                    <label><i class="fas fa-calendar-alt me-1"></i> Période</label>
+                    <div class="AnalInvenIa-select-container">
+                        <div class="AnalInvenIa-select" id="AnalInvenIa-reportPeriodSelect">
+                            <div class="AnalInvenIa-select-value">Ce mois-ci</div>
+                            <i class="fas fa-chevron-down AnalInvenIa-select-arrow"></i>
+                            <div class="AnalInvenIa-select-dropdown">
+                                <div class="AnalInvenIa-select-option" data-value="today">Aujourd'hui</div>
+                                <div class="AnalInvenIa-select-option" data-value="week">Cette semaine</div>
+                                <div class="AnalInvenIa-select-option" data-value="month">Ce mois-ci</div>
+                                <div class="AnalInvenIa-select-option" data-value="quarter">Ce trimestre</div>
+                                <div class="AnalInvenIa-select-option" data-value="year">Cette année</div>
+                                <div class="AnalInvenIa-select-option" data-value="custom">Personnalisé</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="AnalInvenIa-filter-group">
+                    <label><i class="fas fa-search me-1"></i> Rechercher</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Rechercher un rapport...">
+                        <button class="btn btn-outline-secondary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-file-alt me-2"></i> Rapports disponibles</span>
+                    <div class="AnalInvenIa-view-controls">
+                        <button class="AnalInvenIa-view-control active" data-view="list">
+                            <i class="fas fa-list"></i>
+                        </button>
+                        <button class="AnalInvenIa-view-control" data-view="grid">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="AnalInvenIa-reports-list active">
+                        <div class="AnalInvenIa-report-item">
+                            <div class="AnalInvenIa-report-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="AnalInvenIa-report-info">
+                                <div class="AnalInvenIa-report-title">État global de l'inventaire</div>
+                                <div class="AnalInvenIa-report-meta">
+                                    <span class="AnalInvenIa-report-type">État de stock</span>
+                                    <span class="AnalInvenIa-report-date">18 mai 2025</span>
+                                </div>
+                                <div class="AnalInvenIa-report-description">
+                                    Aperçu complet de l'état actuel de votre inventaire avec analyses des niveaux de stock, rotations et valeur totale.
+                                </div>
+                            </div>
+                            <div class="AnalInvenIa-report-actions">
+                                <button class="AnalInvenIa-action-btn" title="Voir le rapport">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="AnalInvenIa-action-btn" title="Télécharger en PDF">
+                                    <i class="fas fa-file-pdf"></i>
+                                </button>
+                                <button class="AnalInvenIa-action-btn" title="Imprimer">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                                <button class="AnalInvenIa-action-btn" title="Plus d'options">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="AnalInvenIa-report-item">
+                            <div class="AnalInvenIa-report-icon sales">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="AnalInvenIa-report-info">
+                                <div class="AnalInvenIa-report-title">Analyse des ventes et tendances</div>
+                                <div class="AnalInvenIa-report-meta">
+                                    <span class="AnalInvenIa-report-type">Ventes et bénéfices</span>
+                                    <span class="AnalInvenIa-report-date">17 mai 2025</span>
+                                </div>
+                                <div class="AnalInvenIa-report-description">
+                                    Rapport détaillé sur les performances de vente, les tendances, et l'analyse comparative avec les périodes précédentes.
+                                </div>
+                            </div>
+                            <div class="AnalInvenIa-report-actions">
+                                <button class="AnalInvenIa-action-btn" title="Voir le rapport">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="AnalInvenIa-action-btn" title="Télécharger en PDF">
+                                    <i class="fas fa-file-pdf"></i>
+                                </button>
+                                <button class="AnalInvenIa-action-btn" title="Imprimer">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                                <button class="AnalInvenIa-action-btn" title="Plus d'options">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="AnalInvenIa-report-item">
+                            <div class="AnalInvenIa-report-icon forecast">
+                                <i class="fas fa-crystal-ball"></i>
+                            </div>
+                            <div class="AnalInvenIa-report-info">
+                                <div class="AnalInvenIa-report-title">Prévisions de ventes T2 2025</div>
+                                <div class="AnalInvenIa-report-meta">
+                                    <span class="AnalInvenIa-report-type">Prévisions</span>
+                                    <span class="AnalInvenIa-report-date">15 mai 2025</span>
+                                </div>
+                                <div class="AnalInvenIa-report-description">
+                                    Prévisions établies par l'IA pour les 3 prochains mois, basées sur les données historiques et les tendances actuelles du marché.
+                                </div>
+                            </div>
+                            <div class="AnalInvenIa-report-actions">
+                                <button class="AnalInvenIa-action-btn" title="Voir le rapport">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="AnalInvenIa-action-btn" title="Télécharger en PDF">
+                                    <i class="fas fa-file-pdf"></i>
+                                </button>
+                                <button class="AnalInvenIa-action-btn" title="Imprimer">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                                <button class="AnalInvenIa-action-btn" title="Plus d'options">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="AnalInvenIa-report-item">
+                            <div class="AnalInvenIa-report-icon audit">
+                                <i class="fas fa-clipboard-check"></i>
+                            </div>
+                            <div class="AnalInvenIa-report-info">
+                                <div class="AnalInvenIa-report-title">Audit trimestriel d'inventaire</div>
+                                <div class="AnalInvenIa-report-meta">
+                                    <span class="AnalInvenIa-report-type">Audit d'inventaire</span>
+                                    <span class="AnalInvenIa-report-date">10 mai 2025</span>
+                                </div>
+                                <div class="AnalInvenIa-report-description">
+                                    Vérification complète de l'inventaire avec réconciliation des écarts, analyse des pertes et recommandations.
+                                </div>
+                            </div>
+                            <div class="AnalInvenIa-report-actions">
+                                <button class="AnalInvenIa-action-btn" title="Voir le rapport">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="AnalInvenIa-action-btn" title="Télécharger en PDF">
+                                    <i class="fas fa-file-pdf"></i>
+                                </button>
+                                <button class="AnalInvenIa-action-btn" title="Imprimer">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                                <button class="AnalInvenIa-action-btn" title="Plus d'options">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="AnalInvenIa-report-item">
+                            <div class="AnalInvenIa-report-icon low-stock">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="AnalInvenIa-report-info">
+                                <div class="AnalInvenIa-report-title">Alerte de stocks critiques</div>
+                                <div class="AnalInvenIa-report-meta">
+                                    <span class="AnalInvenIa-report-type">État de stock</span>
+                                    <span class="AnalInvenIa-report-date">5 mai 2025</span>
+                                </div>
+                                <div class="AnalInvenIa-report-description">
+                                    Liste des produits en rupture ou proche de la rupture avec recommandations de réapprovisionnement.
+                                </div>
+                            </div>
+                            <div class="AnalInvenIa-report-actions">
+                                <button class="AnalInvenIa-action-btn" title="Voir le rapport">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="AnalInvenIa-action-btn" title="Télécharger en PDF">
+                                    <i class="fas fa-file-pdf"></i>
+                                </button>
+                                <button class="AnalInvenIa-action-btn" title="Imprimer">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                                <button class="AnalInvenIa-action-btn" title="Plus d'options">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="AnalInvenIa-reports-grid">
+                        <!-- Le contenu de la vue grille sera affiché ici via JavaScript -->
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="AnalInvenIa-pagination">
+                        <button class="AnalInvenIa-pagination-btn disabled">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="AnalInvenIa-pagination-pages">
+                            <span class="AnalInvenIa-pagination-text">Page 1 sur 1</span>
+                        </div>
+                        <button class="AnalInvenIa-pagination-btn disabled">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="AnalInvenIa-report-preview-modal" id="AnalInvenIa-reportPreview">
+        <div class="AnalInvenIa-report-preview-content">
+            <div class="AnalInvenIa-report-preview-header">
+                <div class="AnalInvenIa-report-preview-title">
+                    <i class="fas fa-file-alt me-2"></i>
+                    <span>Aperçu du rapport</span>
+                </div>
+                <div class="AnalInvenIa-report-preview-actions">
+                    <button class="AnalInvenIa-preview-action" title="Télécharger PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                    <button class="AnalInvenIa-preview-action" title="Imprimer">
+                        <i class="fas fa-print"></i>
+                    </button>
+                    <button class="AnalInvenIa-preview-action" title="Partager">
+                        <i class="fas fa-share-alt"></i>
+                    </button>
+                    <button class="AnalInvenIa-preview-close" id="AnalInvenIa-closePreview">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="AnalInvenIa-report-preview-body">
+                <div class="AnalInvenIa-report-loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                    <div class="mt-3">Chargement du rapport...</div>
+                </div>
+                <div class="AnalInvenIa-report-content" style="display:none;">
+                    <!-- Le contenu du rapport sera chargé ici dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
         
     </div>
     
@@ -1202,17 +1874,19 @@
                         </div>
                         <div class="table-responsive">
                             <table class="table table-hover" id="inventory-table">
-                                <thead>
-                                    <tr>
-                                        <th>Code Produit</th>
-                                        <th>Nom</th>
-                                        <th>Prix</th>
-                                        <th>Quantité</th>
-                                        <th>Emplacement</th>
-                                        <th>Statut</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
+<thead>
+    <tr>
+        <th>Code Produit</th>
+        <th>Nom</th>
+        <th>Prix</th>
+        <th>Quantité</th>
+        <th>Unité</th>
+        <th>Emplacement</th>
+        <th>Statut</th>
+        <th>Actions</th>
+    </tr>
+</thead>
+
                                 <tbody>
                                     <tr>
                                         <td colspan="7" class="text-center">Aucun produit trouvé</td>
@@ -1299,6 +1973,113 @@
                                     <label for="product-quantity" class="form-label">Quantité*</label>
                                     <input type="number" class="form-control" id="product-quantity" min="0" required>
                                 </div>
+<div class="col-md-6">
+    <label for="product-unit" class="form-label">Unité de mesure*</label>
+    <div class="custom-dropdown">
+        <div class="custom-dropdown-selected" data-toggle="dropdown">
+<span class="selected-text"><i class="fas fa-tag me-2"></i>Pièce</span>
+
+            <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="custom-dropdown-menu">
+            <div class="custom-dropdown-search">
+                <input type="text" placeholder="Rechercher...">
+            </div>
+            <div class="custom-dropdown-items">
+<div class="custom-dropdown-item" data-value="piece" data-icon="fas fa-tag">
+    <i class="fas fa-tag me-2"></i>Pièce
+    <span class="info-tooltip-container">
+        <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+        <span class="info-tooltip">Produit vendu à l'unité (ex: téléphone, vélo, ou un stylo provenant d'une boîte)</span>
+    </span>
+</div>
+
+                <div class="custom-dropdown-group">
+                    <div class="custom-dropdown-group-header">Conditionnements</div>
+                    <div class="custom-dropdown-item" data-value="lot" data-icon="fas fa-layer-group">
+                        <i class="fas fa-layer-group me-2"></i>Lot
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Ensemble de produits vendus ensemble</span>
+                        </span>
+                    </div>
+<div class="custom-dropdown-item" data-value="paquet" data-icon="fas fa-box">
+    <i class="fas fa-box me-2"></i>Paquet
+    <span class="info-tooltip-container">
+        <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+        <span class="info-tooltip">Produits emballés ensemble (ex: paquet de biscuits)</span>
+    </span>
+</div>
+
+                    <div class="custom-dropdown-item" data-value="boite" data-icon="fas fa-box-open">
+                        <i class="fas fa-box-open me-2"></i>Boîte
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Produits contenus dans une boîte (ex: boîte de stylos)</span>
+                        </span>
+                    </div>
+<div class="custom-dropdown-item" data-value="carton" data-icon="fas fa-dice-d6">
+    <i class="fas fa-dice-d6 me-2"></i>Carton
+    <span class="info-tooltip-container">
+        <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+        <span class="info-tooltip">Emballage contenant plusieurs unités (ex: carton de boîtes de stylos)</span>
+    </span>
+</div>
+
+                </div>
+                <div class="custom-dropdown-group">
+                    <div class="custom-dropdown-group-header">Mesures</div>
+                    <div class="custom-dropdown-item" data-value="kg" data-icon="fas fa-weight">
+                        <i class="fas fa-weight me-2"></i>Kilogramme
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Produit vendu au poids (ex: viande, riz, céréales)</span>
+                        </span>
+                    </div>
+                    <div class="custom-dropdown-item" data-value="litre" data-icon="fas fa-tint">
+                        <i class="fas fa-tint me-2"></i>Litre
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Produit liquide vendu au volume (ex: essence, huile, eau)</span>
+                        </span>
+                    </div>
+                    <div class="custom-dropdown-item" data-value="metre" data-icon="fas fa-ruler-horizontal">
+                        <i class="fas fa-ruler-horizontal me-2"></i>Mètre
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Produit vendu à la longueur (ex: tissu, câble, ruban)</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="custom-dropdown-group">
+                    <div class="custom-dropdown-group-header">Ensembles</div>
+                    <div class="custom-dropdown-item" data-value="kit" data-icon="fas fa-toolbox">
+                        <i class="fas fa-toolbox me-2"></i>Kit
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Ensemble d'articles complémentaires vendus comme une unité (ex: kit de réparation)</span>
+                        </span>
+                    </div>
+<div class="custom-dropdown-item" data-value="pack" data-icon="fas fa-gifts">
+    <i class="fas fa-gifts me-2"></i>Pack
+    <span class="info-tooltip-container">
+        <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+        <span class="info-tooltip">Groupe d'articles vendus ensemble à un prix spécial (ex: pack promotionnel)</span>
+    </span>
+</div>
+
+                </div>
+                <div class="custom-dropdown-divider"></div>
+                <div class="custom-dropdown-item add-new" data-value="custom">
+                    <i class="fas fa-plus-circle me-2"></i>Ajouter une unité personnalisée
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="product-unit" value="piece">
+    </div>
+</div>
+
+
                                 <div class="col-md-6">
                                     <label for="product-location" class="form-label">Emplacement*</label>
                                     <input type="text" class="form-control" id="product-location" placeholder="Ex: Rayon 2, étagère 3" required>
@@ -2386,6 +3167,923 @@
     </div>
 </div>
 
+        
+        
+        
+        <!-- Point de Vente Section -->
+<div id="newonInventSalesPoint" class="content-section" style="display: none;">
+    <h2 class="mb-4"><i class="fas fa-cash-register me-2"></i> Point de Vente</h2>
+    
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Gestion des ventes</span>
+            <div class="d-flex">
+                <div class="role-selector me-2">
+                    <button class="btn btn-outline-primary" id="newonInventRoleToggle">
+                        <i class="fas fa-exchange-alt me-1"></i> Changer de rôle
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Sélection du mode de vente -->
+            <div id="newonInventSelectMode" class="mb-4">
+                <h5 class="mb-3">Sélectionnez votre mode de vente:</h5>
+                <div class="newonInventModeContainer">
+                    <div class="newonInventModeCard" data-mode="oneSeller">
+                        <div class="newonInventModeIcon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h5>Un seul vendeur</h5>
+                        <p>Un vendeur gère tout le processus de vente</p>
+                    </div>
+                    <div class="newonInventModeCard" data-mode="twoSellers">
+                        <div class="newonInventModeIcon">
+                            <i class="fas fa-user-friends"></i>
+                        </div>
+                        <h5>Deux vendeurs</h5>
+                        <p>Réception client + Caisse</p>
+                    </div>
+                    <div class="newonInventModeCard" data-mode="threeSellers">
+                        <div class="newonInventModeIcon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h5>Trois vendeurs</h5>
+                        <p>Réception + Caisse + Livraison</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interface de vente (Mode 1: Un seul vendeur) -->
+            <div id="newonInventSingleSellerMode" class="newonInventRoleInterface" style="display: none;">
+                <div class="newonInventRoleHeader">
+                    <h4>Mode Vendeur Unique</h4>
+                    <div class="newonInventSellerInfo">
+                        <i class="fas fa-user-circle"></i> 
+                        <span id="newonInventCurrentSeller">Vendeur actuel</span>
+                    </div>
+                </div>
+
+                <div class="newonInventSalesProcess">
+                    <!-- Zone Scanner & Panier -->
+                    <div class="newonInventSalesGrid">
+                        <!-- Zone Scanner -->
+<div class="newonInventScanZone">
+    <div class="newonInventScanActions">
+        <button class="newonInventActionBtn" id="newonInventScanBtn">
+            <i class="fas fa-camera"></i>
+            <span>Scanner un produit</span>
+        </button>
+        <button class="newonInventActionBtn" id="newonInventManualEntryBtn">
+            <i class="fas fa-keyboard"></i>
+            <span>Saisie manuelle</span>
+        </button>
+    </div>
+    
+    <div id="newonInventScannerArea" style="display: none;">
+        <!-- Scanner ultra-moderne -->
+        <div class="newonInventVideoContainer ScanProdVentContainer">
+            <video id="newonInventScannerVideo"></video>
+            
+            <!-- Nouvelle interface scanner futuriste -->
+            <div class="ScanProdVentOverlay">
+                <!-- Coin supérieur gauche -->
+                <div class="ScanProdVentCorner ScanProdVentTopLeft">
+                    <svg width="50" height="50" viewBox="0 0 50 50">
+                        <path d="M2 2 L2 20 L20 20 L20 2" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                    </svg>
+                </div>
+                
+                <!-- Coin supérieur droit -->
+                <div class="ScanProdVentCorner ScanProdVentTopRight">
+                    <svg width="50" height="50" viewBox="0 0 50 50">
+                        <path d="M48 2 L48 20 L30 20 L30 2" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                    </svg>
+                </div>
+                
+                <!-- Coin inférieur gauche -->
+                <div class="ScanProdVentCorner ScanProdVentBottomLeft">
+                    <svg width="50" height="50" viewBox="0 0 50 50">
+                        <path d="M2 48 L2 30 L20 30 L20 48" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                    </svg>
+                </div>
+                
+                <!-- Coin inférieur droit -->
+                <div class="ScanProdVentCorner ScanProdVentBottomRight">
+                    <svg width="50" height="50" viewBox="0 0 50 50">
+                        <path d="M48 48 L48 30 L30 30 L30 48" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                    </svg>
+                </div>
+                
+                <!-- Ligne de scan -->
+                <div class="ScanProdVentScanLine"></div>
+                
+                <!-- Indicateur d'état et mode -->
+                <div class="ScanProdVentStatus">
+                    <div class="ScanProdVentModeIndicator">
+                        <div class="ScanProdVentModeIcon" id="ScanProdVentBarcode">
+                            <i class="fas fa-barcode"></i>
+                        </div>
+                        <div class="ScanProdVentModeIcon" id="ScanProdVentQRCode">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                    </div>
+                    <div class="ScanProdVentMessage">Positionnez le code dans le cadre</div>
+                </div>
+                
+                <!-- Cadre de scan dynamique -->
+                <div class="ScanProdVentFrame">
+                    <div class="ScanProdVentTargetDot"></div>
+                </div>
+                
+                <!-- Écran d'information technique -->
+                <div class="ScanProdVentTechOverlay">
+                    <div class="ScanProdVentInfoPanel">
+                        <div class="ScanProdVentInfoLine">Scanner v2.5</div>
+                        <div class="ScanProdVentInfoLine">Mode: <span id="ScanProdVentCurrentMode">Auto-détection</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Boutons d'action scanner -->
+        <div class="ScanProdVentControls">
+            <button class="ScanProdVentBtn ScanProdVentModeBtn" id="ScanProdVentToggleMode">
+                <i class="fas fa-sync-alt"></i>
+                <span>Changer de mode</span>
+            </button>
+            <button class="ScanProdVentBtn ScanProdVentLightBtn" id="ScanProdVentToggleLight">
+                <i class="fas fa-lightbulb"></i>
+                <span>Flash</span>
+            </button>
+            <button class="newonInventActionBtn newonInventCancelBtn" id="newonInventCancelScan">
+                <i class="fas fa-times"></i>
+                <span>Annuler</span>
+            </button>
+        </div>
+    </div>
+    
+<div id="newonInventManualEntry" style="display: none;">
+    <div class="newonInventManualForm ManualModeSaisie_container">
+        <div class="mb-3">
+            <label class="form-label">Recherche produit</label>
+            <div class="input-group ManualModeSaisie_searchGroup">
+                <input type="text" class="form-control ManualModeSaisie_searchInput" id="newonInventManualCode" 
+                       placeholder="Code ou nom du produit">
+                <button class="btn btn-primary ManualModeSaisie_searchBtn" id="newonInventFindProduct">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <small class="form-text text-muted ManualModeSaisie_hint">Entrez le code produit ou son nom</small>
+        </div>
+        
+        <!-- Zone de résultats de recherche -->
+        <div class="ManualModeSaisie_results" id="ManualModeSaisie_resultsList">
+            <!-- Les résultats de recherche seront ajoutés ici dynamiquement -->
+        </div>
+        
+        <!-- Produits récemment vendus -->
+        <div class="ManualModeSaisie_recentSection">
+            <h6 class="ManualModeSaisie_sectionTitle">Produits récents</h6>
+            <div class="ManualModeSaisie_recentProducts" id="ManualModeSaisie_recentItems">
+                <!-- Les produits récents seront ajoutés ici dynamiquement -->
+            </div>
+        </div>
+        
+        <button class="newonInventActionBtn newonInventCancelBtn" id="newonInventCancelManual">
+            <i class="fas fa-times"></i>
+            <span>Annuler</span>
+        </button>
+    </div>
+</div>
+
+</div>
+
+                        
+                        <!-- Panier Client -->
+                        <div class="newonInventCart">
+                            <div class="newonInventCartHeader">
+                                <h5><i class="fas fa-shopping-cart me-2"></i> Panier client</h5>
+                                <button class="newonInventActionBtn newonInventSmallBtn" id="newonInventResetCart">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="newonInventCartItems" id="newonInventCartItems">
+                                <div class="newonInventEmptyCart">
+                                    <i class="fas fa-shopping-basket"></i>
+                                    <p>Le panier est vide</p>
+                                    <p class="newonInventHelpText">Scannez ou saisissez un produit pour l'ajouter</p>
+                                </div>
+                                <!-- Les produits scannés apparaîtront ici -->
+                            </div>
+                            
+                            <div class="newonInventCartTotal">
+                                <div class="newonInventTotalLine">
+                                    <span>Total:</span>
+                                    <span id="newonInventTotalAmount">0.00</span>
+                                </div>
+                                <div class="newonInventTotalLine newonInventTotalCurrency">
+                                    <span id="newonInventTotalCurrency">USD</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Zone Client & Finalisation -->
+                    <div class="newonInventCheckoutZone">
+                        <div class="newonInventClientInfo">
+                            <div class="mb-3">
+                                <label class="form-label">Nom du client (optionnel)</label>
+                                <input type="text" class="form-control" id="newonInventClientName" placeholder="Nom du client">
+                            </div>
+                        </div>
+                        
+                        <div class="newonInventPaymentOptions">
+                            <h5>Paiement</h5>
+                            <div class="newonInventPaymentGrid">
+                                <button class="newonInventPayBtn newonInventPayCash" id="newonInventCashPayment">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Espèces</span>
+                                </button>
+                                <button class="newonInventPayBtn newonInventPayOther" id="newonInventOtherPayment">
+                                    <i class="fas fa-credit-card"></i>
+                                    <span>Autre méthode</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button class="newonInventCompleteBtn" id="newonInventCompleteSale" disabled>
+                            <i class="fas fa-check-circle me-2"></i> Finaliser la vente
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interface Mode 2: Vendeur 1 (Réception) -->
+            <div id="newonInventTwoSellers_Seller1" class="newonInventRoleInterface" style="display: none;">
+                <div class="newonInventRoleHeader">
+                    <h4>Réception Client</h4>
+                    <div class="newonInventSellerInfo">
+                        <span class="newonInventRoleBadge">Vendeur 1</span>
+                        <span id="newonInventCurrentSeller2">Vendeur actuel</span>
+                    </div>
+                </div>
+
+                <div class="newonInventSalesProcess">
+                    <!-- Zone Scanner & Panier -->
+                    <div class="newonInventSalesGrid">
+                        <!-- Zone Scanner -->
+<div class="newonInventScanZone">
+    <div class="newonInventScanActions">
+        <button class="newonInventActionBtn" id="newonInventScanBtn2">
+            <i class="fas fa-camera"></i>
+            <span>Scanner un produit</span>
+        </button>
+        <button class="newonInventActionBtn" id="newonInventManualEntryBtn2">
+            <i class="fas fa-keyboard"></i>
+            <span>Saisie manuelle</span>
+        </button>
+    </div>
+    
+    <div id="newonInventScannerArea2" style="display: none;">
+        <!-- Scanner ultra-moderne -->
+        <div class="newonInventVideoContainer ScanProdVentContainer">
+            <video id="newonInventScannerVideo2"></video>
+            
+            <!-- Nouvelle interface scanner futuriste -->
+            <div class="ScanProdVentOverlay">
+                <!-- Coin supérieur gauche -->
+                <div class="ScanProdVentCorner ScanProdVentTopLeft">
+                    <svg width="50" height="50" viewBox="0 0 50 50">
+                        <path d="M2 2 L2 20 L20 20 L20 2" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                    </svg>
+                </div>
+                
+                <!-- Coin supérieur droit -->
+                <div class="ScanProdVentCorner ScanProdVentTopRight">
+                    <svg width="50" height="50" viewBox="0 0 50 50">
+                        <path d="M48 2 L48 20 L30 20 L30 2" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                    </svg>
+                </div>
+                
+                <!-- Coin inférieur gauche -->
+                <div class="ScanProdVentCorner ScanProdVentBottomLeft">
+                    <svg width="50" height="50" viewBox="0 0 50 50">
+                        <path d="M2 48 L2 30 L20 30 L20 48" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                    </svg>
+                </div>
+                
+                <!-- Coin inférieur droit -->
+                <div class="ScanProdVentCorner ScanProdVentBottomRight">
+                    <svg width="50" height="50" viewBox="0 0 50 50">
+                        <path d="M48 48 L48 30 L30 30 L30 48" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                    </svg>
+                </div>
+                
+                <!-- Ligne de scan -->
+                <div class="ScanProdVentScanLine"></div>
+                
+                <!-- Indicateur d'état et mode -->
+                <div class="ScanProdVentStatus">
+                    <div class="ScanProdVentModeIndicator">
+                        <div class="ScanProdVentModeIcon" id="ScanProdVentBarcode2">
+                            <i class="fas fa-barcode"></i>
+                        </div>
+                        <div class="ScanProdVentModeIcon" id="ScanProdVentQRCode2">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                    </div>
+                    <div class="ScanProdVentMessage">Positionnez le code dans le cadre</div>
+                </div>
+                
+                <!-- Cadre de scan dynamique -->
+                <div class="ScanProdVentFrame">
+                    <div class="ScanProdVentTargetDot"></div>
+                </div>
+                
+                <!-- Écran d'information technique -->
+                <div class="ScanProdVentTechOverlay">
+                    <div class="ScanProdVentInfoPanel">
+                        <div class="ScanProdVentInfoLine">Scanner v2.5</div>
+                        <div class="ScanProdVentInfoLine">Mode: <span id="ScanProdVentCurrentMode2">Auto-détection</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Boutons d'action scanner -->
+        <div class="ScanProdVentControls">
+            <button class="ScanProdVentBtn ScanProdVentModeBtn" id="ScanProdVentToggleMode2">
+                <i class="fas fa-sync-alt"></i>
+                <span>Changer de mode</span>
+            </button>
+            <button class="ScanProdVentBtn ScanProdVentLightBtn" id="ScanProdVentToggleLight2">
+                <i class="fas fa-lightbulb"></i>
+                <span>Flash</span>
+            </button>
+            <button class="newonInventActionBtn newonInventCancelBtn" id="newonInventCancelScan2">
+                <i class="fas fa-times"></i>
+                <span>Annuler</span>
+            </button>
+        </div>
+    </div>
+    
+<div id="newonInventManualEntry2" style="display: none;">
+    <div class="newonInventManualForm ManualModeSaisie_container">
+        <div class="mb-3">
+            <label class="form-label">Recherche produit</label>
+            <div class="input-group ManualModeSaisie_searchGroup">
+                <input type="text" class="form-control ManualModeSaisie_searchInput" id="newonInventManualCode2" 
+                       placeholder="Code ou nom du produit">
+                <button class="btn btn-primary ManualModeSaisie_searchBtn" id="newonInventFindProduct2">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <small class="form-text text-muted ManualModeSaisie_hint">Entrez le code produit ou son nom</small>
+        </div>
+        
+        <!-- Zone de résultats de recherche -->
+        <div class="ManualModeSaisie_results" id="ManualModeSaisie_resultsList2">
+            <!-- Les résultats de recherche seront ajoutés ici dynamiquement -->
+        </div>
+        
+        <!-- Produits récemment vendus -->
+        <div class="ManualModeSaisie_recentSection">
+            <h6 class="ManualModeSaisie_sectionTitle">Produits récents</h6>
+            <div class="ManualModeSaisie_recentProducts" id="ManualModeSaisie_recentItems2">
+                <!-- Les produits récents seront ajoutés ici dynamiquement -->
+            </div>
+        </div>
+        
+        <button class="newonInventActionBtn newonInventCancelBtn" id="newonInventCancelManual2">
+            <i class="fas fa-times"></i>
+            <span>Annuler</span>
+        </button>
+    </div>
+</div>
+
+</div>
+
+                        
+                        <!-- Panier Client -->
+                        <div class="newonInventCart">
+                            <div class="newonInventCartHeader">
+                                <h5><i class="fas fa-shopping-cart me-2"></i> Panier client</h5>
+                                <button class="newonInventActionBtn newonInventSmallBtn" id="newonInventResetCart2">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="newonInventCartItems" id="newonInventCartItems2">
+                                <div class="newonInventEmptyCart">
+                                    <i class="fas fa-shopping-basket"></i>
+                                    <p>Le panier est vide</p>
+                                    <p class="newonInventHelpText">Scannez ou saisissez un produit pour l'ajouter</p>
+                                </div>
+                                <!-- Les produits scannés apparaîtront ici -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Zone Client & Transfert -->
+                    <div class="newonInventCheckoutZone">
+                        <div class="newonInventClientInfo">
+                            <div class="mb-3">
+                                <label class="form-label">Nom du client</label>
+                                <input type="text" class="form-control" id="newonInventClientName2" placeholder="Nom du client">
+                            </div>
+                        </div>
+                        
+                        <div class="newonInventCashierSelection">
+                            <h5>Transférer vers un caissier</h5>
+                            <div class="newonInventCashierOptions" id="newonInventCashierOptions">
+                                <!-- Les caissiers disponibles seront ajoutés ici dynamiquement -->
+                                <div class="newonInventCashierCard">
+                                    <div class="newonInventCashierIcon">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="newonInventCashierInfo">
+                                        <h6>Caissier 1</h6>
+                                        <span class="newonInventCashierLoad">0 clients en attente</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="newonInventCompleteBtn" id="newonInventTransferOrder" disabled>
+                            <i class="fas fa-paper-plane me-2"></i> Transférer la commande
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interface Mode 2: Vendeur 2 (Caissier) -->
+            <div id="newonInventTwoSellers_Seller2" class="newonInventRoleInterface" style="display: none;">
+                <div class="newonInventRoleHeader">
+                    <h4>Caisse</h4>
+                    <div class="newonInventSellerInfo">
+                        <span class="newonInventRoleBadge">Caissier</span>
+                        <span id="newonInventCurrentCashier">Caissier actuel</span>
+                    </div>
+                </div>
+
+                <div class="newonInventPendingOrders">
+                    <h5><i class="fas fa-clock me-2"></i> Commandes en attente</h5>
+                    <div id="newonInventOrderQueue">
+                        <!-- Les commandes en attente seront ajoutées ici -->
+                        <div class="newonInventEmptyState">
+                            <i class="fas fa-clipboard-check"></i>
+                            <p>Aucune commande en attente</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="newonInventProcessOrder" style="display: none;">
+                    <div class="newonInventProcessHeader">
+                        <h5>Traitement de la commande</h5>
+                        <div class="newonInventClientBadge">
+                            <i class="fas fa-user me-1"></i>
+                            <span id="newonInventProcessClientName">Nom du client</span>
+                        </div>
+                    </div>
+                    
+                    <div class="newonInventOrderDetails">
+                        <div class="newonInventCartItems" id="newonInventProcessItems">
+                            <!-- Les articles de la commande s'afficheront ici -->
+                        </div>
+                        
+                        <div class="newonInventCartTotal">
+                            <div class="newonInventTotalLine">
+                                <span>Total:</span>
+                                <span id="newonInventProcessTotal">0.00</span>
+                            </div>
+                            <div class="newonInventTotalLine newonInventTotalCurrency">
+                                <span id="newonInventProcessCurrency">USD</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="newonInventPaymentConfirm">
+                        <h5>Paiement</h5>
+                        <div class="newonInventPaymentGrid">
+                            <button class="newonInventPayBtn newonInventPayCash" id="newonInventProcessCash">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <span>Espèces reçues</span>
+                            </button>
+                            <button class="newonInventPayBtn newonInventPayOther" id="newonInventProcessOther">
+                                <i class="fas fa-credit-card"></i>
+                                <span>Autre méthode</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="newonInventActionButtons">
+                        <button class="newonInventCancelBtn" id="newonInventCancelProcess">
+                            <i class="fas fa-times-circle me-2"></i> Annuler
+                        </button>
+                        <button class="newonInventCompleteBtn" id="newonInventConfirmPayment" disabled>
+                            <i class="fas fa-check-circle me-2"></i> Confirmer paiement
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interface Mode 3: Vendeur 1 (Réception) -->
+            <div id="newonInventThreeSellers_Seller1" class="newonInventRoleInterface" style="display: none;">
+                <div class="newonInventRoleHeader">
+                    <h4>Réception Client</h4>
+                    <div class="newonInventSellerInfo">
+                        <span class="newonInventRoleBadge">Vendeur 1</span>
+                        <span id="newonInventCurrentSeller3">Vendeur actuel</span>
+                    </div>
+                </div>
+
+                <!-- Contenu similaire au mode 2 vendeur 1 -->
+                <div class="newonInventSalesProcess">
+                    <!-- Zone Scanner & Panier -->
+                    <div class="newonInventSalesGrid">
+                        <!-- Zone Scanner -->
+<div class="newonInventScanZone">
+    <div class="newonInventScanActions">
+        <button class="newonInventActionBtn" id="newonInventScanBtn3">
+            <i class="fas fa-camera"></i>
+            <span>Scanner un produit</span>
+        </button>
+        <button class="newonInventActionBtn" id="newonInventManualEntryBtn3">
+            <i class="fas fa-keyboard"></i>
+            <span>Saisie manuelle</span>
+        </button>
+    </div>
+    
+    <div id="newonInventScannerArea3" style="display: none;">
+        <!-- Scanner ultra-moderne -->
+        <div class="newonInventVideoContainer ScanProdVentContainer">
+            <video id="newonInventScannerVideo3"></video>
+            
+            <!-- Nouvelle interface scanner futuriste -->
+            <div class="ScanProdVentOverlay">
+                <!-- Coin supérieur gauche -->
+                <div class="ScanProdVentCorner ScanProdVentTopLeft">
+                    <svg width="50" height="50" viewBox="0 0 50 50">
+                        <path d="M2 2 L2 20 L20 20 L20 2" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                    </svg>
+                </div>
+                
+                <!-- Coin supérieur droit -->
+                <div class="ScanProdVentCorner ScanProdVentTopRight">
+                    <svg width="50" height="50" viewBox="0 0 50 50">
+                        <path d="M48 2 L48 20 L30 20 L30 2" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                    </svg>
+                </div>
+                
+                <!-- Coin inférieur gauche -->
+                <div class="ScanProdVentCorner ScanProdVentBottomLeft">
+                    <svg width="50" height="50" viewBox="0 0 50 50">
+                        <path d="M2 48 L2 30 L20 30 L20 48" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                    </svg>
+                </div>
+                
+                <!-- Coin inférieur droit -->
+                <div class="ScanProdVentCorner ScanProdVentBottomRight">
+                    <svg width="50" height="50" viewBox="0 0 50 50">
+                        <path d="M48 48 L48 30 L30 30 L30 48" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                    </svg>
+                </div>
+                
+                <!-- Ligne de scan -->
+                <div class="ScanProdVentScanLine"></div>
+                
+                <!-- Indicateur d'état et mode -->
+                <div class="ScanProdVentStatus">
+                    <div class="ScanProdVentModeIndicator">
+                        <div class="ScanProdVentModeIcon" id="ScanProdVentBarcode3">
+                            <i class="fas fa-barcode"></i>
+                        </div>
+                        <div class="ScanProdVentModeIcon" id="ScanProdVentQRCode3">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                    </div>
+                    <div class="ScanProdVentMessage">Positionnez le code dans le cadre</div>
+                </div>
+                
+                <!-- Cadre de scan dynamique -->
+                <div class="ScanProdVentFrame">
+                    <div class="ScanProdVentTargetDot"></div>
+                </div>
+                
+                <!-- Écran d'information technique -->
+                <div class="ScanProdVentTechOverlay">
+                    <div class="ScanProdVentInfoPanel">
+                        <div class="ScanProdVentInfoLine">Scanner v2.5</div>
+                        <div class="ScanProdVentInfoLine">Mode: <span id="ScanProdVentCurrentMode3">Auto-détection</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Boutons d'action scanner -->
+        <div class="ScanProdVentControls">
+            <button class="ScanProdVentBtn ScanProdVentModeBtn" id="ScanProdVentToggleMode3">
+                <i class="fas fa-sync-alt"></i>
+                <span>Changer de mode</span>
+            </button>
+            <button class="ScanProdVentBtn ScanProdVentLightBtn" id="ScanProdVentToggleLight3">
+                <i class="fas fa-lightbulb"></i>
+                <span>Flash</span>
+            </button>
+            <button class="newonInventActionBtn newonInventCancelBtn" id="newonInventCancelScan3">
+                <i class="fas fa-times"></i>
+                <span>Annuler</span>
+            </button>
+        </div>
+    </div>
+    
+<div id="newonInventManualEntry3" style="display: none;">
+    <div class="newonInventManualForm ManualModeSaisie_container">
+        <div class="mb-3">
+            <label class="form-label">Recherche produit</label>
+            <div class="input-group ManualModeSaisie_searchGroup">
+                <input type="text" class="form-control ManualModeSaisie_searchInput" id="newonInventManualCode3" 
+                       placeholder="Code ou nom du produit">
+                <button class="btn btn-primary ManualModeSaisie_searchBtn" id="newonInventFindProduct3">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <small class="form-text text-muted ManualModeSaisie_hint">Entrez le code produit ou son nom</small>
+        </div>
+        
+        <!-- Zone de résultats de recherche -->
+        <div class="ManualModeSaisie_results" id="ManualModeSaisie_resultsList3">
+            <!-- Les résultats de recherche seront ajoutés ici dynamiquement -->
+        </div>
+        
+        <!-- Produits récemment vendus -->
+        <div class="ManualModeSaisie_recentSection">
+            <h6 class="ManualModeSaisie_sectionTitle">Produits récents</h6>
+            <div class="ManualModeSaisie_recentProducts" id="ManualModeSaisie_recentItems3">
+                <!-- Les produits récents seront ajoutés ici dynamiquement -->
+            </div>
+        </div>
+        
+        <button class="newonInventActionBtn newonInventCancelBtn" id="newonInventCancelManual3">
+            <i class="fas fa-times"></i>
+            <span>Annuler</span>
+        </button>
+    </div>
+</div>
+
+</div>
+
+                        
+                        <!-- Panier Client -->
+                        <div class="newonInventCart">
+                            <div class="newonInventCartHeader">
+                                <h5><i class="fas fa-shopping-cart me-2"></i> Panier client</h5>
+                                <button class="newonInventActionBtn newonInventSmallBtn" id="newonInventResetCart3">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="newonInventCartItems" id="newonInventCartItems3">
+                                <div class="newonInventEmptyCart">
+                                    <i class="fas fa-shopping-basket"></i>
+                                    <p>Le panier est vide</p>
+                                    <p class="newonInventHelpText">Scannez ou saisissez un produit pour l'ajouter</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Zone Client & Transfert -->
+                    <div class="newonInventCheckoutZone">
+                        <div class="newonInventClientInfo">
+                            <div class="mb-3">
+                                <label class="form-label">Nom du client</label>
+                                <input type="text" class="form-control" id="newonInventClientName3" placeholder="Nom du client">
+                            </div>
+                        </div>
+                        
+                        <div class="newonInventCashierSelection">
+                            <h5>Transférer vers un caissier</h5>
+                            <div class="newonInventCashierOptions" id="newonInventCashierOptions3">
+                                <!-- Les caissiers disponibles seront ajoutés ici dynamiquement -->
+                            </div>
+                        </div>
+                        
+                        <button class="newonInventCompleteBtn" id="newonInventTransferOrder3" disabled>
+                            <i class="fas fa-paper-plane me-2"></i> Transférer la commande
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+<!-- Interface Mode 3: Vendeur 2 (Caissier) -->
+<div id="newonInventThreeSellers_Seller2" class="newonInventRoleInterface" style="display: none;">
+    <div class="newonInventRoleHeader">
+        <h4>Caisse</h4>
+        <div class="newonInventSellerInfo">
+            <span class="newonInventRoleBadge">Caissier</span>
+            <span id="newonInventCurrentCashier3">Caissier actuel</span>
+        </div>
+    </div>
+
+    <div class="newonInventPendingOrders">
+        <h5><i class="fas fa-clock me-2"></i> Commandes en attente</h5>
+        <div id="newonInventOrderQueue3">
+            <!-- Les commandes en attente seront ajoutées ici -->
+            <div class="newonInventEmptyState">
+                <i class="fas fa-clipboard-check"></i>
+                <p>Aucune commande en attente</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="newonInventProcessOrder3" style="display: none;">
+        <div class="newonInventProcessHeader">
+            <h5>Traitement de la commande</h5>
+            <div class="newonInventClientBadge">
+                <i class="fas fa-user me-1"></i>
+                <span id="newonInventProcessClientName3">Nom du client</span>
+            </div>
+        </div>
+        
+        <div class="newonInventOrderDetails">
+            <div class="newonInventCartItems" id="newonInventProcessItems3">
+                <!-- Les articles de la commande s'afficheront ici -->
+            </div>
+            
+            <div class="newonInventCartTotal">
+                <div class="newonInventTotalLine">
+                    <span>Total:</span>
+                    <span id="newonInventProcessTotal3">0.00</span>
+                </div>
+                <div class="newonInventTotalLine newonInventTotalCurrency">
+                    <span id="newonInventProcessCurrency3">USD</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="newonInventPaymentConfirm">
+            <h5>Paiement</h5>
+            <div class="newonInventPaymentGrid">
+                <button class="newonInventPayBtn newonInventPayCash" id="newonInventProcessCash3">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Espèces reçues</span>
+                </button>
+                <button class="newonInventPayBtn newonInventPayOther" id="newonInventProcessOther3">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Autre méthode</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Nouvelle zone de sélection des livreurs -->
+        <div class="newonInventDeliverySelection">
+            <h5>Transférer vers un livreur</h5>
+            <div class="newonInventDeliveryOptions" id="newonInventDeliveryOptions3">
+                <!-- Les livreurs disponibles seront ajoutés ici dynamiquement -->
+            </div>
+        </div>
+        
+        <div class="newonInventActionButtons">
+            <button class="newonInventCancelBtn" id="newonInventCancelProcess3">
+                <i class="fas fa-times-circle me-2"></i> Annuler
+            </button>
+            <button class="newonInventCompleteBtn" id="newonInventConfirmPayment3" disabled>
+                <i class="fas fa-check-circle me-2"></i> Confirmer paiement et transférer
+            </button>
+        </div>
+    </div>
+</div>
+
+
+            <!-- Interface Mode 3: Vendeur 3 (Livraison) -->
+            <div id="newonInventThreeSellers_Seller3" class="newonInventRoleInterface" style="display: none;">
+                <div class="newonInventRoleHeader">
+                    <h4>Livraison des produits</h4>
+                    <div class="newonInventSellerInfo">
+                        <span class="newonInventRoleBadge">Livreur</span>
+                        <span id="newonInventCurrentDelivery">Livreur actuel</span>
+                    </div>
+                </div>
+
+                <div class="newonInventPendingOrders">
+                    <h5><i class="fas fa-clock me-2"></i> Commandes à livrer</h5>
+                    <div id="newonInventDeliveryQueue">
+                        <!-- Les commandes à livrer seront ajoutées ici -->
+                        <div class="newonInventEmptyState">
+                            <i class="fas fa-box-open"></i>
+                            <p>Aucune commande à livrer</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="newonInventDeliveryProcess" style="display: none;">
+                    <div class="newonInventProcessHeader">
+                        <h5>Livraison de la commande</h5>
+                        <div class="newonInventClientBadge">
+                            <i class="fas fa-user me-1"></i>
+                            <span id="newonInventDeliveryClientName">Nom du client</span>
+                        </div>
+                    </div>
+                    
+                    <div class="newonInventDeliveryDetails">
+                        <h6>Articles à livrer</h6>
+                        <div class="newonInventCartItems" id="newonInventDeliveryItems">
+                            <!-- Les articles à livrer s'afficheront ici -->
+                        </div>
+                    </div>
+                    
+                    <div class="newonInventActionButtons">
+                        <button class="newonInventCancelBtn" id="newonInventCancelDelivery">
+                            <i class="fas fa-times-circle me-2"></i> Annuler
+                        </button>
+                        <button class="newonInventCompleteBtn" id="newonInventConfirmDelivery">
+                            <i class="fas fa-check-circle me-2"></i> Confirmer la livraison
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modales pour le point de vente -->
+            <div class="modal fade" id="newonInventRoleModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Choisir votre rôle</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="newonInventRoleSelector" id="newonInventRoleSelector">
+                                <!-- Les options de rôle seront ajoutées ici dynamiquement -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="newonInventPaymentModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Détails du paiement</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-4">
+                                <h6>Total à payer</h6>
+                                <div class="newonInventModalTotal" id="newonInventModalTotal">0.00 USD</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="newonInventPaymentAmount" class="form-label">Montant reçu</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="newonInventPaymentAmount" min="0" step="0.01">
+                                    <select class="form-select" id="newonInventPaymentCurrency" style="max-width: 100px;">
+                                        <option value="usd">USD</option>
+                                        <option value="cdf">CDF</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="newonInventChangeAmount" id="newonInventChangeContainer" style="display: none;">
+                                <h6>Monnaie à rendre</h6>
+                                <div class="newonInventChangeValue" id="newonInventChangeAmount">0.00 USD</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="button" class="btn btn-primary" id="newonInventConfirmModalPayment">Confirmer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="newonInventReceiptModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Reçu de vente</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="newonInventReceipt" id="newonInventReceiptContent">
+                                <!-- Le contenu du reçu sera généré ici -->
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                            <button type="button" class="btn btn-primary" id="newonInventPrintReceipt">
+                                <i class="fas fa-print me-2"></i> Imprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
         </div>
     
     
@@ -2542,6 +4240,113 @@
                                     <label for="edit-product-quantity" class="form-label">Quantité</label>
                                     <input type="number" class="form-control" id="edit-product-quantity" min="0" required>
                                 </div>
+<div class="mb-3">
+    <label for="edit-product-unit" class="form-label">Unité de mesure</label>
+    <div class="custom-dropdown">
+        <div class="custom-dropdown-selected" data-toggle="dropdown">
+<span class="selected-text"><i class="fas fa-tag me-2"></i>Pièce</span>
+
+            <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="custom-dropdown-menu">
+            <div class="custom-dropdown-search">
+                <input type="text" placeholder="Rechercher...">
+            </div>
+            <div class="custom-dropdown-items">
+<div class="custom-dropdown-item" data-value="piece" data-icon="fas fa-tag">
+    <i class="fas fa-tag me-2"></i>Pièce
+    <span class="info-tooltip-container">
+        <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+        <span class="info-tooltip">Produit vendu à l'unité (ex: téléphone, vélo, ou un stylo provenant d'une boîte)</span>
+    </span>
+</div>
+
+                <div class="custom-dropdown-group">
+                    <div class="custom-dropdown-group-header">Conditionnements</div>
+                    <div class="custom-dropdown-item" data-value="lot" data-icon="fas fa-layer-group">
+                        <i class="fas fa-layer-group me-2"></i>Lot
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Ensemble de produits vendus ensemble</span>
+                        </span>
+                    </div>
+<div class="custom-dropdown-item" data-value="paquet" data-icon="fas fa-box">
+    <i class="fas fa-box me-2"></i>Paquet
+
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Produits emballés ensemble (ex: paquet de biscuits)</span>
+                        </span>
+                    </div>
+                    <div class="custom-dropdown-item" data-value="boite" data-icon="fas fa-box-open">
+                        <i class="fas fa-box-open me-2"></i>Boîte
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Produits contenus dans une boîte (ex: boîte de stylos)</span>
+                        </span>
+                    </div>
+<div class="custom-dropdown-item" data-value="carton" data-icon="fas fa-dice-d6">
+    <i class="fas fa-dice-d6 me-2"></i>Carton
+
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Emballage contenant plusieurs unités (ex: carton de boîtes de stylos)</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="custom-dropdown-group">
+                    <div class="custom-dropdown-group-header">Mesures</div>
+                    <div class="custom-dropdown-item" data-value="kg" data-icon="fas fa-weight">
+                        <i class="fas fa-weight me-2"></i>Kilogramme
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Produit vendu au poids (ex: viande, riz, céréales)</span>
+                        </span>
+                    </div>
+                    <div class="custom-dropdown-item" data-value="litre" data-icon="fas fa-tint">
+                        <i class="fas fa-tint me-2"></i>Litre
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Produit liquide vendu au volume (ex: essence, huile, eau)</span>
+                        </span>
+                    </div>
+                    <div class="custom-dropdown-item" data-value="metre" data-icon="fas fa-ruler-horizontal">
+                        <i class="fas fa-ruler-horizontal me-2"></i>Mètre
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Produit vendu à la longueur (ex: tissu, câble, ruban)</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="custom-dropdown-group">
+                    <div class="custom-dropdown-group-header">Ensembles</div>
+                    <div class="custom-dropdown-item" data-value="kit" data-icon="fas fa-toolbox">
+                        <i class="fas fa-toolbox me-2"></i>Kit
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Ensemble d'articles complémentaires vendus comme une unité (ex: kit de réparation)</span>
+                        </span>
+                    </div>
+<div class="custom-dropdown-item" data-value="pack" data-icon="fas fa-gifts">
+    <i class="fas fa-gifts me-2"></i>Pack
+
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Groupe d'articles vendus ensemble à un prix spécial (ex: pack promotionnel)</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="custom-dropdown-divider"></div>
+                <div class="custom-dropdown-item add-new" data-value="custom">
+                    <i class="fas fa-plus-circle me-2"></i>Ajouter une unité personnalisée
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="edit-product-unit" value="piece">
+    </div>
+</div>
+
+
                                 <div class="mb-3">
                                     <label for="edit-product-location" class="form-label">Emplacement</label>
                                     <input type="text" class="form-control" id="edit-product-location" required>

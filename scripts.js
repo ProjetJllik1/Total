@@ -262,6 +262,11 @@ function generateQRCode(data, elementId) {
         // Event Listeners
         document.addEventListener('DOMContentLoaded', function() {
             initApp();
+                // Initialiser les tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
             // Charger les paramètres de devise
 loadCurrencySettings();
 initCurrencyEvents();
@@ -459,138 +464,150 @@ document.getElementById('print-generated').addEventListener('click', function() 
 
         // Initialisation de l'application
         function initApp() {
-            // Charger les paramètres
-            const defaultMinStock = localStorage.getItem('totalInventoryDefaultMinStock') || 5;
-            document.getElementById('default-min-stock').value = defaultMinStock;
-            
-            const enableEmailAlerts = localStorage.getItem('totalInventoryEnableEmailAlerts') === 'true';
-            document.getElementById('enable-email-alerts').checked = enableEmailAlerts;
-            
-            const alertEmail = localStorage.getItem('totalInventoryAlertEmail') || '';
-            document.getElementById('alert-email').value = alertEmail;
-            
-            document.getElementById('email-alerts-config').style.display = enableEmailAlerts ? 'block' : 'none';
-            
-            // Si c'est la première exécution, ajouter des produits d'exemple
-            if (products.length === 0) {
-                addSampleProducts();
-            }
-            // Chargement de la table des produits pour impression
+    // Charger les paramètres
+    const defaultMinStock = localStorage.getItem('totalInventoryDefaultMinStock') || 5;
+    document.getElementById('default-min-stock').value = defaultMinStock;
+    
+    const enableEmailAlerts = localStorage.getItem('totalInventoryEnableEmailAlerts') === 'true';
+    document.getElementById('enable-email-alerts').checked = enableEmailAlerts;
+    
+    const alertEmail = localStorage.getItem('totalInventoryAlertEmail') || '';
+    document.getElementById('alert-email').value = alertEmail;
+    
+    document.getElementById('email-alerts-config').style.display = enableEmailAlerts ? 'block' : 'none';
+    
+    // Initialiser les dropdowns personnalisés
+    initCustomDropdowns();
+    initInfoUnitMesureTooltips();
+    // Charger les unités personnalisées
+    loadCustomUnits();
+    
+    // Si c'est la première exécution, ajouter des produits d'exemple
+    if (products.length === 0) {
+        addSampleProducts();
+    }
+    
+    // Chargement de la table des produits pour impression
     loadPrintTable();
-        }
+}
 
         function addSampleProducts() {
-            const sampleProducts = [
+    const sampleProducts = [
+        {
+            id: generateProductCode(),
+            name: "Antenne TV extérieure",
+            code: "ANT-TV-001",
+            category: "antennes",
+            price: 49.99,
+            quantity: 15,
+            unit: "piece", // Ajout de l'unité de mesure
+            location: "Rayon 1, Étagère A",
+            description: "Antenne TV puissante pour réception TNT HD",
+            minStock: 5,
+            supplier: "AntennaPro",
+            dateAdded: new Date().toISOString(),
+            movements: [
                 {
-                    id: generateProductCode(),
-                    name: "Antenne TV extérieure",
-                    code: "ANT-TV-001",
-                    category: "antennes",
-                    price: 49.99,
+                    type: "add",
                     quantity: 15,
-                    location: "Rayon 1, Étagère A",
-                    description: "Antenne TV puissante pour réception TNT HD",
-                    minStock: 5,
-                    supplier: "AntennaPro",
-                    dateAdded: new Date().toISOString(),
-                    movements: [
-                        {
-                            type: "add",
-                            quantity: 15,
-                            date: new Date().toISOString(),
-                            description: "Stock initial"
-                        }
-                    ]
-                },
-                {
-                    id: generateProductCode(),
-                    name: "Panneau solaire 100W",
-                    code: "SOL-100W",
-                    category: "panneaux-solaires",
-                    price: 129.99,
-                    quantity: 8,
-                    location: "Rayon 2, Étagère C",
-                    description: "Panneau solaire monocristallin 100W",
-                    minStock: 3,
-                    supplier: "SolarTech",
-                    dateAdded: new Date().toISOString(),
-                    movements: [
-                        {
-                            type: "add",
-                            quantity: 8,
-                            date: new Date().toISOString(),
-                            description: "Stock initial"
-                        }
-                    ]
-                },
-                {
-                    id: generateProductCode(),
-                    name: "Perceuse sans fil 18V",
-                    code: "OUT-PER-01",
-                    category: "outillage",
-                    price: 89.90,
-                    quantity: 12,
-                    location: "Rayon 3, Étagère B",
-                    description: "Perceuse-visseuse sans fil avec 2 batteries",
-                    minStock: 4,
-                    supplier: "OutilPro",
-                    dateAdded: new Date().toISOString(),
-                    movements: [
-                        {
-                            type: "add",
-                            quantity: 12,
-                            date: new Date().toISOString(),
-                            description: "Stock initial"
-                        }
-                    ]
-                },
-                {
-                    id: generateProductCode(),
-                    name: "Filtre à huile moto",
-                    code: "MOTO-FH-01",
-                    category: "motos",
-                    price: 12.50,
-                    quantity: 25,
-                    location: "Rayon 4, Étagère D",
-                    description: "Filtre à huile compatible plusieurs modèles",
-                    minStock: 10,
-                    supplier: "MotoTech",
-                    dateAdded: new Date().toISOString(),
-                    movements: [
-                        {
-                            type: "add",
-                            quantity: 25,
-                            date: new Date().toISOString(),
-                            description: "Stock initial"
-                        }
-                    ]
-                },
-                {
-                    id: generateProductCode(),
-                    name: "Multimètre digital",
-                    code: "ELEC-MM-01",
-                    category: "electronique",
-                    price: 34.99,
-                    quantity: 7,
-                    location: "Rayon 5, Étagère A",
-                    description: "Multimètre numérique professionnel",
-                    minStock: 3,
-                    supplier: "ElectroPro",
-                    dateAdded: new Date().toISOString(),
-                    movements: [
-                        {
-                            type: "add",
-                            quantity: 7,
-                            date: new Date().toISOString(),
-                            description: "Stock initial"
-                        }
-                    ]
+                    date: new Date().toISOString(),
+                    description: "Stock initial"
                 }
-            ];
-            
-            products = sampleProducts;
-            updateLocalStorage();
+            ]
+        },
+        {
+            id: generateProductCode(),
+            name: "Panneau solaire 100W",
+            code: "SOL-100W",
+            category: "panneaux-solaires",
+            price: 129.99,
+            quantity: 8,
+            unit: "piece", // Ajout de l'unité de mesure
+            location: "Rayon 2, Étagère C",
+            description: "Panneau solaire monocristallin 100W",
+            minStock: 3,
+            supplier: "SolarTech",
+            dateAdded: new Date().toISOString(),
+            movements: [
+                {
+                    type: "add",
+                    quantity: 8,
+                    date: new Date().toISOString(),
+                    description: "Stock initial"
+                }
+            ]
+        },
+        {
+            id: generateProductCode(),
+            name: "Perceuse sans fil 18V",
+            code: "OUT-PER-01",
+            category: "outillage",
+            price: 89.90,
+            quantity: 12,
+            unit: "kit", // Ajout de l'unité de mesure
+            location: "Rayon 3, Étagère B",
+            description: "Perceuse-visseuse sans fil avec 2 batteries",
+            minStock: 4,
+            supplier: "OutilPro",
+            dateAdded: new Date().toISOString(),
+            movements: [
+                {
+                    type: "add",
+                    quantity: 12,
+                    date: new Date().toISOString(),
+                    description: "Stock initial"
+                }
+            ]
+        },
+        {
+            id: generateProductCode(),
+            name: "Filtre à huile moto",
+            code: "MOTO-FH-01",
+            category: "motos",
+            price: 12.50,
+            quantity: 25,
+            unit: "piece", // Ajout de l'unité de mesure
+            location: "Rayon 4, Étagère D",
+            description: "Filtre à huile compatible plusieurs modèles",
+            minStock: 10,
+            supplier: "MotoTech",
+            dateAdded: new Date().toISOString(),
+            movements: [
+                {
+                    type: "add",
+                    quantity: 25,
+                    date: new Date().toISOString(),
+                    description: "Stock initial"
+                }
+            ]
+        },
+        {
+            id: generateProductCode(),
+            name: "Multimètre digital",
+            code: "ELEC-MM-01",
+            category: "electronique",
+            price: 34.99,
+            quantity: 7,
+            unit: "piece", // Ajout de l'unité de mesure
+            location: "Rayon 5, Étagère A",
+            description: "Multimètre numérique professionnel",
+            minStock: 3,
+            supplier: "ElectroPro",
+            dateAdded: new Date().toISOString(),
+            movements: [
+                {
+                    type: "add",
+                    quantity: 7,
+                    date: new Date().toISOString(),
+                    description: "Stock initial"
+                }
+            ]
         }
+    ];
+    
+    products = sampleProducts;
+    updateLocalStorage();
+}
 
         function showSection(sectionId) {
             // Cacher toutes les sections
@@ -696,7 +713,7 @@ document.getElementById('print-generated').addEventListener('click', function() 
     recentProductsTable.innerHTML = '';
     
     if (products.length === 0) {
-        recentProductsTable.innerHTML = '<tr><td colspan="5" class="text-center">Aucun produit trouvé</td></tr>';
+        recentProductsTable.innerHTML = '<tr><td colspan="6" class="text-center">Aucun produit trouvé</td></tr>';
         return;
     }
     
@@ -711,10 +728,14 @@ document.getElementById('print-generated').addEventListener('click', function() 
         // Formater le prix selon les préférences d'affichage
         const formattedPrice = formatPriceForDisplay(product.price, product.priceCurrency || 'usd');
         
+        // Obtenir les informations sur l'unité de mesure
+        const unitInfo = getUnitInfo(product.unit || 'piece');
+        const unitBadge = `<span class="unit-badge"><i class="${unitInfo.icon}"></i>${unitInfo.name}</span>`;
+        
         row.innerHTML = `
             <td>${product.name}</td>
             <td>${formattedPrice}</td>
-            <td>${product.quantity}</td>
+            <td>${product.quantity} ${unitBadge}</td>
             <td>${product.location}</td>
             <td>${getStockBadge(product.quantity, product.minStock)}</td>
         `;
@@ -724,12 +745,13 @@ document.getElementById('print-generated').addEventListener('click', function() 
 }
 
 
+
 function loadInventoryTable() {
     const inventoryTable = document.getElementById('inventory-table').querySelector('tbody');
     inventoryTable.innerHTML = '';
     
     if (products.length === 0) {
-        inventoryTable.innerHTML = '<tr><td colspan="7" class="text-center">Aucun produit trouvé</td></tr>';
+        inventoryTable.innerHTML = '<tr><td colspan="8" class="text-center">Aucun produit trouvé</td></tr>';
         return;
     }
     
@@ -739,11 +761,16 @@ function loadInventoryTable() {
         // Formater le prix selon les préférences d'affichage
         const formattedPrice = formatPriceForDisplay(product.price, product.priceCurrency || 'usd');
         
+        // Obtenir les informations sur l'unité de mesure
+        const unitInfo = getUnitInfo(product.unit || 'piece');
+        const unitBadge = `<span class="unit-badge"><i class="${unitInfo.icon}"></i>${unitInfo.name}</span>`;
+        
         row.innerHTML = `
             <td>${product.code}</td>
             <td>${product.name}</td>
             <td>${formattedPrice}</td>
             <td>${product.quantity}</td>
+            <td>${unitBadge}</td>
             <td>${product.location}</td>
             <td>${getStockBadge(product.quantity, product.minStock)}</td>
             <td>
@@ -1095,6 +1122,7 @@ function loadInventoryTable() {
     const price = parseFloat(document.getElementById('product-price').value);
     const priceCurrency = document.getElementById('product-price-currency').value;
     const quantity = parseInt(document.getElementById('product-quantity').value);
+    const unit = document.getElementById('product-unit').value;
     const location = document.getElementById('product-location').value;
     const description = document.getElementById('product-description').value;
     const minStock = parseInt(document.getElementById('min-stock').value) || 5;
@@ -1108,6 +1136,7 @@ function loadInventoryTable() {
         price: price,
         priceCurrency: priceCurrency, // Stocker la devise d'origine
         quantity: quantity,
+        unit: unit, // Nouvelle propriété: unité de mesure
         location: location,
         description: description,
         minStock: minStock,
@@ -1134,11 +1163,20 @@ function loadInventoryTable() {
     document.getElementById('code-scan-container').style.display = 'none';
     document.getElementById('code-manual-container').style.display = 'none';
     
+    // Réinitialiser l'unité de mesure
+    const dropdown = document.querySelector('#add-product .custom-dropdown');
+    if (dropdown) {
+        const selected = dropdown.querySelector('.custom-dropdown-selected .selected-text');
+        selected.innerHTML = '<i class="fas fa-tag me-2"></i>Pièce';
+        document.getElementById('product-unit').value = 'piece';
+    }
+    
     // Mettre à jour les statistiques et tables
     updateDashboardStats();
     loadRecentProducts();
     checkStockAlerts();
 }
+
 
 
         function openProductModal(productId) {
@@ -1170,6 +1208,18 @@ function loadInventoryTable() {
     document.getElementById('edit-product-description').value = product.description;
     document.getElementById('edit-min-stock').value = product.minStock;
     
+    // Définir l'unité de mesure
+    const unitValue = product.unit || 'piece';
+    document.getElementById('edit-product-unit').value = unitValue;
+    
+    // Mettre à jour l'affichage du dropdown
+    const unitInfo = getUnitInfo(unitValue);
+    const dropdown = document.querySelector('#productModal .custom-dropdown');
+    if (dropdown) {
+        const selected = dropdown.querySelector('.custom-dropdown-selected .selected-text');
+        selected.innerHTML = `<i class="${unitInfo.icon} me-2"></i>${unitInfo.name}`;
+    }
+    
     // Générer les codes
     generateBarcode(product.code, '#edit-barcode-preview');
     
@@ -1177,7 +1227,8 @@ function loadInventoryTable() {
         code: product.code,
         name: product.name,
         price: product.price,
-        currency: product.priceCurrency || 'usd'
+        currency: product.priceCurrency || 'usd',
+        unit: product.unit || 'piece'
     };
     
     generateQRCode(JSON.stringify(qrData), 'edit-qrcode-preview');
@@ -1242,6 +1293,7 @@ function saveEditProduct() {
     product.price = parseFloat(document.getElementById('edit-product-price').value);
     product.priceCurrency = document.getElementById('edit-product-price-currency').value;
     product.quantity = newQuantity;
+    product.unit = document.getElementById('edit-product-unit').value; // Mettre à jour l'unité de mesure
     product.location = document.getElementById('edit-product-location').value;
     product.description = document.getElementById('edit-product-description').value;
     product.minStock = parseInt(document.getElementById('edit-min-stock').value);
@@ -3709,10 +3761,14 @@ function initThemeLangMode() {
     // Chargement des préférences stockées
     loadPreferences();
     
-    // Initialisation des boutons et popups
+    // Initialisation des boutons et popups du sidebar
     setupThemeButton();
     setupDarkModeButton();
     setupLanguageButton();
+    setupAdvancedButton();
+    
+    // Initialisation des boutons et popups de l'authentification
+    setupAuthSettings();
     
     // Initialisation des événements pour les options des popups
     setupThemeOptions();
@@ -3722,6 +3778,72 @@ function initThemeLangMode() {
     setupPopupBehavior();
 }
 
+function setupAuthSettings() {
+    // Vérifiez si les éléments d'authentification existent
+    const authThemeBtn = document.getElementById('auth-ThemeLangMode_themeBtn');
+    const authDarkModeBtn = document.getElementById('auth-ThemeLangMode_darkModeBtn');
+    const authLangBtn = document.getElementById('auth-ThemeLangMode_langBtn');
+    
+    if (!authThemeBtn || !authDarkModeBtn || !authLangBtn) return;
+    
+    // Configuration du bouton de thème pour l'authentification
+    const authThemePopup = document.getElementById('auth-ThemeLangMode_themePopup');
+    authThemeBtn.addEventListener('click', function() {
+        closeAllPopups();
+        authThemePopup.classList.toggle('active');
+    });
+    
+    // Configuration du bouton de mode sombre pour l'authentification
+    authDarkModeBtn.addEventListener('click', function() {
+        toggleDarkMode();
+        
+        // Mise à jour de l'icône du bouton d'authentification
+        const isDarkMode = document.documentElement.getAttribute('data-theme-mode') === 'dark';
+        if (isDarkMode) {
+            authDarkModeBtn.querySelector('i').className = 'fas fa-sun';
+        } else {
+            authDarkModeBtn.querySelector('i').className = 'fas fa-moon';
+        }
+    });
+    
+    // Configuration du bouton de langue pour l'authentification
+    const authLangPopup = document.getElementById('auth-ThemeLangMode_langPopup');
+    authLangBtn.addEventListener('click', function() {
+        closeAllPopups();
+        authLangPopup.classList.toggle('active');
+    });
+    
+    // Configuration du toggle de mode sombre dans le popup d'authentification
+    const authDarkModeToggle = document.getElementById('auth-ThemeLangMode_darkModeToggle');
+    if (authDarkModeToggle) {
+        const isDarkMode = document.documentElement.getAttribute('data-theme-mode') === 'dark';
+        authDarkModeToggle.checked = isDarkMode;
+        
+        authDarkModeToggle.addEventListener('change', function() {
+            toggleDarkMode();
+            
+            // Mise à jour de l'icône du bouton d'authentification
+            const isDarkModeNow = document.documentElement.getAttribute('data-theme-mode') === 'dark';
+            if (isDarkModeNow) {
+                authDarkModeBtn.querySelector('i').className = 'fas fa-sun';
+            } else {
+                authDarkModeBtn.querySelector('i').className = 'fas fa-moon';
+            }
+        });
+    }
+    
+    // Mise à jour de la fonction closeAllPopups pour inclure les popups d'authentification
+    const originalCloseAllPopups = closeAllPopups;
+    closeAllPopups = function() {
+        const popups = document.querySelectorAll('.ThemeLangMode_popup, .auth-popup');
+        popups.forEach(popup => {
+            popup.classList.remove('active');
+        });
+    };
+}
+
+
+
 function loadPreferences() {
     // Chargement du thème
     const theme = localStorage.getItem('theme') || 'default';
@@ -3729,18 +3851,37 @@ function loadPreferences() {
     
     // Chargement du mode sombre/clair
     const darkMode = localStorage.getItem('darkMode') === 'true';
+    
+    // Mise à jour des boutons principaux
+    const darkModeBtn = document.getElementById('ThemeLangMode_darkModeBtn');
+    const authDarkModeBtn = document.getElementById('auth-ThemeLangMode_darkModeBtn');
+    
     if (darkMode) {
         document.documentElement.setAttribute('data-theme-mode', 'dark');
-        document.getElementById('ThemeLangMode_darkModeBtn').innerHTML = '<i class="fas fa-sun"></i>';
+        if (darkModeBtn) {
+            darkModeBtn.querySelector('i').className = 'fas fa-sun';
+        }
+        if (authDarkModeBtn) {
+            authDarkModeBtn.querySelector('i').className = 'fas fa-sun';
+        }
     } else {
         document.documentElement.removeAttribute('data-theme-mode');
-        document.getElementById('ThemeLangMode_darkModeBtn').innerHTML = '<i class="fas fa-moon"></i>';
+        if (darkModeBtn) {
+            darkModeBtn.querySelector('i').className = 'fas fa-moon';
+        }
+        if (authDarkModeBtn) {
+            authDarkModeBtn.querySelector('i').className = 'fas fa-moon';
+        }
     }
     
-    // Mise à jour des UI elements pour refléter les préférences stockées
+    // Mise à jour des toggles pour le mode sombre
     const darkModeToggle = document.getElementById('ThemeLangMode_darkModeToggle');
+    const authDarkModeToggle = document.getElementById('auth-ThemeLangMode_darkModeToggle');
     if (darkModeToggle) {
         darkModeToggle.checked = darkMode;
+    }
+    if (authDarkModeToggle) {
+        authDarkModeToggle.checked = darkMode;
     }
     
     // Sélection du thème dans l'UI
@@ -3767,6 +3908,8 @@ function loadPreferences() {
         }
     });
 }
+
+
 
 function setupThemeButton() {
     const themeBtn = document.getElementById('ThemeLangMode_themeBtn');
@@ -3796,19 +3939,21 @@ function setupDarkModeButton() {
 function toggleDarkMode() {
     const isDarkMode = document.documentElement.getAttribute('data-theme-mode') === 'dark';
     const darkModeToggle = document.getElementById('ThemeLangMode_darkModeToggle');
+    const darkModeBtn = document.getElementById('ThemeLangMode_darkModeBtn');
     
     if (isDarkMode) {
         document.documentElement.removeAttribute('data-theme-mode');
-        document.getElementById('ThemeLangMode_darkModeBtn').innerHTML = '<i class="fas fa-moon"></i>';
+        darkModeBtn.querySelector('i').className = 'fas fa-moon';
         if (darkModeToggle) darkModeToggle.checked = false;
         localStorage.setItem('darkMode', 'false');
     } else {
         document.documentElement.setAttribute('data-theme-mode', 'dark');
-        document.getElementById('ThemeLangMode_darkModeBtn').innerHTML = '<i class="fas fa-sun"></i>';
+        darkModeBtn.querySelector('i').className = 'fas fa-sun';
         if (darkModeToggle) darkModeToggle.checked = true;
         localStorage.setItem('darkMode', 'true');
     }
 }
+
 
 function setupLanguageButton() {
     const langBtn = document.getElementById('ThemeLangMode_langBtn');
@@ -3817,6 +3962,16 @@ function setupLanguageButton() {
     langBtn.addEventListener('click', function() {
         closeAllPopups();
         langPopup.classList.toggle('active');
+    });
+}
+
+function setupAdvancedButton() {
+    const advancedBtn = document.getElementById('ThemeLangMode_advancedBtn');
+    
+    advancedBtn.addEventListener('click', function() {
+        closeAllPopups();
+        // Ici vous pourriez ajouter l'ouverture d'une modal ou popup pour les paramètres avancés
+        showNotification('Paramètres avancés', 'Les paramètres avancés seront disponibles prochainement.', 'info');
     });
 }
 
@@ -3880,7 +4035,7 @@ function setupPopupBehavior() {
     
     // Fermeture des popups lorsqu'on clique à l'extérieur
     document.addEventListener('click', function(event) {
-        const popups = document.querySelectorAll('.ThemeLangMode_popup');
+        const popups = document.querySelectorAll('.ThemeLangMode_popup, .auth-popup');
         const settingBtns = document.querySelectorAll('.ThemeLangMode_settingBtn');
         
         let isClickInsidePopup = false;
@@ -3902,7 +4057,41 @@ function setupPopupBehavior() {
             closeAllPopups();
         }
     });
+    
+    // Synchro entre les popups d'authentification et les popups normaux
+    const themeItems = document.querySelectorAll('.ThemeLangMode_theme-item');
+    themeItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const theme = this.getAttribute('data-theme');
+            
+            // Mise à jour de l'UI dans tous les popups de thème
+            document.querySelectorAll('.ThemeLangMode_theme-item').forEach(el => {
+                if (el.getAttribute('data-theme') === theme) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+        });
+    });
+    
+    const langItems = document.querySelectorAll('.ThemeLangMode_lang-item');
+    langItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const lang = this.getAttribute('data-lang');
+            
+            // Mise à jour de l'UI dans tous les popups de langue
+            document.querySelectorAll('.ThemeLangMode_lang-item').forEach(el => {
+                if (el.getAttribute('data-lang') === lang) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+        });
+    });
 }
+
 
 function closeAllPopups() {
     const popups = document.querySelectorAll('.ThemeLangMode_popup');
@@ -5767,12 +5956,3782 @@ document.addEventListener('DOMContentLoaded', function() {
   🟡 JS PARTIE 6
   ═════════════════════════════╝*/
 
+  // Fonctions pour l'onglet Statistiques
+function initStatisticsCharts() {
+    if (!window.Chart) return;
+    
+    // Graphique des ventes par catégorie
+    const categorySalesCtx = document.getElementById('AnalInvenIa-categorySalesChart');
+    if (categorySalesCtx) {
+        new Chart(categorySalesCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Électronique', 'Mobilier', 'Vêtements', 'Alimentaire', 'Autres'],
+                datasets: [{
+                    data: [45, 20, 15, 10, 10],
+                    backgroundColor: [
+                        '#0d6efd',
+                        '#6610f2',
+                        '#6f42c1',
+                        '#d63384',
+                        '#dc3545'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+    
+    // Graphique d'évolution des ventes
+    const salesTrendCtx = document.getElementById('AnalInvenIa-salesTrendChart');
+    if (salesTrendCtx) {
+        new Chart(salesTrendCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai'],
+                datasets: [{
+                    label: 'Ventes 2025',
+                    data: [12000, 19000, 15000, 18500, 24500],
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Ventes 2024',
+                    data: [10000, 15000, 12000, 14500, 19000],
+                    borderColor: '#6c757d',
+                    borderDash: [5, 5],
+                    fill: false,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+    
+    // Graphique de répartition des stocks
+    const stockDistributionCtx = document.getElementById('AnalInvenIa-stockDistributionChart');
+    if (stockDistributionCtx) {
+        new Chart(stockDistributionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Stock optimal', 'Stock faible', 'Rupture', 'Surstockage'],
+                datasets: [{
+                    data: [65, 20, 5, 10],
+                    backgroundColor: [
+                        '#28a745',
+                        '#ffc107',
+                        '#dc3545',
+                        '#17a2b8'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    }
+    
+    // Graphique comparatif
+    const comparativeCtx = document.getElementById('AnalInvenIa-comparativeChart');
+    if (comparativeCtx) {
+        new Chart(comparativeCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Électronique', 'Mobilier', 'Vêtements', 'Alimentaire', 'Autres'],
+                datasets: [{
+                    label: 'Ce mois-ci',
+                    data: [12450, 5420, 3780, 2650, 2480],
+                    backgroundColor: '#0d6efd',
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.7
+                }, {
+                    label: 'Mois précédent',
+                    data: [10800, 4950, 3350, 2240, 2650],
+                    backgroundColor: '#6c757d',
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Fonctions pour l'onglet Rapports
+function initReportsInteractions() {
+    // Gestion des sélecteurs
+    document.querySelectorAll('.AnalInvenIa-select').forEach(select => {
+        select.addEventListener('click', function(e) {
+            if (e.target.closest('.AnalInvenIa-select-option')) {
+                const option = e.target.closest('.AnalInvenIa-select-option');
+                const value = option.dataset.value;
+                const valueDisplay = this.querySelector('.AnalInvenIa-select-value');
+                
+                valueDisplay.textContent = option.textContent.trim();
+                this.dataset.value = value;
+                this.classList.remove('active');
+            } else {
+                this.classList.toggle('active');
+            }
+        });
+    });
+    
+    // Fermer les sélecteurs quand on clique ailleurs
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.AnalInvenIa-select')) {
+            document.querySelectorAll('.AnalInvenIa-select.active').forEach(select => {
+                select.classList.remove('active');
+            });
+        }
+    });
+    
+    // Changement de vue (liste/grille)
+    document.querySelectorAll('.AnalInvenIa-view-control').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const viewType = this.dataset.view;
+            
+            // Activer/désactiver les boutons
+            document.querySelectorAll('.AnalInvenIa-view-control').forEach(b => {
+                b.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // Afficher la vue correspondante
+            document.querySelectorAll('.AnalInvenIa-reports-list, .AnalInvenIa-reports-grid').forEach(view => {
+                view.classList.remove('active');
+            });
+            
+            if (viewType === 'list') {
+                document.querySelector('.AnalInvenIa-reports-list').classList.add('active');
+            } else {
+                document.querySelector('.AnalInvenIa-reports-grid').classList.add('active');
+                // Remplir la grille si nécessaire (pour l'exemple, nous utiliserons les mêmes données)
+                if (document.querySelector('.AnalInvenIa-reports-grid').children.length === 0) {
+                    const items = document.querySelectorAll('.AnalInvenIa-report-item');
+                    let gridHTML = '';
+                    
+                    items.forEach(item => {
+                        const icon = item.querySelector('.AnalInvenIa-report-icon').innerHTML;
+                        const title = item.querySelector('.AnalInvenIa-report-title').textContent;
+                        const type = item.querySelector('.AnalInvenIa-report-type').textContent;
+                        const date = item.querySelector('.AnalInvenIa-report-date').textContent;
+                        
+                        gridHTML += `
+                            <div class="AnalInvenIa-report-grid-item">
+                                <div class="AnalInvenIa-report-grid-content">
+                                    <div class="AnalInvenIa-report-grid-icon">${icon}</div>
+                                    <div class="AnalInvenIa-report-grid-title">${title}</div>
+                                    <div class="AnalInvenIa-report-grid-meta">
+                                        <span class="AnalInvenIa-report-grid-type">${type}</span>
+                                        <span class="AnalInvenIa-report-grid-date">${date}</span>
+                                    </div>
+                                </div>
+                                <div class="AnalInvenIa-report-grid-actions">
+                                    <button class="AnalInvenIa-action-btn" title="Voir le rapport">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="AnalInvenIa-action-btn" title="Télécharger en PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    document.querySelector('.AnalInvenIa-reports-grid').innerHTML = gridHTML;
+                }
+            }
+        });
+    });
+    
+    // Prévisualisation des rapports
+    document.querySelectorAll('.AnalInvenIa-action-btn').forEach(btn => {
+        if (btn.querySelector('.fa-eye')) {
+            btn.addEventListener('click', function() {
+                const reportTitle = this.closest('.AnalInvenIa-report-item').querySelector('.AnalInvenIa-report-title').textContent;
+                showReportPreview(reportTitle);
+            });
+        }
+    });
+    
+    // Fermer la prévisualisation
+    document.getElementById('AnalInvenIa-closePreview')?.addEventListener('click', function() {
+        document.getElementById('AnalInvenIa-reportPreview').style.display = 'none';
+    });
+    
+    // Bouton de génération de rapport
+    document.getElementById('AnalInvenIa-generateReport')?.addEventListener('click', function() {
+        alert("Fonctionnalité de génération de rapport en cours de développement.");
+    });
+}
+
+// Afficher la prévisualisation d'un rapport
+function showReportPreview(reportTitle) {
+    const previewModal = document.getElementById('AnalInvenIa-reportPreview');
+    if (!previewModal) return;
+    
+    // Afficher le modal
+    previewModal.style.display = 'flex';
+    
+    // Mettre à jour le titre
+    const titleElement = previewModal.querySelector('.AnalInvenIa-report-preview-title span');
+    if (titleElement) titleElement.textContent = reportTitle;
+    
+    // Afficher le loader
+    previewModal.querySelector('.AnalInvenIa-report-loading').style.display = 'block';
+    previewModal.querySelector('.AnalInvenIa-report-content').style.display = 'none';
+    
+    // Simuler le chargement
+    setTimeout(() => {
+        previewModal.querySelector('.AnalInvenIa-report-loading').style.display = 'none';
+        previewModal.querySelector('.AnalInvenIa-report-content').style.display = 'block';
+        
+        // Contenu de démo pour le rapport (vous pouvez le personnaliser en fonction du titre)
+        let reportContent = `
+            <div class="AnalInvenIa-report-document">
+                <div class="AnalInvenIa-report-header-logo">
+                    <img src="img/logo.png" alt="Logo" style="max-height: 50px;">
+                    <h2>${reportTitle}</h2>
+                </div>
+                <div class="AnalInvenIa-report-metadata">
+                    <div class="AnalInvenIa-report-metadata-item">
+                        <span class="label">Date de génération:</span>
+                        <span class="value">18 mai 2025</span>
+                    </div>
+                    <div class="AnalInvenIa-report-metadata-item">
+                        <span class="label">Période analysée:</span>
+                        <span class="value">1 mai - 17 mai 2025</span>
+                    </div>
+                    <div class="AnalInvenIa-report-metadata-item">
+                        <span class="label">Généré par:</span>
+                        <span class="value">AnalInvenIA</span>
+                    </div>
+                </div>
+                
+                <div class="AnalInvenIa-report-section">
+                    <h3>Résumé exécutif</h3>
+                    <p>Ce rapport présente une analyse détaillée de l'état actuel de votre inventaire, incluant les tendances clés, les points d'attention, et des recommandations basées sur l'analyse IA de vos données.</p>
+                    
+                    <div class="AnalInvenIa-report-kpi-row">
+                        <div class="AnalInvenIa-report-kpi">
+                            <div class="AnalInvenIa-report-kpi-value">24 850 €</div>
+                            <div class="AnalInvenIa-report-kpi-label">Valeur du stock</div>
+                        </div>
+                        <div class="AnalInvenIa-report-kpi">
+                            <div class="AnalInvenIa-report-kpi-value">12 450 €</div>
+                            <div class="AnalInvenIa-report-kpi-label">Ventes totales</div>
+                        </div>
+                        <div class="AnalInvenIa-report-kpi">
+                            <div class="AnalInvenIa-report-kpi-value">+12.3%</div>
+                            <div class="AnalInvenIa-report-kpi-label">Croissance</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="AnalInvenIa-report-section">
+                    <h3>Analyse détaillée</h3>
+                    <p>L'analyse de vos données d'inventaire pour le mois de Mai 2025 montre une tendance positive avec une augmentation des ventes de 12,3% par rapport au mois précédent. La valeur totale de votre stock a augmenté de 8,5%, indiquant un bon équilibre entre les entrées et sorties de stock.</p>
+                    
+                    <h4>Points forts</h4>
+                    <ul>
+                        <li>La catégorie Électronique continue de dominer vos ventes avec une croissance constante</li>
+                        <li>Votre rotation de stock s'est améliorée de 5% ce mois-ci</li>
+                        <li>Le produit "Smartphone XL+" montre une excellente performance avec une hausse de ventes de 15%</li>
+                    </ul>
+                    
+                    <h4>Points d'attention</h4>
+                    <ul>
+                        <li>3 produits sont en surstockage, représentant une valeur immobilisée de 5 420€</li>
+                        <li>2 produits populaires risquent une rupture de stock dans les 10 prochains jours</li>
+                        <li>La catégorie "Accessoires gaming" montre une tendance à la baisse (-8%)</li>
+                    </ul>
+                </div>
+                
+                <div class="AnalInvenIa-report-section">
+                    <h3>Graphiques et visualisations</h3>
+                    <div class="AnalInvenIa-report-charts">
+                        <div class="AnalInvenIa-report-chart">
+                            <img src="https://via.placeholder.com/500x300?text=Graphique+des+ventes" alt="Graphique des ventes" style="max-width: 100%;">
+                            <p class="AnalInvenIa-report-chart-caption">Figure 1: Évolution des ventes par catégorie</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="AnalInvenIa-report-section">
+                    <h3>Recommandations</h3>
+                    <p>Notre IA recommande de concentrer vos efforts sur l'optimisation des niveaux de stock pour les produits à forte rotation et de réévaluer votre stratégie pour les produits en surstockage.</p>
+                    
+                    <div class="AnalInvenIa-report-recommendations">
+                        <div class="AnalInvenIa-report-recommendation">
+                            <div class="AnalInvenIa-report-recommendation-icon">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                            <div class="AnalInvenIa-report-recommendation-content">
+                                <h4>Augmenter le stock de Smartphone XL+</h4>
+                                <p>Les ventes augmentent de 15% chaque mois depuis 3 mois.</p>
+                                <p>Action recommandée: Commander 50 unités supplémentaires pour anticiper la demande croissante.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="AnalInvenIa-report-recommendation">
+                            <div class="AnalInvenIa-report-recommendation-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="AnalInvenIa-report-recommendation-content">
+                                <h4>Augmenter le prix des Écouteurs sans fil Pro</h4>
+                                <p>Forte demande avec une élasticité-prix favorable. Potentiel +15% sans impact sur les ventes.</p>
+                                <p>Action recommandée: Tester une augmentation de prix progressive de 5%, 10% puis 15% sur les 3 prochaines semaines.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="AnalInvenIa-report-recommendation">
+                            <div class="AnalInvenIa-report-recommendation-icon">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                            <div class="AnalInvenIa-report-recommendation-content">
+                                <h4>Réduire le stock de Casques gaming standard</h4>
+                                <p>Rotation lente, 35 unités en stock depuis plus de 60 jours.</p>
+                                <p>Action recommandée: Créer une promotion temporaire avec 25% de réduction pour écouler le stock.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="AnalInvenIa-report-footer">
+                    <p>Ce rapport a été généré automatiquement par AnalInvenIA. Les recommandations sont basées sur l'analyse des données historiques et des tendances actuelles.</p>
+                </div>
+            </div>
+        `;
+        
+        previewModal.querySelector('.AnalInvenIa-report-content').innerHTML = reportContent;
+    }, 1500);
+}
+
+// Initialiser les fonctionnalités lors du chargement des onglets
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion des onglets d'insights
+    document.querySelectorAll('.AnalInvenIa-insight-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabId = this.dataset.tab;
+            
+            // Désactiver tous les onglets et contenus
+            document.querySelectorAll('.AnalInvenIa-insight-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.AnalInvenIa-insight-content').forEach(c => c.classList.remove('active'));
+            
+            // Activer l'onglet et le contenu sélectionnés
+            this.classList.add('active');
+            document.getElementById(`AnalInvenIa-tab-${tabId}`)?.classList.add('active');
+            
+            // Initialiser les graphiques pour l'onglet Statistiques
+            if (tabId === 'stats') {
+                initStatisticsCharts();
+            }
+            
+            // Initialiser les interactions pour l'onglet Rapports
+            if (tabId === 'reports') {
+                initReportsInteractions();
+            }
+        });
+    });
+    
+    // Initialiser les filtres de période pour les statistiques
+    document.querySelectorAll('.AnalInvenIa-time-btn, .AnalInvenIa-period-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const parent = this.parentElement;
+            parent.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Ici vous pouvez ajouter du code pour actualiser les graphiques selon la période sélectionnée
+        });
+    });
+});
+
+
 
 //══════════════════════════════╗
 // 🟤 JS PARTIE 7
 //══════════════════════════════╝
+// Initialisation des dropdowns personnalisés
+function initCustomDropdowns() {
+    document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+        const selected = dropdown.querySelector('.custom-dropdown-selected');
+        const menu = dropdown.querySelector('.custom-dropdown-menu');
+        const items = dropdown.querySelectorAll('.custom-dropdown-item');
+        const input = dropdown.querySelector('input[type="hidden"]');
+        const search = dropdown.querySelector('.custom-dropdown-search input');
+        
+        // Toggle menu
+        selected.addEventListener('click', function() {
+            menu.classList.toggle('show');
+            if (search) {
+                setTimeout(() => search.focus(), 100);
+            }
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            // Ne pas fermer si on clique sur une icône d'info
+            if (e.target.classList.contains('info_unit_mesure') || 
+                e.target.closest('.info-tooltip-container')) {
+                return;
+            }
+            
+            if (!dropdown.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
+        
+        // Item selection
+        items.forEach(item => {
+            item.addEventListener('click', function(e) {
+                // Ne pas sélectionner l'élément si on a cliqué sur l'icône d'info
+                if (e.target.classList.contains('info_unit_mesure') || 
+                    e.target.closest('.info-tooltip-container')) {
+                    return;
+                }
+                
+                if (this.classList.contains('add-new')) {
+                    showCustomUnitModal(dropdown);
+                } else {
+                    const value = this.dataset.value;
+                    // Utiliser l'icône de l'élément sélectionné, pas une valeur par défaut
+                    const iconElement = this.querySelector('i:first-child');
+                    const iconClass = iconElement ? iconElement.className : 'fas fa-box me-2';
+                    
+                    // Extraire uniquement le texte visible sans le contenu de l'info-tooltip
+                    const itemClone = this.cloneNode(true);
+                    const tooltipContainer = itemClone.querySelector('.info-tooltip-container');
+                    if (tooltipContainer) {
+                        tooltipContainer.remove();
+                    }
+                    const text = itemClone.textContent.trim();
+                    
+                    selected.querySelector('.selected-text').innerHTML = `<i class="${iconClass}"></i>${text}`;
+                    input.value = value;
+                    
+                    items.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    menu.classList.remove('show');
+                }
+            });
+        });
+        
+        // Filter items on search
+        if (search) {
+            search.addEventListener('input', function() {
+                const value = this.value.toLowerCase();
+                const groups = dropdown.querySelectorAll('.custom-dropdown-group');
+                
+                items.forEach(item => {
+                    if (!item.classList.contains('add-new')) {
+                        const text = item.textContent.toLowerCase();
+                        const show = text.includes(value);
+                        item.style.display = show ? '' : 'none';
+                    }
+                });
+                
+                // Show/hide group headers based on visible items
+                groups.forEach(group => {
+                    const groupItems = group.querySelectorAll('.custom-dropdown-item');
+                    const visibleItems = Array.from(groupItems).filter(item => 
+                        item.style.display !== 'none'
+                    ).length;
+                    
+                    const header = group.querySelector('.custom-dropdown-group-header');
+                    if (header) {
+                        header.style.display = visibleItems > 0 ? '' : 'none';
+                    }
+                });
+            });
+            
+            // Prevent dropdown closing on search input click
+            search.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+    });
+}
+
+
+
+
+// Afficher la modal pour ajouter une unité personnalisée
+function showCustomUnitModal(dropdown) {
+    // Create modal if it doesn't exist
+    if (!document.getElementById('customUnitModal')) {
+        const modalHTML = `
+            <div class="custom-unit-modal" id="customUnitModal">
+                <div class="custom-unit-content">
+                    <div class="custom-unit-header">
+                        <h5 class="custom-unit-title">Ajouter une unité personnalisée</h5>
+                        <button type="button" class="custom-unit-close" id="closeCustomUnit">&times;</button>
+                    </div>
+                    <div class="custom-unit-body">
+                        <div class="mb-3">
+                            <label for="custom-unit-name" class="form-label">Nom de l'unité</label>
+                            <input type="text" class="form-control" id="custom-unit-name" placeholder="Ex: Sachet, Flacon, etc.">
+                        </div>
+                    </div>
+                    <div class="custom-unit-footer">
+                        <button type="button" class="btn btn-secondary" id="cancelCustomUnit">Annuler</button>
+                        <button type="button" class="btn btn-primary" id="saveCustomUnit">Ajouter</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        // Close events
+        document.getElementById('closeCustomUnit').addEventListener('click', closeCustomUnitModal);
+        document.getElementById('cancelCustomUnit').addEventListener('click', closeCustomUnitModal);
+        
+        // Save custom unit
+        document.getElementById('saveCustomUnit').addEventListener('click', function() {
+            const unitName = document.getElementById('custom-unit-name').value.trim();
+            if (unitName) {
+                addCustomUnit(unitName, dropdown);
+                closeCustomUnitModal();
+            }
+        });
+    }
+    
+    // Show modal
+    document.getElementById('customUnitModal').classList.add('show');
+    setTimeout(() => document.getElementById('custom-unit-name').focus(), 100);
+}
+
+// Fermer la modal d'unité personnalisée
+function closeCustomUnitModal() {
+    const modal = document.getElementById('customUnitModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.getElementById('custom-unit-name').value = '';
+    }
+}
+
+// Ajouter une unité personnalisée
+function addCustomUnit(unitName, dropdown) {
+    // Generate a unique value for the custom unit
+    const unitValue = 'custom-' + Date.now();
+    
+    // Get the custom units from localStorage or create empty array
+    let customUnits = JSON.parse(localStorage.getItem('customUnits') || '[]');
+    
+    // Add the new unit
+    customUnits.push({
+        value: unitValue,
+        name: unitName
+    });
+    
+    // Save to localStorage
+    localStorage.setItem('customUnits', JSON.stringify(customUnits));
+    
+    // Add to all dropdowns
+    document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+        const items = dropdown.querySelector('.custom-dropdown-items');
+        const addNewItem = items.querySelector('.add-new');
+        
+        // Check if this custom unit already exists in this dropdown
+        if (!items.querySelector(`[data-value="${unitValue}"]`)) {
+            const newItem = document.createElement('div');
+            newItem.className = 'custom-dropdown-item';
+            newItem.dataset.value = unitValue;
+            newItem.dataset.icon = 'fas fa-box';
+            newItem.innerHTML = `
+                <i class="fas fa-box me-2"></i>${unitName}
+                <span class="info-tooltip-container">
+                    <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                    <span class="info-tooltip">Unité personnalisée</span>
+                </span>
+            `;
+            
+            // Insert before the "Add new" item
+            if (addNewItem) {
+                items.insertBefore(newItem, addNewItem);
+            } else {
+                items.appendChild(newItem);
+            }
+            
+            // Add click event
+            newItem.addEventListener('click', function(e) {
+                // Ne pas sélectionner l'élément si on a cliqué sur l'icône d'info
+                if (e.target.classList.contains('info_unit_mesure') || 
+                    e.target.closest('.info-tooltip-container')) {
+                    return;
+                }
+                
+                const selected = dropdown.querySelector('.custom-dropdown-selected');
+                const input = dropdown.querySelector('input[type="hidden"]');
+                
+                // Extraire uniquement le texte visible sans le contenu de l'info-tooltip
+                const itemClone = this.cloneNode(true);
+                const tooltipContainer = itemClone.querySelector('.info-tooltip-container');
+                if (tooltipContainer) {
+                    tooltipContainer.remove();
+                }
+                const text = itemClone.textContent.trim();
+                
+                // Utiliser l'icône de l'élément sélectionné
+                const iconElement = this.querySelector('i:first-child');
+                const iconClass = iconElement ? iconElement.className : 'fas fa-box me-2';
+                
+                selected.querySelector('.selected-text').innerHTML = `<i class="${iconClass}"></i>${text}`;
+                input.value = unitValue;
+                
+                dropdown.querySelectorAll('.custom-dropdown-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                
+                dropdown.querySelector('.custom-dropdown-menu').classList.remove('show');
+            });
+            
+            // Réinitialiser les info-bulles
+            initInfoUnitMesureTooltips();
+        }
+    });
+    
+    // Select the newly added unit in the current dropdown
+    if (dropdown) {
+        const selected = dropdown.querySelector('.custom-dropdown-selected');
+        const input = dropdown.querySelector('input[type="hidden"]');
+        
+        selected.querySelector('.selected-text').innerHTML = `<i class="fas fa-box me-2"></i>${unitName}`;
+        input.value = unitValue;
+        
+        dropdown.querySelector('.custom-dropdown-menu').classList.remove('show');
+    }
+}
+
+
+
+
+
+// Charger les unités personnalisées au démarrage
+function loadCustomUnits() {
+    const customUnits = JSON.parse(localStorage.getItem('customUnits') || '[]');
+    
+    if (customUnits.length > 0) {
+        document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+            const items = dropdown.querySelector('.custom-dropdown-items');
+            const addNewItem = items.querySelector('.add-new');
+            
+            customUnits.forEach(unit => {
+                // Check if this custom unit already exists in this dropdown
+                if (!items.querySelector(`[data-value="${unit.value}"]`)) {
+                    const newItem = document.createElement('div');
+                    newItem.className = 'custom-dropdown-item';
+                    newItem.dataset.value = unit.value;
+                    newItem.dataset.icon = 'fas fa-box';
+                    newItem.innerHTML = `
+                        <i class="fas fa-box me-2"></i>${unit.name}
+                        <span class="info-tooltip-container">
+                            <i class="fas fa-info-circle ms-2 info-icon info_unit_mesure"></i>
+                            <span class="info-tooltip">Unité personnalisée</span>
+                        </span>
+                    `;
+                    
+                    // Insert before the "Add new" item
+                    if (addNewItem) {
+                        items.insertBefore(newItem, addNewItem);
+                    } else {
+                        items.appendChild(newItem);
+                    }
+                    
+                    // Add click event
+                    newItem.addEventListener('click', function(e) {
+                        // Ne pas sélectionner l'élément si on a cliqué sur l'icône d'info
+                        if (e.target.classList.contains('info_unit_mesure') || 
+                            e.target.closest('.info-tooltip-container')) {
+                            return;
+                        }
+                        
+                        const selected = dropdown.querySelector('.custom-dropdown-selected');
+                        const input = dropdown.querySelector('input[type="hidden"]');
+                        
+                        // Extraire uniquement le texte visible sans le contenu de l'info-tooltip
+                        const itemClone = this.cloneNode(true);
+                        const tooltipContainer = itemClone.querySelector('.info-tooltip-container');
+                        if (tooltipContainer) {
+                            tooltipContainer.remove();
+                        }
+                        const text = itemClone.textContent.trim();
+                        
+                        // Utiliser l'icône de l'élément sélectionné
+                        const iconElement = this.querySelector('i:first-child');
+                        const iconClass = iconElement ? iconElement.className : 'fas fa-box me-2';
+                        
+                        selected.querySelector('.selected-text').innerHTML = `<i class="${iconClass}"></i>${text}`;
+                        input.value = unit.value;
+                        
+                        dropdown.querySelectorAll('.custom-dropdown-item').forEach(i => i.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        dropdown.querySelector('.custom-dropdown-menu').classList.remove('show');
+                    });
+                }
+            });
+            
+            // Réinitialiser les info-bulles
+            initInfoUnitMesureTooltips();
+        });
+    }
+}
+
+
+
+
+
+// Obtenir l'icône et le nom pour une unité donnée
+function getUnitInfo(unitValue) {
+    const defaultInfo = { icon: 'fas fa-tag', name: 'Pièce' };
+    
+    // Unités standard
+    const standardUnits = {
+        'piece': { icon: 'fas fa-tag', name: 'Pièce' },
+        'lot': { icon: 'fas fa-layer-group', name: 'Lot' },
+        'paquet': { icon: 'fas fa-box', name: 'Paquet' },
+        'boite': { icon: 'fas fa-box-open', name: 'Boîte' },
+        'carton': { icon: 'fas fa-dice-d6', name: 'Carton' },
+        'kg': { icon: 'fas fa-weight', name: 'Kilogramme' },
+        'litre': { icon: 'fas fa-tint', name: 'Litre' },
+        'metre': { icon: 'fas fa-ruler-horizontal', name: 'Mètre' },
+        'kit': { icon: 'fas fa-toolbox', name: 'Kit' },
+        'pack': { icon: 'fas fa-gifts', name: 'Pack' }
+    };
+    
+    // Si c'est une unité standard
+    if (standardUnits[unitValue]) {
+        return standardUnits[unitValue];
+    }
+    
+    // Si c'est une unité personnalisée
+    if (unitValue.startsWith('custom-')) {
+        const customUnits = JSON.parse(localStorage.getItem('customUnits') || '[]');
+        const customUnit = customUnits.find(unit => unit.value === unitValue);
+        
+        if (customUnit) {
+            return { icon: 'fas fa-box', name: customUnit.name };
+        }
+    }
+    
+    return defaultInfo;
+}
+
+
+
+// Fonction pour positionner les tooltips de manière adaptative
+function positionTooltips() {
+    document.querySelectorAll('.info_unit_mesure.active').forEach(icon => {
+        const tooltip = icon.nextElementSibling;
+        if (!tooltip) return;
+        
+        // Réinitialiser les styles de positionnement
+        tooltip.style.left = '';
+        tooltip.style.right = '';
+        tooltip.style.top = '';
+        tooltip.style.bottom = '';
+        tooltip.style.transform = '';
+        tooltip.style.maxWidth = '';
+        
+        // Réinitialiser les classes de positionnement des flèches
+        tooltip.classList.remove(
+            'tooltip-top', 'tooltip-bottom', 'tooltip-left', 'tooltip-right',
+            'arrow-left', 'arrow-right', 'arrow-center'
+        );
+        
+        // Récupérer les dimensions et positions
+        const iconRect = icon.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const parentMenu = icon.closest('.custom-dropdown-menu');
+        const parentRect = parentMenu.getBoundingClientRect();
+        
+        // Largeur disponible à gauche et à droite de l'icône
+        const spaceLeft = iconRect.left - parentRect.left;
+        const spaceRight = parentRect.right - iconRect.right;
+        
+        // Espace disponible en haut et en bas
+        const spaceTop = iconRect.top - parentRect.top;
+        const spaceBottom = parentRect.bottom - iconRect.bottom;
+        
+        // Variable pour stocker la position horizontale de la flèche
+        let arrowHorizontalClass = 'arrow-center';
+        
+        // Calcul de la position horizontale idéale
+        if (spaceLeft > tooltipRect.width / 2 && spaceRight > tooltipRect.width / 2) {
+            // Centrer si possible
+            tooltip.style.left = '50%';
+            tooltip.style.transform = 'translateX(-50%)';
+            arrowHorizontalClass = 'arrow-center';
+        } else if (spaceRight > tooltipRect.width) {
+            // Aligner à gauche de l'icône
+            tooltip.style.left = '0';
+            arrowHorizontalClass = 'arrow-left';
+        } else if (spaceLeft > tooltipRect.width) {
+            // Aligner à droite de l'icône
+            tooltip.style.right = '0';
+            arrowHorizontalClass = 'arrow-right';
+        } else {
+            // Ajuster pour ne pas déborder
+            if (spaceRight > spaceLeft) {
+                tooltip.style.left = '0';
+                tooltip.style.maxWidth = spaceRight + 'px';
+                arrowHorizontalClass = 'arrow-left';
+            } else {
+                tooltip.style.right = '0';
+                tooltip.style.maxWidth = spaceLeft + 'px';
+                arrowHorizontalClass = 'arrow-right';
+            }
+        }
+        
+        // Calcul de la position verticale idéale
+        if (spaceBottom > tooltipRect.height + 10) {
+            // En dessous de l'icône
+            tooltip.style.top = '100%';
+            tooltip.style.marginTop = '5px';
+            tooltip.classList.add('tooltip-bottom');
+            tooltip.classList.add(arrowHorizontalClass);
+        } else if (spaceTop > tooltipRect.height + 10) {
+            // Au-dessus de l'icône
+            tooltip.style.bottom = '100%';
+            tooltip.style.marginBottom = '5px';
+            tooltip.classList.add('tooltip-top');
+            tooltip.classList.add(arrowHorizontalClass);
+        } else {
+            // Pas assez d'espace vertical, positionner à côté
+            if (spaceRight > tooltipRect.width + 10) {
+                // À droite
+                tooltip.style.left = '100%';
+                tooltip.style.marginLeft = '5px';
+                tooltip.style.top = '0';
+                tooltip.classList.add('tooltip-right');
+            } else {
+                // À gauche
+                tooltip.style.right = '100%';
+                tooltip.style.marginRight = '5px';
+                tooltip.style.top = '0';
+                tooltip.classList.add('tooltip-left');
+            }
+        }
+        
+        // Vérifier si le tooltip dépasse encore du conteneur parent et ajuster si nécessaire
+        const updatedTooltipRect = tooltip.getBoundingClientRect();
+        
+        if (updatedTooltipRect.left < parentRect.left) {
+            tooltip.style.left = '0';
+            tooltip.style.right = 'auto';
+            
+            // Ajuster la position de la flèche
+            if (tooltip.classList.contains('tooltip-top') || tooltip.classList.contains('tooltip-bottom')) {
+                tooltip.classList.remove('arrow-center', 'arrow-right');
+                tooltip.classList.add('arrow-left');
+            }
+        }
+        
+        if (updatedTooltipRect.right > parentRect.right) {
+            tooltip.style.right = '0';
+            tooltip.style.left = 'auto';
+            
+            // Ajuster la position de la flèche
+            if (tooltip.classList.contains('tooltip-top') || tooltip.classList.contains('tooltip-bottom')) {
+                tooltip.classList.remove('arrow-center', 'arrow-left');
+                tooltip.classList.add('arrow-right');
+            }
+        }
+        
+        if (updatedTooltipRect.top < parentRect.top) {
+            tooltip.style.top = '0';
+            tooltip.style.bottom = 'auto';
+            
+            // Si le tooltip était censé être au-dessus, le mettre à droite ou à gauche
+            if (tooltip.classList.contains('tooltip-top')) {
+                tooltip.classList.remove('tooltip-top');
+                if (spaceRight > tooltipRect.width + 10) {
+                    tooltip.classList.add('tooltip-right');
+                    tooltip.style.left = '100%';
+                    tooltip.style.marginLeft = '5px';
+                } else {
+                    tooltip.classList.add('tooltip-left');
+                    tooltip.style.right = '100%';
+                    tooltip.style.marginRight = '5px';
+                }
+            }
+        }
+        
+        if (updatedTooltipRect.bottom > parentRect.bottom) {
+            tooltip.style.bottom = '0';
+            tooltip.style.top = 'auto';
+            
+            // Si le tooltip était censé être en dessous, le mettre à droite ou à gauche
+            if (tooltip.classList.contains('tooltip-bottom')) {
+                tooltip.classList.remove('tooltip-bottom');
+                if (spaceRight > tooltipRect.width + 10) {
+                    tooltip.classList.add('tooltip-right');
+                    tooltip.style.left = '100%';
+                    tooltip.style.marginLeft = '5px';
+                } else {
+                    tooltip.classList.add('tooltip-left');
+                    tooltip.style.right = '100%';
+                    tooltip.style.marginRight = '5px';
+                }
+            }
+        }
+    });
+}
+
+// Fonction d'initialisation des info-bulles
+function initInfoUnitMesureTooltips() {
+    document.querySelectorAll('.info_unit_mesure').forEach(icon => {
+        // Ajouter un gestionnaire d'événements pour le clic
+        icon.addEventListener('click', function(e) {
+            e.stopPropagation(); // Empêcher la propagation vers les éléments parents
+            
+            // Supprimer la classe active de toutes les autres icônes d'info
+            document.querySelectorAll('.info_unit_mesure.active').forEach(activeIcon => {
+                if (activeIcon !== this) {
+                    activeIcon.classList.remove('active');
+                }
+            });
+            
+            // Toggle la classe active sur cette icône
+            this.classList.toggle('active');
+            
+            // Positionner le tooltip si l'icône est active
+            if (this.classList.contains('active')) {
+                setTimeout(positionTooltips, 0);
+            }
+        });
+    });
+    
+    // Fermer les tooltips lorsqu'on clique ailleurs sur la page
+    document.addEventListener('click', function(e) {
+        if (!e.target.classList.contains('info_unit_mesure')) {
+            document.querySelectorAll('.info_unit_mesure.active').forEach(icon => {
+                icon.classList.remove('active');
+            });
+        }
+    });
+    
+    // Repositionner les tooltips lors du redimensionnement
+    window.addEventListener('resize', function() {
+        if (document.querySelectorAll('.info_unit_mesure.active').length > 0) {
+            positionTooltips();
+        }
+    });
+    
+    // Repositionner les tooltips lors du défilement du menu déroulant
+    document.querySelectorAll('.custom-dropdown-items').forEach(container => {
+        container.addEventListener('scroll', function() {
+            if (document.querySelectorAll('.info_unit_mesure.active').length > 0) {
+                positionTooltips();
+            }
+        });
+    });
+}
+
+
+
 
 
 /*══════════════════════════════╗
   ⚫ JS PARTIE 8
+  ═════════════════════════════╝*/
+  
+  // Point de Vente / Sales Point
+// ----------------------------------------
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialisation des variables globales
+    let currentSalesMode = null;
+    let currentRole = null;
+    let currentCart = [];
+    let pendingOrders = [];
+    let deliveryOrders = [];
+    let inventoryData = []; // Sera rempli par vos données d'inventaire existantes
+    
+    // Éléments d'interface
+    const modeSelector = document.getElementById('newonInventSelectMode');
+    const roleInterfaces = document.querySelectorAll('.newonInventRoleInterface');
+    
+    // Service pour les effets sonores et vibrations
+const ScannerFeedback = {
+    // Contexte audio
+    audioContext: null,
+    
+    // Initialiser le contexte audio
+    initAudio: function() {
+        if (!this.audioContext) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.audioContext = new AudioContext();
+        }
+        
+        // Démarrer le contexte audio s'il est suspendu
+        if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+    },
+    
+    // Jouer un son de scanner
+    playSound: function() {
+        this.initAudio();
+        
+        // Durée très courte pour un beep net
+        const duration = 0.07;
+        
+        // Oscillateur principal pour le beep
+        const oscillator = this.audioContext.createOscillator();
+        
+        // Gain pour contrôler le volume et l'enveloppe du son
+        const gainNode = this.audioContext.createGain();
+        
+        // Filtre pour affiner le son
+        const filter = this.audioContext.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 2500;
+        filter.Q.value = 10;
+        
+        // Configuration de l'oscillateur
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(2500, this.audioContext.currentTime);
+        
+        // Enveloppe sonore pour un beep net et court
+        gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.7, this.audioContext.currentTime + 0.01);
+        gainNode.gain.setValueAtTime(0.7, this.audioContext.currentTime + duration - 0.01);
+        gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + duration);
+        
+        // Connexion des nœuds audio
+        oscillator.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        // Démarrage et arrêt de l'oscillateur
+        oscillator.start();
+        oscillator.stop(this.audioContext.currentTime + duration + 0.01);
+    },
+    
+    // Faire vibrer l'appareil
+    vibrate: function() {
+        if (navigator.vibrate) {
+            // Le pattern [40, 30, 70] signifie:
+            // - vibrer 40ms
+            // - pause 30ms
+            // - vibrer 70ms
+            navigator.vibrate([40, 30, 70]);
+            return true;
+        }
+        return false;
+    },
+    
+    // Déclencher le son et la vibration
+    feedback: function() {
+        this.playSound();
+        this.vibrate();
+    }
+};
+
+// Service pour les sons de la saisie manuelle
+const ManualEntryFeedback = {
+    // Contexte audio
+    audioContext: null,
+    
+    // Initialiser le contexte audio
+    initAudio: function() {
+        if (!this.audioContext) {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        // Démarrer le contexte audio s'il est suspendu
+        if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+    },
+    
+    // Jouer un son de beep pour la saisie manuelle
+    playSound: function() {
+        this.initAudio();
+        
+        // Créer un oscillateur pour générer le son
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        
+        // Configurer l'oscillateur pour un son de scanner typique
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(2000, this.audioContext.currentTime); // Fréquence haute
+        oscillator.frequency.setValueAtTime(1800, this.audioContext.currentTime + 0.05); // Fréquence légèrement plus basse
+        
+        // Configurer le volume
+        gainNode.gain.setValueAtTime(0.5, this.audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+        
+        // Connecter les nœuds audio
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        // Jouer le son
+        oscillator.start();
+        oscillator.stop(this.audioContext.currentTime + 0.1);
+    },
+    
+    // Faire vibrer l'appareil
+    vibrate: function() {
+        if (navigator.vibrate) {
+            // Vibrer pendant 100ms
+            navigator.vibrate(100);
+            return true;
+        }
+        return false;
+    },
+    
+    // Déclencher le son et la vibration
+    feedback: function() {
+        this.playSound();
+        this.vibrate();
+    }
+};
+
+
+// Service pour les sons de paiement
+const PaymentFeedback = {
+    // Contexte audio
+    audioContext: null,
+    // Buffer du son de caisse
+    cashSoundBuffer: null,
+    
+    // Initialiser le contexte audio et charger le son
+    init: function() {
+        if (!this.audioContext) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.audioContext = new AudioContext();
+            this.loadCashSound();
+        }
+        
+        // Démarrer le contexte audio s'il est suspendu
+        if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+    },
+    
+    // Charger le son de caisse
+    loadCashSound: function() {
+        // Créer une requête pour charger le fichier audio
+        const request = new XMLHttpRequest();
+        request.open('GET', 'cash.mp3', true);
+        request.responseType = 'arraybuffer';
+        
+        request.onload = () => {
+            // Décoder les données audio
+            this.audioContext.decodeAudioData(request.response, (buffer) => {
+                this.cashSoundBuffer = buffer;
+            }, (error) => {
+                console.error('Erreur lors du décodage du fichier audio:', error);
+            });
+        };
+        
+        request.onerror = () => {
+            console.error('Erreur lors du chargement du fichier audio');
+        };
+        
+        request.send();
+    },
+    
+    // Jouer le son de caisse
+    playCashSound: function() {
+        if (this.cashSoundBuffer) {
+            // Créer une source audio
+            const source = this.audioContext.createBufferSource();
+            source.buffer = this.cashSoundBuffer;
+            
+            // Connexion au contexte audio
+            source.connect(this.audioContext.destination);
+            
+            // Jouer le son
+            source.start(0);
+            return true;
+        } else {
+            console.warn('Le son de caisse n\'est pas encore chargé');
+            return false;
+        }
+    },
+    
+    // Faire vibrer l'appareil
+    vibrate: function() {
+        if (navigator.vibrate) {
+            // Le pattern [40, 30, 70] signifie:
+            // - vibrer 40ms
+            // - pause 30ms
+            // - vibrer 70ms
+            navigator.vibrate([40, 30, 70]);
+            return true;
+        }
+        return false;
+    },
+    
+    // Déclencher le son et la vibration pour le paiement
+    feedback: function() {
+        this.playCashSound();
+        this.vibrate();
+    }
+};
+
+
+    // Chargement des données d'inventaire (pour simuler votre inventaire existant)
+    function loadInventoryData() {
+        // Cette fonction devrait récupérer les données de votre inventaire
+        // Pour l'exemple, nous utiliserons des données fictives
+        inventoryData = [
+            { id: 'P001', name: 'Smartphone XYZ', price: 250, currency: 'usd', stock: 15 },
+            { id: 'P002', name: 'Chargeur USB', price: 15, currency: 'usd', stock: 30 },
+            { id: 'P003', name: 'Écouteurs sans fil', price: 45, currency: 'usd', stock: 10 },
+            { id: 'P004', name: 'Cable HDMI', price: 8, currency: 'usd', stock: 25 },
+            { id: 'P005', name: 'Batterie portable', price: 30, currency: 'usd', stock: 12 }
+        ];
+    }
+    
+    // Sélection du mode de vente
+    function initModeSelectorCard() {
+        const modeCards = document.querySelectorAll('.newonInventModeCard');
+        
+        modeCards.forEach(card => {
+            card.addEventListener('click', function() {
+                // Supprime la classe active de toutes les cartes
+                modeCards.forEach(c => c.classList.remove('active'));
+                
+                // Ajoute la classe active à la carte cliquée
+                this.classList.add('active');
+                
+                // Récupère le mode sélectionné
+                const mode = this.getAttribute('data-mode');
+                
+                // Définit le mode de vente actuel
+                currentSalesMode = mode;
+                
+                // Active l'interface appropriée selon le mode
+                if (mode === 'oneSeller') {
+                    resetAllInterfaces();
+                    document.getElementById('newonInventSingleSellerMode').style.display = 'block';
+                    modeSelector.style.display = 'none';
+                } 
+                else if (mode === 'twoSellers' || mode === 'threeSellers') {
+                    // Ouvre la modale de sélection de rôle
+                    openRoleSelectionModal(mode);
+                }
+            });
+        });
+    }
+    
+    // Ouvre la modale de sélection de rôle
+    function openRoleSelectionModal(mode) {
+        const roleSelectorContainer = document.getElementById('newonInventRoleSelector');
+        roleSelectorContainer.innerHTML = '';
+        
+        // Crée les options de rôle selon le mode
+        if (mode === 'twoSellers') {
+            // Options pour le mode deux vendeurs
+            roleSelectorContainer.innerHTML = `
+                <div class="newonInventRoleOption" data-role="seller1" data-mode="twoSellers">
+                    <div class="newonInventRoleIcon"><i class="fas fa-user-check"></i></div>
+                    <div class="newonInventRoleInfo">
+                        <h6>Vendeur 1 - Réception Client</h6>
+                        <p>Accueillir le client, scanner les produits et transférer au caissier</p>
+                    </div>
+                </div>
+                <div class="newonInventRoleOption" data-role="seller2" data-mode="twoSellers">
+                    <div class="newonInventRoleIcon"><i class="fas fa-cash-register"></i></div>
+                    <div class="newonInventRoleInfo">
+                        <h6>Vendeur 2 - Caissier</h6>
+                        <p>Recevoir les commandes, encaisser le paiement et apporter les produits</p>
+                    </div>
+                </div>
+            `;
+        } else if (mode === 'threeSellers') {
+            // Options pour le mode trois vendeurs
+            roleSelectorContainer.innerHTML = `
+                <div class="newonInventRoleOption" data-role="seller1" data-mode="threeSellers">
+                    <div class="newonInventRoleIcon"><i class="fas fa-user-check"></i></div>
+                    <div class="newonInventRoleInfo">
+                        <h6>Vendeur 1 - Réception Client</h6>
+                        <p>Accueillir le client, scanner les produits et transférer au caissier</p>
+                    </div>
+                </div>
+                <div class="newonInventRoleOption" data-role="seller2" data-mode="threeSellers">
+                    <div class="newonInventRoleIcon"><i class="fas fa-cash-register"></i></div>
+                    <div class="newonInventRoleInfo">
+                        <h6>Vendeur 2 - Caissier</h6>
+                        <p>Recevoir les commandes et encaisser le paiement</p>
+                    </div>
+                </div>
+                <div class="newonInventRoleOption" data-role="seller3" data-mode="threeSellers">
+                    <div class="newonInventRoleIcon"><i class="fas fa-box"></i></div>
+                    <div class="newonInventRoleInfo">
+                        <h6>Vendeur 3 - Livraison</h6>
+                        <p>Apporter les produits au client après paiement confirmé</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Ajoute des écouteurs d'événements aux options de rôle
+        const roleOptions = document.querySelectorAll('.newonInventRoleOption');
+        roleOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                roleOptions.forEach(o => o.classList.remove('active'));
+                this.classList.add('active');
+                
+                const role = this.getAttribute('data-role');
+                const mode = this.getAttribute('data-mode');
+                
+                // Sauvegarde le rôle sélectionné
+                currentRole = { role, mode };
+            });
+        });
+        
+        // Initialise et ouvre la modale
+        const roleModal = new bootstrap.Modal(document.getElementById('newonInventRoleModal'));
+        roleModal.show();
+        
+        // Ajoute un écouteur d'événements pour quand la modale est fermée
+        document.getElementById('newonInventRoleModal').addEventListener('hidden.bs.modal', function() {
+            if (currentRole) {
+                // Active l'interface appropriée selon le rôle sélectionné
+                activateRoleInterface(currentRole.role, currentRole.mode);
+            } else {
+                // Si aucun rôle n'a été sélectionné, revenir à la sélection de mode
+                resetAllInterfaces();
+                const modeCards = document.querySelectorAll('.newonInventModeCard');
+                modeCards.forEach(c => c.classList.remove('active'));
+                modeSelector.style.display = 'block';
+            }
+        });
+    }
+    
+    // Active l'interface appropriée selon le rôle
+    function activateRoleInterface(role, mode) {
+        resetAllInterfaces();
+        modeSelector.style.display = 'none';
+        
+        if (mode === 'twoSellers') {
+            if (role === 'seller1') {
+                document.getElementById('newonInventTwoSellers_Seller1').style.display = 'block';
+            } else if (role === 'seller2') {
+                document.getElementById('newonInventTwoSellers_Seller2').style.display = 'block';
+            }
+        } else if (mode === 'threeSellers') {
+            if (role === 'seller1') {
+                document.getElementById('newonInventThreeSellers_Seller1').style.display = 'block';
+            } else if (role === 'seller2') {
+                document.getElementById('newonInventThreeSellers_Seller2').style.display = 'block';
+            } else if (role === 'seller3') {
+                document.getElementById('newonInventThreeSellers_Seller3').style.display = 'block';
+            }
+        }
+    }
+    
+    // Réinitialise toutes les interfaces
+    function resetAllInterfaces() {
+        roleInterfaces.forEach(interface => {
+            interface.style.display = 'none';
+        });
+    }
+    
+// Initialisation du scanner
+function initScanners() {
+    const scanButtons = [
+        document.getElementById('newonInventScanBtn'),
+        document.getElementById('newonInventScanBtn2'),
+        document.getElementById('newonInventScanBtn3')
+    ];
+    
+    const cancelScanButtons = [
+        document.getElementById('newonInventCancelScan'),
+        document.getElementById('newonInventCancelScan2'),
+        document.getElementById('newonInventCancelScan3')
+    ];
+    
+    const scannerAreas = [
+        document.getElementById('newonInventScannerArea'),
+        document.getElementById('newonInventScannerArea2'),
+        document.getElementById('newonInventScannerArea3')
+    ];
+    
+    const videoElements = [
+        document.getElementById('newonInventScannerVideo'),
+        document.getElementById('newonInventScannerVideo2'),
+        document.getElementById('newonInventScannerVideo3')
+    ];
+    
+    // Initialisation des éléments pour le scanner moderne
+    const toggleModeBtns = [
+        document.getElementById('ScanProdVentToggleMode'),
+        document.getElementById('ScanProdVentToggleMode2'),
+        document.getElementById('ScanProdVentToggleMode3')
+    ];
+    
+    const toggleLightBtns = [
+        document.getElementById('ScanProdVentToggleLight'),
+        document.getElementById('ScanProdVentToggleLight2'),
+        document.getElementById('ScanProdVentToggleLight3')
+    ];
+    
+    const barcodeIcons = [
+        document.getElementById('ScanProdVentBarcode'),
+        document.getElementById('ScanProdVentBarcode2'),
+        document.getElementById('ScanProdVentBarcode3')
+    ];
+    
+    const qrcodeIcons = [
+        document.getElementById('ScanProdVentQRCode'),
+        document.getElementById('ScanProdVentQRCode2'),
+        document.getElementById('ScanProdVentQRCode3')
+    ];
+    
+    const currentModeTexts = [
+        document.getElementById('ScanProdVentCurrentMode'),
+        document.getElementById('ScanProdVentCurrentMode2'),
+        document.getElementById('ScanProdVentCurrentMode3')
+    ];
+    
+    // Stocke les références des tracks de la caméra pour chaque scanner
+    let videoTracks = [null, null, null];
+    // Stocke l'état de la lampe torche pour chaque scanner
+    let torchStates = [false, false, false];
+    
+    scanButtons.forEach((button, index) => {
+        if (button) {
+            button.addEventListener('click', function() {
+                // Affiche la zone de scan et cache les autres éléments
+                scannerAreas[index].style.display = 'block';
+                
+                // Mettre à jour la hauteur de la zone
+                updateScanZoneHeight();
+                
+                // Initialise le scanner de code-barres/QR code
+                initBarcodeScannerPos(videoElements[index], index);
+                
+                // Active le mode par défaut (barcode)
+                if (barcodeIcons[index]) {
+                    barcodeIcons[index].classList.add('active');
+                    qrcodeIcons[index].classList.remove('active');
+                    if (currentModeTexts[index]) {
+                        currentModeTexts[index].textContent = 'Code-barres';
+                    }
+                }
+                
+                // Animation de démarrage
+                setTimeout(() => {
+                    const message = document.querySelector('.ScanProdVentMessage');
+                    if (message) {
+                        message.textContent = 'Scanner prêt';
+                        
+                        setTimeout(() => {
+                            message.textContent = 'Positionnez le code dans le cadre';
+                        }, 1500);
+                    }
+                }, 500);
+            });
+        }
+    });
+    
+    cancelScanButtons.forEach((button, index) => {
+        if (button) {
+            button.addEventListener('click', function() {
+                // Cache la zone de scan
+                scannerAreas[index].style.display = 'none';
+                
+                // Mettre à jour la hauteur de la zone
+                updateScanZoneHeight();
+                
+                // Arrête le scanner
+                stopBarcodeScanner();
+                
+                // Réinitialise l'état de la lampe torche
+                torchStates[index] = false;
+                if (toggleLightBtns[index]) {
+                    toggleLightBtns[index].classList.remove('active');
+                }
+            });
+        }
+    });
+    
+    // Gestion du changement de mode (code-barres / QR code)
+    toggleModeBtns.forEach((button, index) => {
+        if (button) {
+            button.addEventListener('click', function() {
+                if (barcodeIcons[index] && qrcodeIcons[index]) {
+                    // Change le mode actif
+                    if (barcodeIcons[index].classList.contains('active')) {
+                        barcodeIcons[index].classList.remove('active');
+                        qrcodeIcons[index].classList.add('active');
+                        if (currentModeTexts[index]) {
+                            currentModeTexts[index].textContent = 'QR Code';
+                        }
+                        
+                        // Afficher un message de changement
+                        const message = document.querySelector('.ScanProdVentMessage');
+                        if (message) {
+                            message.textContent = 'Mode QR Code activé';
+                            
+                            setTimeout(() => {
+                                message.textContent = 'Positionnez le QR code dans le cadre';
+                            }, 1500);
+                        }
+                    } else {
+                        barcodeIcons[index].classList.add('active');
+                        qrcodeIcons[index].classList.remove('active');
+                        if (currentModeTexts[index]) {
+                            currentModeTexts[index].textContent = 'Code-barres';
+                        }
+                        
+                        // Afficher un message de changement
+                        const message = document.querySelector('.ScanProdVentMessage');
+                        if (message) {
+                            message.textContent = 'Mode Code-barres activé';
+                            
+                            setTimeout(() => {
+                                message.textContent = 'Positionnez le code-barres dans le cadre';
+                            }, 1500);
+                        }
+                    }
+                }
+            });
+        }
+    });
+    
+    // Gestion du flash
+    toggleLightBtns.forEach((button, index) => {
+        if (button) {
+            button.addEventListener('click', async function() {
+                button.classList.toggle('active');
+                torchStates[index] = button.classList.contains('active');
+                
+                try {
+                    // Si le track n'est pas encore défini, on l'obtient
+                    if (!videoTracks[index] && videoElements[index] && videoElements[index].srcObject) {
+                        videoTracks[index] = videoElements[index].srcObject.getVideoTracks()[0];
+                    }
+                    
+                    if (videoTracks[index]) {
+                        // Vérifier si la fonction torch est disponible
+                        const capabilities = videoTracks[index].getCapabilities();
+                        if ('torch' in capabilities) {
+                            // Appliquer le changement de lampe torche
+                            await videoTracks[index].applyConstraints({
+                                advanced: [{ torch: torchStates[index] }]
+                            });
+                            
+                            // Message flash activé/désactivé
+                            const messages = document.querySelectorAll('.ScanProdVentMessage');
+                            const message = messages[index] || messages[0];
+                            
+                            if (message) {
+                                message.textContent = torchStates[index] ? 'Flash activé' : 'Flash désactivé';
+                                
+                                setTimeout(() => {
+                                    message.textContent = 'Positionnez le code dans le cadre';
+                                }, 1000);
+                            }
+                        } else {
+                            console.warn("La lampe torche n'est pas prise en charge sur cet appareil");
+                            // Simuler un changement de luminosité (comme fallback)
+                            if (videoElements[index]) {
+                                videoElements[index].style.filter = torchStates[index] ? 'brightness(1.3)' : 'brightness(1)';
+                            }
+                            
+                            const messages = document.querySelectorAll('.ScanProdVentMessage');
+                            const message = messages[index] || messages[0];
+                            
+                            if (message) {
+                                message.textContent = torchStates[index] ? 
+                                    "Simulation de flash (appareil non compatible)" : 
+                                    "Flash désactivé";
+                                
+                                setTimeout(() => {
+                                    message.textContent = 'Positionnez le code dans le cadre';
+                                }, 1500);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error("Erreur lors de l'activation de la lampe torche:", error);
+                    
+                    // Fallback au changement de luminosité
+                    if (videoElements[index]) {
+                        videoElements[index].style.filter = torchStates[index] ? 'brightness(1.3)' : 'brightness(1)';
+                    }
+                }
+            });
+        }
+    });
+}
+
+    
+// Initialisation de la saisie manuelle
+function initManualEntry() {
+    const manualButtons = [
+        document.getElementById('newonInventManualEntryBtn'),
+        document.getElementById('newonInventManualEntryBtn2'),
+        document.getElementById('newonInventManualEntryBtn3')
+    ];
+    
+    const cancelManualButtons = [
+        document.getElementById('newonInventCancelManual'),
+        document.getElementById('newonInventCancelManual2'),
+        document.getElementById('newonInventCancelManual3')
+    ];
+    
+    const manualEntryAreas = [
+        document.getElementById('newonInventManualEntry'),
+        document.getElementById('newonInventManualEntry2'),
+        document.getElementById('newonInventManualEntry3')
+    ];
+    
+    manualButtons.forEach((button, index) => {
+        if (button) {
+            button.addEventListener('click', function() {
+                // Affiche la zone de saisie manuelle
+                manualEntryAreas[index].style.display = 'block';
+                
+                // Focus sur le champ de recherche
+                const searchInput = document.getElementById(`newonInventManualCode${index > 0 ? index : ''}`);
+                if (searchInput) {
+                    setTimeout(() => {
+                        searchInput.focus();
+                    }, 100);
+                }
+            });
+        }
+    });
+    
+    cancelManualButtons.forEach((button, index) => {
+        if (button) {
+            button.addEventListener('click', function() {
+                // Cache la zone de saisie manuelle
+                manualEntryAreas[index].style.display = 'none';
+                
+                // Réinitialise le champ de saisie et les résultats
+                const searchInput = document.getElementById(`newonInventManualCode${index > 0 ? index : ''}`);
+                const resultsList = document.getElementById(`ManualModeSaisie_resultsList${index > 0 ? index : ''}`);
+                
+                if (searchInput) {
+                    searchInput.value = '';
+                }
+                
+                if (resultsList) {
+                    resultsList.innerHTML = '';
+                }
+            });
+        }
+    });
+    
+    // Initialiser la recherche produit améliorée
+    ManualModeSaisie_initProductSearch();
+}
+
+    
+
+let scannerInterval;
+let lastDetectionTime = 0; // Pour éviter les détections multiples
+const DETECTION_COOLDOWN = 3000; // 3 secondes de cooldown entre chaque détection
+
+function initBarcodeScannerPos(videoElement, interfaceIndex) {
+    if (videoElement) {
+        // Cette fonction simule la détection d'un code-barres
+        // Dans une application réelle, vous utiliseriez une bibliothèque comme QuaggaJS ou ZXing
+        
+        // Simulons l'accès à la caméra avec options pour caméra arrière et contrôle de la lampe
+        navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'environment',
+                advanced: [{ torch: false }] // La lampe est éteinte par défaut
+            } 
+        })
+        .then(function(stream) {
+            videoElement.srcObject = stream;
+            videoElement.play();
+            
+            // Stockons la référence du track vidéo pour l'utiliser avec la lampe torche
+            const track = stream.getVideoTracks()[0];
+            
+            // Mise à jour des références pour les boutons de lampe
+            const toggleLightBtns = [
+                document.getElementById('ScanProdVentToggleLight'),
+                document.getElementById('ScanProdVentToggleLight2'),
+                document.getElementById('ScanProdVentToggleLight3')
+            ];
+            
+            if (toggleLightBtns[interfaceIndex]) {
+                // Vérifier si la fonction torch est disponible
+                const capabilities = track.getCapabilities();
+                if (!('torch' in capabilities)) {
+                    toggleLightBtns[interfaceIndex].title = "Lampe torche non disponible sur cet appareil";
+                } else {
+                    toggleLightBtns[interfaceIndex].title = "Activer/désactiver la lampe torche";
+                }
+            }
+            
+            // Montrons l'animation de démarrage avec le message
+            let scanProdVentMessages = document.querySelectorAll('.ScanProdVentMessage');
+            let message = scanProdVentMessages[interfaceIndex] || scanProdVentMessages[0];
+            
+            if (message) {
+                message.textContent = 'Initialisation...';
+                
+                setTimeout(() => {
+                    message.textContent = 'Scanner activé';
+                    
+                    setTimeout(() => {
+                        message.textContent = 'Recherche de codes...';
+                        
+                        // Mettons en place une détection continue
+                        startContinuousScanning(videoElement, interfaceIndex, message);
+                        
+                    }, 1000);
+                }, 1000);
+            }
+        })
+        .catch(function(error) {
+            console.error("Impossible d'accéder à la caméra:", error);
+            
+            // Afficher un message d'erreur stylisé plutôt qu'une alerte
+            let scanProdVentMessages = document.querySelectorAll('.ScanProdVentMessage');
+            let message = scanProdVentMessages[interfaceIndex] || scanProdVentMessages[0];
+            
+            if (message) {
+                message.textContent = "Erreur: Impossible d'accéder à la caméra";
+                message.style.backgroundColor = "rgba(255, 0, 0, 0.7)";
+            }
+        });
+    }
+}
+
+
+function startContinuousScanning(videoElement, interfaceIndex, messageElement) {
+    // Simule une détection de code toutes les 5 secondes
+    scannerInterval = setInterval(() => {
+        const currentTime = Date.now();
+        if (currentTime - lastDetectionTime < DETECTION_COOLDOWN) {
+            return; // Ne pas détecter si on est dans la période de cooldown
+        }
+        
+        // Vérifier si la vidéo est toujours active (flux de la caméra)
+        if (!videoElement.srcObject || videoElement.srcObject.getVideoTracks()[0].readyState !== 'live') {
+            clearInterval(scannerInterval);
+            return;
+        }
+        
+        // 20% de chance de détecter quelque chose pour simuler un comportement plus naturel
+        if (Math.random() < 0.2) {
+            // Mise à jour du temps de dernière détection
+            lastDetectionTime = currentTime;
+            
+            // Jeu d'animation pour la détection
+            let frames = document.querySelectorAll('.ScanProdVentFrame');
+            let frame = frames[interfaceIndex] || frames[0];
+            
+            if (frame) {
+                // Animation de détection
+                frame.style.borderColor = 'var(--primary)';
+                frame.style.boxShadow = '0 0 20px var(--primary), 0 0 0 5000px rgba(0, 0, 0, 0.7)';
+                
+                // Message de détection
+                if (messageElement) {
+                    messageElement.textContent = 'Code détecté !';
+                }
+                
+                // Feedback immédiat lors de la détection
+                ScannerFeedback.feedback();
+                
+                // Simulons la détection d'un code aléatoire
+                const randomIndex = Math.floor(Math.random() * inventoryData.length);
+                const detectedProduct = inventoryData[randomIndex];
+                
+                // Ajoutons le produit détecté au panier
+                if (detectedProduct) {
+                    addProductToCart(detectedProduct, interfaceIndex);
+                }
+                
+                // Réinitialisation de l'interface après détection
+                setTimeout(() => {
+                    if (frame) {
+                        frame.style.borderColor = '';
+                        frame.style.boxShadow = '';
+                    }
+                    
+                    if (messageElement) {
+                        messageElement.textContent = 'Recherche de codes...';
+                    }
+                }, 1500);
+            }
+        }
+    }, 1500); // Vérifie toutes les 1.5 secondes si un code est détectable
+}
+
+
+
+
+// Fonction à ajouter dans votre code JavaScript pour gérer la hauteur
+function updateScanZoneHeight() {
+    const scannerAreas = [
+        document.getElementById('newonInventScannerArea'),
+        document.getElementById('newonInventScannerArea2'),
+        document.getElementById('newonInventScannerArea3')
+    ];
+    
+    const scanZones = document.querySelectorAll('.newonInventScanZone');
+    
+    scannerAreas.forEach((area, index) => {
+        if (area) {
+            // Ajuster la hauteur de la zone seulement quand le scanner est visible
+            if (area.style.display === 'block') {
+                if (scanZones[index]) {
+                    scanZones[index].classList.add('newonInventScannerArea-active');
+                    // Augmenter la hauteur pour l'interface moderne
+                    scanZones[index].style.minHeight = '450px';
+                }
+            } else {
+                if (scanZones[index]) {
+                    scanZones[index].classList.remove('newonInventScannerArea-active');
+                    scanZones[index].style.minHeight = '';
+                }
+            }
+        }
+    });
+}
+    
+// Arrête le scanner
+function stopBarcodeScanner() {
+    clearInterval(scannerInterval);
+    
+    // Arrêtons tous les flux vidéo et désactivons les lampes torche
+    const videos = [
+        document.getElementById('newonInventScannerVideo'),
+        document.getElementById('newonInventScannerVideo2'),
+        document.getElementById('newonInventScannerVideo3')
+    ];
+    
+    const toggleLightBtns = [
+        document.getElementById('ScanProdVentToggleLight'),
+        document.getElementById('ScanProdVentToggleLight2'),
+        document.getElementById('ScanProdVentToggleLight3')
+    ];
+    
+    videos.forEach((video, index) => {
+        if (video && video.srcObject) {
+            // S'assurer que la lampe est éteinte avant de fermer le stream
+            const track = video.srcObject.getVideoTracks()[0];
+            if (track) {
+                // Tenter d'éteindre la lampe torche si elle est accessible
+                try {
+                    const capabilities = track.getCapabilities();
+                    if ('torch' in capabilities) {
+                        track.applyConstraints({
+                            advanced: [{ torch: false }]
+                        }).catch(err => console.warn("Impossible d'éteindre la lampe torche:", err));
+                    }
+                } catch (e) {
+                    console.warn("Erreur lors de l'extinction de la lampe torche:", e);
+                }
+            }
+            
+            // Arrêter tous les tracks
+            const tracks = video.srcObject.getTracks();
+            tracks.forEach(track => track.stop());
+        }
+        
+        // Réinitialiser l'état visuel du bouton de la lampe
+        if (toggleLightBtns[index]) {
+            toggleLightBtns[index].classList.remove('active');
+        }
+    });
+    
+    // Réinitialisation de tous les éléments d'interface scanner
+    const frames = document.querySelectorAll('.ScanProdVentFrame');
+    frames.forEach(frame => {
+        if (frame) {
+            frame.style.borderColor = '';
+            frame.style.boxShadow = '';
+        }
+    });
+    
+    const messages = document.querySelectorAll('.ScanProdVentMessage');
+    messages.forEach(message => {
+        if (message) {
+            message.textContent = 'Positionnez le code dans le cadre';
+            message.style.backgroundColor = '';
+        }
+    });
+    
+    // Réinitialiser le style des vidéos (au cas où le fallback de luminosité était utilisé)
+    videos.forEach(video => {
+        if (video) {
+            video.style.filter = 'brightness(1)';
+        }
+    });
+}
+
+
+    
+// Recherche un produit par code et l'ajoute au panier
+function findAndAddProduct(code, interfaceIndex) {
+    // Recherche le produit dans les données d'inventaire
+    const product = inventoryData.find(p => p.id === code);
+    
+    if (product) {
+        // Appel à la fonction addProductToCartManual au lieu de addProductToCart
+        addProductToCartManual(product, interfaceIndex);
+        
+        // Mettre à jour la liste des produits récents
+        ManualModeSaisie_updateRecentProducts(product);
+        
+    } else {
+        // Afficher un message d'erreur dans la zone de résultats
+        const resultsList = document.getElementById(`ManualModeSaisie_resultsList${interfaceIndex > 0 ? interfaceIndex : ''}`);
+        if (resultsList) {
+            resultsList.innerHTML = `
+                <div class="ManualModeSaisie_noResults">
+                    <i class="fas fa-exclamation-circle text-danger"></i>
+                    <p>Produit non trouvé. Vérifiez le code.</p>
+                </div>
+            `;
+        } else {
+            alert("Produit non trouvé. Vérifiez le code.");
+        }
+    }
+}
+
+
+
+    
+// Ajoute un produit au panier
+function addProductToCart(product, interfaceIndex) {
+    // Jouer le son et déclencher la vibration
+    ScannerFeedback.feedback();
+    
+    // Vérifie si l'interface est celle du vendeur unique, du vendeur 1 (mode 2), ou du vendeur 1 (mode 3)
+    const cartIndex = interfaceIndex;
+    
+    // Détermine dans quel panier ajouter le produit
+    let cartItems;
+    if (cartIndex === 0) {
+        cartItems = document.getElementById('newonInventCartItems');
+    } else if (cartIndex === 1) {
+        cartItems = document.getElementById('newonInventCartItems2');
+    } else if (cartIndex === 2) {
+        cartItems = document.getElementById('newonInventCartItems3');
+    }
+    
+    if (!cartItems) return;
+    
+    // Vide l'état "panier vide" s'il existe
+    const emptyCart = cartItems.querySelector('.newonInventEmptyCart');
+    if (emptyCart) {
+        emptyCart.style.display = 'none';
+    }
+    
+    // Vérifie si le produit est déjà dans le panier
+    const existingItem = currentCart.find(item => item.id === product.id);
+    
+    if (existingItem) {
+        // Si le produit existe déjà, incrémente sa quantité
+        existingItem.quantity += 1;
+        
+        // Met à jour l'affichage de la quantité
+        const quantityInput = document.querySelector(`[data-product-id="${product.id}"] .product-quantity-input`);
+        if (quantityInput) {
+            quantityInput.value = existingItem.quantity;
+        }
+    } else {
+        // Si le produit n'existe pas encore, ajoute-le au panier
+        const newItem = { ...product, quantity: 1 };
+        currentCart.push(newItem);
+        
+        // Crée un élément de panier
+        const cartItemElement = document.createElement('div');
+        cartItemElement.className = 'newonInventCartItem';
+        cartItemElement.setAttribute('data-product-id', product.id);
+        
+        const displayPrice = product.price.toFixed(2) + (product.currency === 'usd' ? ' $' : ' FC');
+        
+        cartItemElement.innerHTML = `
+            <div class="product-info">
+                <div class="product-name">${product.name}</div>
+                <button class="remove-item" data-product-id="${product.id}">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="product-controls">
+                <div class="product-price">${displayPrice}</div>
+                <div class="product-quantity">
+                    <div class="newonInventQuantity">
+                        <button class="decrement-quantity" data-product-id="${product.id}">-</button>
+                        <input type="number" min="1" class="product-quantity-input" value="1" data-product-id="${product.id}">
+                        <button class="increment-quantity" data-product-id="${product.id}">+</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Ajoute l'élément au panier
+        cartItems.appendChild(cartItemElement);
+        
+        // Ajoute des écouteurs d'événement pour les boutons d'incrémentation/décrémentation
+        cartItemElement.querySelector('.increment-quantity').addEventListener('click', function() {
+            incrementCartItem(product.id);
+        });
+        
+        cartItemElement.querySelector('.decrement-quantity').addEventListener('click', function() {
+            decrementCartItem(product.id);
+        });
+        
+        cartItemElement.querySelector('.remove-item').addEventListener('click', function() {
+            removeCartItem(product.id);
+        });
+        
+        cartItemElement.querySelector('.product-quantity-input').addEventListener('change', function(e) {
+            updateCartItemQuantity(product.id, parseInt(e.target.value));
+        });
+    }
+    
+    // Met à jour le total du panier
+    updateCartTotal(cartIndex);
+    
+    // Active le bouton de finalisation si le panier n'est pas vide
+    if (cartIndex === 0) {
+        document.getElementById('newonInventCompleteSale').disabled = false;
+    } else if (cartIndex === 1) {
+        document.getElementById('newonInventTransferOrder').disabled = false;
+    } else if (cartIndex === 2) {
+        document.getElementById('newonInventTransferOrder3').disabled = false;
+    }
+    
+    // Affiche une notification de succès similaire à showNotification
+    const notificationCenter = document.getElementById('notification-center');
+    if (!notificationCenter) {
+        // Si notification-center n'existe pas, on le crée
+        const newNotificationCenter = document.createElement('div');
+        newNotificationCenter.id = 'notification-center';
+        document.body.appendChild(newNotificationCenter);
+    }
+    
+    const message = `"${product.name}" ajouté au panier`;
+    const notification = document.createElement('div');
+    notification.className = 'notification notification-success';
+    notification.innerHTML = `
+        <div class="notification-header">
+            <div class="notification-title">Succès</div>
+            <div class="notification-close"><i class="fas fa-times"></i></div>
+        </div>
+        <div class="notification-message">${message}</div>
+    `;
+    
+    document.getElementById('notification-center').appendChild(notification);
+    
+    // Fermeture automatique après 5 secondes
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 5000);
+    
+    // Fermeture manuelle
+    notification.querySelector('.notification-close').addEventListener('click', () => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    });
+}
+
+// Ajoute un produit au panier (version pour la méthode manuelle)
+function addProductToCartManual(product, interfaceIndex) {
+    // Jouer le son et déclencher la vibration spécifiques à la méthode manuelle
+    ManualEntryFeedback.feedback();
+    
+    // Vérifie si l'interface est celle du vendeur unique, du vendeur 1 (mode 2), ou du vendeur 1 (mode 3)
+    const cartIndex = interfaceIndex;
+    
+    // Détermine dans quel panier ajouter le produit
+    let cartItems;
+    if (cartIndex === 0) {
+        cartItems = document.getElementById('newonInventCartItems');
+    } else if (cartIndex === 1) {
+        cartItems = document.getElementById('newonInventCartItems2');
+    } else if (cartIndex === 2) {
+        cartItems = document.getElementById('newonInventCartItems3');
+    }
+    
+    if (!cartItems) return;
+    
+    // Vide l'état "panier vide" s'il existe
+    const emptyCart = cartItems.querySelector('.newonInventEmptyCart');
+    if (emptyCart) {
+        emptyCart.style.display = 'none';
+    }
+    
+    // Vérifie si le produit est déjà dans le panier
+    const existingItem = currentCart.find(item => item.id === product.id);
+    
+    if (existingItem) {
+        // Si le produit existe déjà, incrémente sa quantité
+        existingItem.quantity += 1;
+        
+        // Met à jour l'affichage de la quantité
+        const quantityInput = document.querySelector(`[data-product-id="${product.id}"] .product-quantity-input`);
+        if (quantityInput) {
+            quantityInput.value = existingItem.quantity;
+        }
+    } else {
+        // Si le produit n'existe pas encore, ajoute-le au panier
+        const newItem = { ...product, quantity: 1 };
+        currentCart.push(newItem);
+        
+        // Crée un élément de panier
+        const cartItemElement = document.createElement('div');
+        cartItemElement.className = 'newonInventCartItem';
+        cartItemElement.setAttribute('data-product-id', product.id);
+        
+        const displayPrice = product.price.toFixed(2) + (product.currency === 'usd' ? ' $' : ' FC');
+        
+        cartItemElement.innerHTML = `
+            <div class="product-info">
+                <div class="product-name">${product.name}</div>
+                <button class="remove-item" data-product-id="${product.id}">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="product-controls">
+                <div class="product-price">${displayPrice}</div>
+                <div class="product-quantity">
+                    <div class="newonInventQuantity">
+                        <button class="decrement-quantity" data-product-id="${product.id}">-</button>
+                        <input type="number" min="1" class="product-quantity-input" value="1" data-product-id="${product.id}">
+                        <button class="increment-quantity" data-product-id="${product.id}">+</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Ajoute l'élément au panier
+        cartItems.appendChild(cartItemElement);
+        
+        // Ajoute des écouteurs d'événement pour les boutons d'incrémentation/décrémentation
+        cartItemElement.querySelector('.increment-quantity').addEventListener('click', function() {
+            incrementCartItem(product.id);
+        });
+        
+        cartItemElement.querySelector('.decrement-quantity').addEventListener('click', function() {
+            decrementCartItem(product.id);
+        });
+        
+        cartItemElement.querySelector('.remove-item').addEventListener('click', function() {
+            removeCartItem(product.id);
+        });
+        
+        cartItemElement.querySelector('.product-quantity-input').addEventListener('change', function(e) {
+            updateCartItemQuantity(product.id, parseInt(e.target.value));
+        });
+    }
+    
+    // Met à jour le total du panier
+    updateCartTotal(cartIndex);
+    
+    // Active le bouton de finalisation si le panier n'est pas vide
+    if (cartIndex === 0) {
+        document.getElementById('newonInventCompleteSale').disabled = false;
+    } else if (cartIndex === 1) {
+        document.getElementById('newonInventTransferOrder').disabled = false;
+    } else if (cartIndex === 2) {
+        document.getElementById('newonInventTransferOrder3').disabled = false;
+    }
+    
+    // Affiche une notification de succès similaire à showNotification
+    const notificationCenter = document.getElementById('notification-center');
+    if (!notificationCenter) {
+        // Si notification-center n'existe pas, on le crée
+        const newNotificationCenter = document.createElement('div');
+        newNotificationCenter.id = 'notification-center';
+        document.body.appendChild(newNotificationCenter);
+    }
+    
+    const message = `"${product.name}" ajouté au panier`;
+    const notification = document.createElement('div');
+    notification.className = 'notification notification-success';
+    notification.innerHTML = `
+        <div class="notification-header">
+            <div class="notification-title">Succès</div>
+            <div class="notification-close"><i class="fas fa-times"></i></div>
+        </div>
+        <div class="notification-message">${message}</div>
+    `;
+    
+    document.getElementById('notification-center').appendChild(notification);
+    
+    // Fermeture automatique après 5 secondes
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 5000);
+    
+    // Fermeture manuelle
+    notification.querySelector('.notification-close').addEventListener('click', () => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    });
+}
+
+    
+    // Incrémente la quantité d'un produit dans le panier
+    function incrementCartItem(productId) {
+        const item = currentCart.find(item => item.id === productId);
+        if (item) {
+            item.quantity += 1;
+            
+            // Met à jour l'affichage
+            const quantityInput = document.querySelector(`[data-product-id="${productId}"] .product-quantity-input`);
+            if (quantityInput) {
+                quantityInput.value = item.quantity;
+            }
+            
+            updateCartTotal();
+        }
+    }
+    
+    // Décrémente la quantité d'un produit dans le panier
+    function decrementCartItem(productId) {
+        const item = currentCart.find(item => item.id === productId);
+        if (item && item.quantity > 1) {
+            item.quantity -= 1;
+            
+            // Met à jour l'affichage
+            const quantityInput = document.querySelector(`[data-product-id="${productId}"] .product-quantity-input`);
+            if (quantityInput) {
+                quantityInput.value = item.quantity;
+            }
+            
+            updateCartTotal();
+        } else if (item && item.quantity === 1) {
+            removeCartItem(productId);
+        }
+    }
+    
+    // Supprime un produit du panier
+    function removeCartItem(productId) {
+        // Supprime le produit du panier
+        currentCart = currentCart.filter(item => item.id !== productId);
+        
+        // Supprime l'élément du DOM
+        const cartItemElement = document.querySelector(`[data-product-id="${productId}"].newonInventCartItem`);
+        if (cartItemElement) {
+            cartItemElement.remove();
+        }
+        
+        // Vérifie si le panier est vide
+        checkEmptyCart();
+        
+        // Met à jour le total
+        updateCartTotal();
+    }
+    
+    // Met à jour la quantité d'un produit dans le panier
+    function updateCartItemQuantity(productId, quantity) {
+        const item = currentCart.find(item => item.id === productId);
+        if (item) {
+            item.quantity = Math.max(1, quantity);
+            
+            updateCartTotal();
+        }
+    }
+    
+    // Vérifie si le panier est vide
+    function checkEmptyCart() {
+        const cartItems = [
+            document.getElementById('newonInventCartItems'),
+            document.getElementById('newonInventCartItems2'),
+            document.getElementById('newonInventCartItems3')
+        ];
+        
+        cartItems.forEach((container, index) => {
+            if (container) {
+                // Si le panier est vide, affiche un message
+                if (!container.querySelector('.newonInventCartItem')) {
+                    // Vérifier si le message existe déjà
+                    let emptyCart = container.querySelector('.newonInventEmptyCart');
+                    
+                    if (!emptyCart) {
+                        // Créer le message s'il n'existe pas
+                        emptyCart = document.createElement('div');
+                        emptyCart.className = 'newonInventEmptyCart';
+                        emptyCart.innerHTML = `
+                            <i class="fas fa-shopping-basket"></i>
+                            <p>Le panier est vide</p>
+                            <p class="newonInventHelpText">Scannez ou saisissez un produit pour l'ajouter</p>
+                        `;
+                        container.appendChild(emptyCart);
+                    } else {
+                        emptyCart.style.display = 'flex';
+                    }
+                    
+                    // Désactive le bouton de finalisation
+                    if (index === 0) {
+                        document.getElementById('newonInventCompleteSale').disabled = true;
+                    } else if (index === 1) {
+                        document.getElementById('newonInventTransferOrder').disabled = true;
+                    } else if (index === 2) {
+                        document.getElementById('newonInventTransferOrder3').disabled = true;
+                    }
+                }
+            }
+        });
+    }
+    
+    // Met à jour le total du panier
+    function updateCartTotal(interfaceIndex = 0) {
+        // Calcule le total
+        const total = currentCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+        // Détermine quel élément du total mettre à jour
+        let totalDisplay, currencyDisplay;
+        if (interfaceIndex === 0) {
+            totalDisplay = document.getElementById('newonInventTotalAmount');
+            currencyDisplay = document.getElementById('newonInventTotalCurrency');
+        } else if (interfaceIndex === 1) {
+            totalDisplay = document.getElementById('newonInventTotalAmount2');
+            currencyDisplay = document.getElementById('newonInventTotalCurrency2');
+        } else if (interfaceIndex === 2) {
+            totalDisplay = document.getElementById('newonInventTotalAmount3');
+            currencyDisplay = document.getElementById('newonInventTotalCurrency3');
+        }
+        
+        // Met à jour l'affichage du total
+        if (totalDisplay) {
+            totalDisplay.textContent = total.toFixed(2);
+        }
+        
+        // Met à jour l'affichage de la devise
+        if (currencyDisplay) {
+            const mainCurrency = currentCart.length > 0 ? currentCart[0].currency.toUpperCase() : 'USD';
+            currencyDisplay.textContent = mainCurrency;
+        }
+    }
+    
+// Initialise les écouteurs d'événements pour le point de vente
+function initSalesEventListeners() {
+    // Bouton de changement de rôle
+    const roleToggleBtn = document.getElementById('newonInventRoleToggle');
+    if (roleToggleBtn) {
+        roleToggleBtn.addEventListener('click', function() {
+            if (currentSalesMode) {
+                openRoleSelectionModal(currentSalesMode);
+            }
+        });
+    }
+    
+    // Bouton de réinitialisation du panier
+    const resetButtons = [
+        document.getElementById('newonInventResetCart'),
+        document.getElementById('newonInventResetCart2'),
+        document.getElementById('newonInventResetCart3')
+    ];
+    
+    resetButtons.forEach(button => {
+        if (button) {
+            button.addEventListener('click', function() {
+                resetCart();
+            });
+        }
+    });
+    
+// Boutons de paiement
+const paymentButtons = [
+    document.getElementById('newonInventCashPayment'),
+    document.getElementById('newonInventOtherPayment'),
+    document.getElementById('newonInventProcessCash'),
+    document.getElementById('newonInventProcessOther'),
+    document.getElementById('newonInventProcessCash3'),
+    document.getElementById('newonInventProcessOther3')
+];
+
+paymentButtons.forEach(button => {
+    if (button) {
+        button.addEventListener('click', function() {
+            // Détermine le groupe de boutons parent
+            const parentGroup = this.closest('.newonInventPaymentGrid') || this.closest('.newonInventPaymentOptions');
+            
+            // Retire la classe active de tous les boutons du même groupe
+            if (parentGroup) {
+                parentGroup.querySelectorAll('.newonInventPayBtn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            }
+            
+            // Ajoute la classe active au bouton cliqué
+            this.classList.add('active');
+            
+            // Active le bouton de validation approprié
+            if (this.id === 'newonInventCashPayment' || this.id === 'newonInventOtherPayment') {
+                document.getElementById('newonInventCompleteSale').disabled = false;
+            } else if (this.id === 'newonInventProcessCash' || this.id === 'newonInventProcessOther') {
+                document.getElementById('newonInventConfirmPayment').disabled = false;
+            } else if (this.id === 'newonInventProcessCash3' || this.id === 'newonInventProcessOther3') {
+                document.getElementById('newonInventConfirmPayment3').disabled = false;
+            }
+            
+            // Si c'est un paiement en espèces, ouvre la modale
+            if (this.id.includes('Cash')) {
+                openPaymentModal();
+            }
+        });
+    }
+});
+
+// Écouteurs pour les boutons de confirmation de paiement
+const confirmPaymentButtons = [
+    document.getElementById('newonInventConfirmPayment'),
+    document.getElementById('newonInventConfirmPayment3')
+];
+
+confirmPaymentButtons.forEach(button => {
+    if (button) {
+        button.addEventListener('click', function() {
+            // Vérifie si un mode de paiement est sélectionné
+            const cashBtn = button.id === 'newonInventConfirmPayment' 
+                ? document.getElementById('newonInventProcessCash')
+                : document.getElementById('newonInventProcessCash3');
+                
+            const otherBtn = button.id === 'newonInventConfirmPayment' 
+                ? document.getElementById('newonInventProcessOther')
+                : document.getElementById('newonInventProcessOther3');
+            
+            if ((cashBtn && cashBtn.classList.contains('active')) || 
+                (otherBtn && otherBtn.classList.contains('active'))) {
+                
+                // Si paiement en espèces, ouvre la modale de paiement
+                if (cashBtn && cashBtn.classList.contains('active')) {
+                    openPaymentModal();
+                } else {
+                    // Pour les autres méthodes, confirme directement le paiement
+                    confirmPayment({
+                        amount: 0,
+                        change: 0,
+                        currency: 'usd',
+                        method: 'other'
+                    });
+                }
+            } else {
+                alert("Veuillez sélectionner un mode de paiement.");
+            }
+        });
+    }
+});
+
+    
+    // Bouton de finalisation de la vente (mode vendeur unique)
+    const completeSaleBtn = document.getElementById('newonInventCompleteSale');
+    if (completeSaleBtn) {
+        completeSaleBtn.addEventListener('click', function() {
+            // Vérifier si un mode de paiement est sélectionné
+            const cashBtn = document.getElementById('newonInventCashPayment');
+            const otherBtn = document.getElementById('newonInventOtherPayment');
+            
+            if ((cashBtn && cashBtn.classList.contains('active')) || 
+                (otherBtn && otherBtn.classList.contains('active'))) {
+                // Finaliser la vente
+                processSale();
+            } else {
+                alert("Veuillez sélectionner un mode de paiement.");
+            }
+        });
+    }
+    
+    // Bouton de transfert de commande (mode 2 et 3, vendeur 1)
+    const transferButtons = [
+        document.getElementById('newonInventTransferOrder'),
+        document.getElementById('newonInventTransferOrder3')
+    ];
+    
+    transferButtons.forEach(button => {
+        if (button) {
+            button.addEventListener('click', function() {
+                // Vérifie si un caissier est sélectionné
+                const selectedCashier = document.querySelector('.newonInventCashierCard.active');
+                
+                if (selectedCashier) {
+                    // Transfère la commande au caissier
+                    transferOrderToCashier(selectedCashier.getAttribute('data-cashier-id'));
+                } else {
+                    alert("Veuillez sélectionner un caissier pour le transfert.");
+                }
+            });
+        }
+    });
+    
+    // Initialisation de la sélection des caissiers
+    initCashierSelection();
+    
+    // Initialisation de la sélection des livreurs
+    initDeliverySelection();
+}
+
+    
+    // Initialise la sélection des caissiers
+    function initCashierSelection() {
+        // Simulation de caissiers disponibles
+        const cashiers = [
+            { id: 'C001', name: 'Caissier 1', pendingOrders: 0 },
+            { id: 'C002', name: 'Caissier 2', pendingOrders: 2 },
+            { id: 'C003', name: 'Caissier 3', pendingOrders: 1 }
+        ];
+        
+        // Trie les caissiers par nombre de commandes en attente
+        cashiers.sort((a, b) => a.pendingOrders - b.pendingOrders);
+        
+        // Crée les éléments pour les caissiers
+        const cashierContainers = [
+            document.getElementById('newonInventCashierOptions'),
+            document.getElementById('newonInventCashierOptions3')
+        ];
+        
+        cashierContainers.forEach(container => {
+            if (container) {
+                container.innerHTML = '';
+                
+                cashiers.forEach(cashier => {
+                    const cashierCard = document.createElement('div');
+                    cashierCard.className = 'newonInventCashierCard';
+                    cashierCard.setAttribute('data-cashier-id', cashier.id);
+                    
+                    cashierCard.innerHTML = `
+                        <div class="newonInventCashierIcon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="newonInventCashierInfo">
+                            <h6>${cashier.name}</h6>
+                            <span class="newonInventCashierLoad">${cashier.pendingOrders} client${cashier.pendingOrders !== 1 ? 's' : ''} en attente</span>
+                        </div>
+                    `;
+                    
+                    container.appendChild(cashierCard);
+                    
+                    // Ajoute un écouteur d'événement pour la sélection du caissier
+                    cashierCard.addEventListener('click', function() {
+                        // Retire la classe active de tous les caissiers
+                        container.querySelectorAll('.newonInventCashierCard').forEach(card => {
+                            card.classList.remove('active');
+                        });
+                        
+                        // Ajoute la classe active au caissier sélectionné
+                        cashierCard.classList.add('active');
+                    });
+                });
+            }
+        });
+    }
+    
+    // Initialise la sélection des livreurs
+function initDeliverySelection() {
+    // Simulation de livreurs disponibles
+    const deliveryStaff = [
+        { id: 'D001', name: 'Livreur 1', pendingOrders: 0 },
+        { id: 'D002', name: 'Livreur 2', pendingOrders: 1 },
+        { id: 'D003', name: 'Livreur 3', pendingOrders: 0 }
+    ];
+    
+    // Trie les livreurs par nombre de commandes en attente
+    deliveryStaff.sort((a, b) => a.pendingOrders - b.pendingOrders);
+    
+    // Crée les éléments pour les livreurs
+    const deliveryContainer = document.getElementById('newonInventDeliveryOptions3');
+    
+    if (deliveryContainer) {
+        deliveryContainer.innerHTML = '';
+        
+        deliveryStaff.forEach(staff => {
+            const deliveryCard = document.createElement('div');
+            deliveryCard.className = 'newonInventCashierCard'; // Réutilisation de la classe existante
+            deliveryCard.setAttribute('data-delivery-id', staff.id);
+            
+            deliveryCard.innerHTML = `
+                <div class="newonInventCashierIcon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <div class="newonInventCashierInfo">
+                    <h6>${staff.name}</h6>
+                    <span class="newonInventCashierLoad">${staff.pendingOrders} commande${staff.pendingOrders !== 1 ? 's' : ''} en attente</span>
+                </div>
+            `;
+            
+            deliveryContainer.appendChild(deliveryCard);
+            
+            // Ajoute un écouteur d'événement pour la sélection du livreur
+            deliveryCard.addEventListener('click', function() {
+                // Retire la classe active de tous les livreurs
+                deliveryContainer.querySelectorAll('.newonInventCashierCard').forEach(card => {
+                    card.classList.remove('active');
+                });
+                
+                // Ajoute la classe active au livreur sélectionné
+                deliveryCard.classList.add('active');
+            });
+        });
+    }
+}
+
+    
+// Ouvre la modale de paiement
+function openPaymentModal() {
+    // Détermine si nous sommes en mode caissier et récupère l'ID de commande
+    let total = 0;
+    let orderItems = [];
+    let orderId = null;
+    
+    if (currentRole && (currentRole.role === 'seller2' || currentRole.role === 'cashier')) {
+        // Mode caissier - récupère les détails de la commande en cours
+        const processOrderElement = currentRole.mode === 'twoSellers' 
+            ? document.getElementById('newonInventProcessOrder')
+            : document.getElementById('newonInventProcessOrder3');
+            
+        if (processOrderElement && processOrderElement.style.display !== 'none') {
+            orderId = processOrderElement.querySelector('.newonInventOrderCard')?.getAttribute('data-order-id');
+            
+            if (orderId) {
+                const order = pendingOrders.find(o => o.id === orderId);
+                if (order) {
+                    orderItems = order.items;
+                    total = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                }
+            }
+        }
+    } else {
+        // Mode vendeur unique - utilise le panier courant
+        orderItems = currentCart;
+        total = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    }
+    
+    // Met à jour le total dans la modale
+    document.getElementById('newonInventModalTotal').textContent = total.toFixed(2) + ' USD';
+    
+    // Réinitialise le champ du montant reçu
+    document.getElementById('newonInventPaymentAmount').value = '';
+    
+    // Cache la zone de la monnaie à rendre
+    document.getElementById('newonInventChangeContainer').style.display = 'none';
+    
+    // Initialise et ouvre la modale
+    const paymentModal = new bootstrap.Modal(document.getElementById('newonInventPaymentModal'));
+    paymentModal.show();
+    
+    // Supprime les anciens écouteurs d'événements pour éviter les doublons
+    const paymentAmountInput = document.getElementById('newonInventPaymentAmount');
+    const newPaymentAmountInput = paymentAmountInput.cloneNode(true);
+    paymentAmountInput.parentNode.replaceChild(newPaymentAmountInput, paymentAmountInput);
+    
+    // Ajoute un écouteur d'événement pour calculer la monnaie à rendre
+    newPaymentAmountInput.addEventListener('input', function() {
+        const amountReceived = parseFloat(this.value) || 0;
+        
+        if (amountReceived >= total) {
+            const change = amountReceived - total;
+            
+            document.getElementById('newonInventChangeContainer').style.display = 'block';
+            document.getElementById('newonInventChangeAmount').textContent = change.toFixed(2) + ' USD';
+        } else {
+            document.getElementById('newonInventChangeContainer').style.display = 'none';
+        }
+    });
+    
+    // Supprime les anciens écouteurs pour le bouton de confirmation
+    const confirmBtn = document.getElementById('newonInventConfirmModalPayment');
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    
+    // Ajoute un écouteur d'événement pour la confirmation du paiement
+    newConfirmBtn.addEventListener('click', function() {
+        const amountReceived = parseFloat(document.getElementById('newonInventPaymentAmount').value) || 0;
+        
+        if (amountReceived >= total) {
+            // Jouer le son de caisse et faire vibrer l'appareil
+            PaymentFeedback.feedback();
+            
+            // Animation visuelle pour confirmer l'action
+            newConfirmBtn.style.backgroundColor = '#2E7D32';
+            setTimeout(() => {
+                newConfirmBtn.style.backgroundColor = '';
+            }, 300);
+            
+            // Ferme la modale après un court délai pour que le son puisse être entendu
+            setTimeout(() => {
+                bootstrap.Modal.getInstance(document.getElementById('newonInventPaymentModal')).hide();
+                
+                // Finalise la vente avec les informations de paiement
+                const paymentInfo = {
+                    amount: amountReceived,
+                    change: amountReceived - total,
+                    currency: document.getElementById('newonInventPaymentCurrency').value,
+                    method: 'cash'
+                };
+                
+                if (currentRole === null || currentRole.role === 'seller1') {
+                    // Mode vendeur unique
+                    processSale(paymentInfo);
+                } else if (currentRole.role === 'seller2' || currentRole.role === 'cashier') {
+                    // Mode caissier
+                    confirmPayment(paymentInfo);
+                }
+            }, 300);
+        } else {
+            alert("Le montant reçu doit être supérieur ou égal au montant total.");
+        }
+    });
+}
+
+
+    
+    // Finalise la vente (mode vendeur unique)
+    function processSale(paymentInfo = null) {
+        // Récupère le nom du client
+        const clientName = document.getElementById('newonInventClientName').value || 'Client';
+        
+        // Crée le reçu
+        generateReceipt(clientName, currentCart, paymentInfo);
+        
+        // Ouvre la modale du reçu
+        const receiptModal = new bootstrap.Modal(document.getElementById('newonInventReceiptModal'));
+        receiptModal.show();
+        
+        // Après l'affichage du reçu, réinitialise le panier
+        document.getElementById('newonInventReceiptModal').addEventListener('hidden.bs.modal', function() {
+            resetCart();
+        });
+    }
+    
+// Transfère la commande au caissier
+function transferOrderToCashier(cashierId) {
+    // Récupère le nom du client
+    const clientInputId = currentRole.mode === 'twoSellers' ? 'newonInventClientName2' : 'newonInventClientName3';
+    const clientName = document.getElementById(clientInputId).value || 'Client';
+    
+    // Vérifie si le panier n'est pas vide
+    if (currentCart.length === 0) {
+        alert("Le panier est vide. Impossible de transférer la commande.");
+        return;
+    }
+    
+    // Crée un nouvel objet pour la commande
+    const newOrder = {
+        id: 'O' + Date.now(),
+        clientName: clientName,
+        items: [...currentCart],
+        timestamp: new Date(),
+        status: 'pending',
+        cashierId: cashierId,
+        fromMode: currentRole.mode // Ajoute l'information sur le mode utilisé
+    };
+    
+    // Ajoute la commande à la liste des commandes en attente
+    pendingOrders.push(newOrder);
+    
+    // Affiche un message de confirmation
+    alert(`Commande de ${clientName} transférée avec succès au caissier.`);
+    
+    // Réinitialise le panier et le nom du client
+    resetCart();
+    document.getElementById(clientInputId).value = '';
+    
+    // Désélectionne le caissier
+    const cashierContainers = [
+        document.getElementById('newonInventCashierOptions'),
+        document.getElementById('newonInventCashierOptions3')
+    ];
+    
+    cashierContainers.forEach(container => {
+        if (container) {
+            container.querySelectorAll('.newonInventCashierCard').forEach(card => {
+                card.classList.remove('active');
+            });
+        }
+    });
+    
+    // Mise à jour de l'interface du caissier (si le caissier est déjà connecté)
+    updatePendingOrdersList();
+}
+
+    
+// Confirmez le paiement (mode caissier)
+function confirmPayment(paymentInfo = null) {
+    // Détermine le mode actuel
+    const mode = currentRole.mode;
+    
+    // Détermine la zone de traitement et les éléments associés
+    let processOrderElement, confirmBtn;
+    if (mode === 'twoSellers') {
+        processOrderElement = document.getElementById('newonInventProcessOrder');
+        confirmBtn = document.getElementById('newonInventConfirmPayment');
+    } else {
+        processOrderElement = document.getElementById('newonInventProcessOrder3');
+        confirmBtn = document.getElementById('newonInventConfirmPayment3');
+    }
+    
+    // Récupère l'ID de la commande en cours
+    const orderId = processOrderElement.querySelector('.newonInventOrderCard')?.getAttribute('data-order-id');
+    
+    if (orderId) {
+        // Trouve la commande
+        const order = pendingOrders.find(o => o.id === orderId);
+        
+        if (order) {
+            // Met à jour le statut de la commande
+            order.status = 'paid';
+            order.paymentInfo = paymentInfo;
+            
+            // Si mode 2 vendeurs, la commande est terminée
+            if (mode === 'twoSellers') {
+                // Génère le reçu
+                generateReceipt(order.clientName, order.items, paymentInfo);
+                
+                // Ouvre la modale du reçu
+                const receiptModal = new bootstrap.Modal(document.getElementById('newonInventReceiptModal'));
+                receiptModal.show();
+                
+                // Supprime la commande des commandes en attente
+                pendingOrders = pendingOrders.filter(o => o.id !== orderId);
+                
+                // Cache la zone de traitement
+                processOrderElement.style.display = 'none';
+                
+                // Réaffiche la liste des commandes en attente
+                updatePendingOrdersList();
+            } 
+            // Si mode 3 vendeurs, vérifie la sélection du livreur
+            else if (mode === 'threeSellers') {
+                // Vérifie si un livreur est sélectionné
+                const selectedDelivery = document.querySelector('#newonInventDeliveryOptions3 .newonInventCashierCard.active');
+                
+                if (selectedDelivery) {
+                    // Ajoute l'ID du livreur à la commande
+                    order.deliveryId = selectedDelivery.getAttribute('data-delivery-id');
+                    order.deliveryName = selectedDelivery.querySelector('h6').textContent;
+                    
+                    // Génère le reçu
+                    generateReceipt(order.clientName, order.items, paymentInfo);
+                    
+                    // Ouvre la modale du reçu
+                    const receiptModal = new bootstrap.Modal(document.getElementById('newonInventReceiptModal'));
+                    receiptModal.show();
+                    
+                    // Transfère la commande au livreur
+                    deliveryOrders.push(order);
+                    pendingOrders = pendingOrders.filter(o => o.id !== orderId);
+                    
+                    // Cache la zone de traitement
+                    processOrderElement.style.display = 'none';
+                    
+                    // Réaffiche la liste des commandes
+                    updatePendingOrdersList();
+                    
+                    // Désélectionne le livreur
+                    document.querySelectorAll('#newonInventDeliveryOptions3 .newonInventCashierCard').forEach(card => {
+                        card.classList.remove('active');
+                    });
+                    
+                    alert(`Commande payée et transférée au livreur ${order.deliveryName}.`);
+                } else {
+                    alert("Veuillez sélectionner un livreur avant de confirmer le paiement.");
+                    return; // Arrête l'exécution si aucun livreur n'est sélectionné
+                }
+            }
+        }
+    }
+}
+
+
+    
+    // Réinitialise le panier
+    function resetCart() {
+        // Vide le panier
+        currentCart = [];
+        
+        // Vide les éléments du panier dans le DOM
+        const cartContainers = [
+            document.getElementById('newonInventCartItems'),
+            document.getElementById('newonInventCartItems2'),
+            document.getElementById('newonInventCartItems3')
+        ];
+        
+        cartContainers.forEach(container => {
+            if (container) {
+                container.innerHTML = '';
+                
+                // Ajoute le message de panier vide
+                const emptyCart = document.createElement('div');
+                emptyCart.className = 'newonInventEmptyCart';
+                emptyCart.innerHTML = `
+                    <i class="fas fa-shopping-basket"></i>
+                    <p>Le panier est vide</p>
+                    <p class="newonInventHelpText">Scannez ou saisissez un produit pour l'ajouter</p>
+                `;
+                container.appendChild(emptyCart);
+            }
+        });
+        
+        // Réinitialise les totaux
+        const totals = [
+            document.getElementById('newonInventTotalAmount'),
+            document.getElementById('newonInventTotalAmount2'),
+            document.getElementById('newonInventTotalAmount3')
+        ];
+        
+        totals.forEach(total => {
+            if (total) {
+                total.textContent = '0.00';
+            }
+        });
+        
+        // Désactive les boutons de finalisation
+        const completeButtons = [
+            document.getElementById('newonInventCompleteSale'),
+            document.getElementById('newonInventTransferOrder'),
+            document.getElementById('newonInventTransferOrder3')
+        ];
+        
+        completeButtons.forEach(button => {
+            if (button) {
+                button.disabled = true;
+            }
+        });
+        
+        // Réinitialise les boutons de paiement
+        const paymentButtons = document.querySelectorAll('.newonInventPayBtn');
+        paymentButtons.forEach(button => {
+            button.classList.remove('active');
+        });
+    }
+    
+    // Génère un reçu de vente
+    function generateReceipt(clientName, items, paymentInfo = null) {
+        const receiptContent = document.getElementById('newonInventReceiptContent');
+        
+        // Calcule le total
+        const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+        // Crée le contenu du reçu
+        receiptContent.innerHTML = `
+            <div class="newonInventReceiptHeader">
+                <div class="newonInventReceiptLogo">TOTAL</div>
+                <p>Gestion d'Inventaire</p>
+            </div>
+            
+            <div class="newonInventReceiptInfo">
+                <p><strong>Client:</strong> ${clientName}</p>
+                <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+                <p><strong>N° de reçu:</strong> R${Date.now()}</p>
+            </div>
+            
+            <div class="newonInventReceiptItems">
+                ${items.map(item => `
+                    <div class="newonInventReceiptItem">
+                        <div class="newonInventReceiptItemName">${item.name}</div>
+                        <div class="newonInventReceiptItemQty">x${item.quantity}</div>
+                        <div class="newonInventReceiptItemPrice">${(item.price * item.quantity).toFixed(2)} ${item.currency.toUpperCase()}</div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="newonInventReceiptTotal">
+                <span>TOTAL</span>
+                <span>${total.toFixed(2)} USD</span>
+            </div>
+            
+            ${paymentInfo ? `
+                <div class="newonInventReceiptPayment">
+                    <div class="newonInventReceiptItem">
+                        <div class="newonInventReceiptItemName">Montant reçu</div>
+                        <div class="newonInventReceiptItemQty"></div>
+                        <div class="newonInventReceiptItemPrice">${paymentInfo.amount.toFixed(2)} ${paymentInfo.currency.toUpperCase()}</div>
+                    </div>
+                    <div class="newonInventReceiptItem">
+                        <div class="newonInventReceiptItemName">Monnaie rendue</div>
+                        <div class="newonInventReceiptItemQty"></div>
+                        <div class="newonInventReceiptItemPrice">${paymentInfo.change.toFixed(2)} ${paymentInfo.currency.toUpperCase()}</div>
+                    </div>
+                </div>
+            ` : ''}
+            
+            <div class="newonInventReceiptFooter">
+                <p>Merci pour votre achat!</p>
+                <p>Service client: +243 XXX XXX XXX</p>
+            </div>
+        `;
+    }
+    
+// Met à jour la liste des commandes en attente
+function updatePendingOrdersList() {
+    // Met à jour la liste des commandes pour les caissiers (Mode 2)
+    const orderQueueElement = document.getElementById('newonInventOrderQueue');
+    if (orderQueueElement) {
+        orderQueueElement.innerHTML = '';
+        
+        // Filtre les commandes pour ce caissier dans le mode 2
+        const mode2Orders = pendingOrders.filter(order => order.fromMode === 'twoSellers');
+        
+        if (mode2Orders.length === 0) {
+            orderQueueElement.innerHTML = `
+                <div class="newonInventEmptyState">
+                    <i class="fas fa-clipboard-check"></i>
+                    <p>Aucune commande en attente</p>
+                </div>
+            `;
+        } else {
+            mode2Orders.forEach(order => {
+                const orderCard = document.createElement('div');
+                orderCard.className = 'newonInventOrderCard';
+                orderCard.setAttribute('data-order-id', order.id);
+                
+                const totalAmount = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const itemCount = order.items.reduce((count, item) => count + item.quantity, 0);
+                
+                orderCard.innerHTML = `
+                    <div class="newonInventOrderInfo">
+                        <div class="newonInventOrderClient">
+                            <i class="fas fa-user-circle"></i>
+                            <span>${order.clientName}</span>
+                        </div>
+                        <div class="newonInventOrderTime">
+                            <i class="fas fa-clock"></i>
+                            <span>${new Date(order.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                    </div>
+                    <div class="newonInventOrderSummary">
+                        <div class="newonInventOrderItems">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>${itemCount} article${itemCount > 1 ? 's' : ''}</span>
+                        </div>
+                        <div class="newonInventOrderTotal">
+                            <span>${totalAmount.toFixed(2)} USD</span>
+                        </div>
+                    </div>
+                    <button class="newonInventProcessBtn">
+                        <i class="fas fa-cash-register"></i>
+                        <span>Traiter</span>
+                    </button>
+                `;
+                
+                orderQueueElement.appendChild(orderCard);
+                
+                // Ajoute un écouteur pour le bouton "Traiter"
+                orderCard.querySelector('.newonInventProcessBtn').addEventListener('click', function() {
+                    processOrder(order.id, 'twoSellers');
+                });
+            });
+        }
+    }
+    
+    // Met à jour la liste des commandes pour les caissiers (Mode 3)
+    const orderQueueElement3 = document.getElementById('newonInventOrderQueue3');
+    if (orderQueueElement3) {
+        orderQueueElement3.innerHTML = '';
+        
+        // Filtre les commandes pour ce caissier dans le mode 3
+        const mode3Orders = pendingOrders.filter(order => order.fromMode === 'threeSellers');
+        
+        if (mode3Orders.length === 0) {
+            orderQueueElement3.innerHTML = `
+                <div class="newonInventEmptyState">
+                    <i class="fas fa-clipboard-check"></i>
+                    <p>Aucune commande en attente</p>
+                </div>
+            `;
+        } else {
+            mode3Orders.forEach(order => {
+                const orderCard = document.createElement('div');
+                orderCard.className = 'newonInventOrderCard';
+                orderCard.setAttribute('data-order-id', order.id);
+                
+                const totalAmount = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const itemCount = order.items.reduce((count, item) => count + item.quantity, 0);
+                
+                orderCard.innerHTML = `
+                    <div class="newonInventOrderInfo">
+                        <div class="newonInventOrderClient">
+                            <i class="fas fa-user-circle"></i>
+                            <span>${order.clientName}</span>
+                        </div>
+                        <div class="newonInventOrderTime">
+                            <i class="fas fa-clock"></i>
+                            <span>${new Date(order.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                    </div>
+                    <div class="newonInventOrderSummary">
+                        <div class="newonInventOrderItems">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>${itemCount} article${itemCount > 1 ? 's' : ''}</span>
+                        </div>
+                        <div class="newonInventOrderTotal">
+                            <span>${totalAmount.toFixed(2)} USD</span>
+                        </div>
+                    </div>
+                    <button class="newonInventProcessBtn">
+                        <i class="fas fa-cash-register"></i>
+                        <span>Traiter</span>
+                    </button>
+                `;
+                
+                orderQueueElement3.appendChild(orderCard);
+                
+                // Ajoute un écouteur pour le bouton "Traiter"
+                orderCard.querySelector('.newonInventProcessBtn').addEventListener('click', function() {
+                    processOrder(order.id, 'threeSellers');
+                });
+            });
+        }
+    }
+    
+    // Met à jour la liste des commandes pour les livreurs
+    const deliveryQueueElement = document.getElementById('newonInventDeliveryQueue');
+    if (deliveryQueueElement) {
+        deliveryQueueElement.innerHTML = '';
+        
+        if (deliveryOrders.length === 0) {
+            deliveryQueueElement.innerHTML = `
+                <div class="newonInventEmptyState">
+                    <i class="fas fa-box-open"></i>
+                    <p>Aucune commande à livrer</p>
+                </div>
+            `;
+        } else {
+            deliveryOrders.forEach(order => {
+                const orderCard = document.createElement('div');
+                orderCard.className = 'newonInventOrderCard';
+                orderCard.setAttribute('data-order-id', order.id);
+                
+                const itemCount = order.items.reduce((count, item) => count + item.quantity, 0);
+                
+                orderCard.innerHTML = `
+                    <div class="newonInventOrderInfo">
+                        <div class="newonInventOrderClient">
+                            <i class="fas fa-user-circle"></i>
+                            <span>${order.clientName}</span>
+                        </div>
+                        <div class="newonInventOrderTime">
+                            <i class="fas fa-clock"></i>
+                            <span>${new Date(order.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                    </div>
+                    <div class="newonInventOrderSummary">
+                        <div class="newonInventOrderItems">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>${itemCount} article${itemCount > 1 ? 's' : ''}</span>
+                        </div>
+                    </div>
+                    <button class="newonInventProcessBtn">
+                        <i class="fas fa-truck"></i>
+                        <span>Livrer</span>
+                    </button>
+                `;
+                
+                deliveryQueueElement.appendChild(orderCard);
+                
+                // Ajoute un écouteur pour le bouton "Livrer"
+                orderCard.querySelector('.newonInventProcessBtn').addEventListener('click', function() {
+                    processDelivery(order.id);
+                });
+            });
+        }
+    }
+}
+
+
+// Affiche les détails d'une commande à traiter par le caissier
+function processOrder(orderId, mode) {
+    // Trouve la commande
+    const order = pendingOrders.find(o => o.id === orderId);
+    
+    if (order) {
+        // Détermine les éléments DOM en fonction du mode
+        let processOrder, processItems, processTotal, processCurrency, processClientName, 
+            confirmPaymentBtn, cancelProcessBtn;
+            
+        if (mode === 'twoSellers') {
+            processOrder = document.getElementById('newonInventProcessOrder');
+            processItems = document.getElementById('newonInventProcessItems');
+            processTotal = document.getElementById('newonInventProcessTotal');
+            processCurrency = document.getElementById('newonInventProcessCurrency');
+            processClientName = document.getElementById('newonInventProcessClientName');
+            confirmPaymentBtn = document.getElementById('newonInventConfirmPayment');
+            cancelProcessBtn = document.getElementById('newonInventCancelProcess');
+        } else {
+            processOrder = document.getElementById('newonInventProcessOrder3');
+            processItems = document.getElementById('newonInventProcessItems3');
+            processTotal = document.getElementById('newonInventProcessTotal3');
+            processCurrency = document.getElementById('newonInventProcessCurrency3');
+            processClientName = document.getElementById('newonInventProcessClientName3');
+            confirmPaymentBtn = document.getElementById('newonInventConfirmPayment3');
+            cancelProcessBtn = document.getElementById('newonInventCancelProcess3');
+        }
+        
+        // Affiche le nom du client
+        processClientName.textContent = order.clientName;
+        
+        // Affiche les articles
+        processItems.innerHTML = '';
+        order.items.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'newonInventCartItem';
+            
+            const displayPrice = (item.price * item.quantity).toFixed(2) + (item.currency === 'usd' ? ' $' : ' FC');
+            
+            itemElement.innerHTML = `
+                <div class="product-info">
+                    <div class="product-name">${item.name}</div>
+                    <div class="product-quantity">x${item.quantity}</div>
+                </div>
+                <div class="product-price">${displayPrice}</div>
+            `;
+            
+            processItems.appendChild(itemElement);
+        });
+        
+        // Calcule et affiche le total
+        const total = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        processTotal.textContent = total.toFixed(2);
+        
+        // Détermine la devise à partir du premier article
+        const currency = order.items.length > 0 ? order.items[0].currency.toUpperCase() : 'USD';
+        processCurrency.textContent = currency;
+        
+        // Réinitialise la sélection du mode de paiement
+        const paymentBtns = processOrder.querySelectorAll('.newonInventPayBtn');
+        paymentBtns.forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Désactive le bouton de confirmation
+        confirmPaymentBtn.disabled = true;
+        
+        // Supprime l'ancien orderCard s'il existe
+        const oldOrderCard = processOrder.querySelector('.newonInventOrderCard');
+        if (oldOrderCard) {
+            oldOrderCard.remove();
+        }
+        
+        // Ajoute l'ID de la commande à la zone de traitement
+        const orderCardElement = document.createElement('div');
+        orderCardElement.className = 'newonInventOrderCard';
+        orderCardElement.setAttribute('data-order-id', order.id);
+        orderCardElement.style.display = 'none';
+        processOrder.appendChild(orderCardElement);
+        
+        // Ajoute un écouteur pour le bouton d'annulation
+        cancelProcessBtn.onclick = function() {
+            processOrder.style.display = 'none';
+        };
+        
+        // Affiche la zone de traitement
+        processOrder.style.display = 'block';
+    }
+}
+
+
+// Affiche les détails d'une commande à livrer
+function processDelivery(orderId) {
+    // Trouve la commande
+    const order = deliveryOrders.find(o => o.id === orderId);
+    
+    if (order) {
+        // Récupère les éléments DOM
+        const deliveryProcess = document.getElementById('newonInventDeliveryProcess');
+        const deliveryItems = document.getElementById('newonInventDeliveryItems');
+        const deliveryClientName = document.getElementById('newonInventDeliveryClientName');
+        
+        // Affiche le nom du client
+        deliveryClientName.textContent = order.clientName;
+        
+        // Affiche les articles
+        deliveryItems.innerHTML = '';
+        order.items.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'newonInventCartItem';
+            
+            itemElement.innerHTML = `
+                <div class="product-info">
+                    <div class="product-name">${item.name}</div>
+                    <div class="product-quantity">x${item.quantity}</div>
+                </div>
+            `;
+            
+            deliveryItems.appendChild(itemElement);
+        });
+        
+        // Ajoute l'ID de la commande à la zone de livraison
+        const orderCardElement = document.createElement('div');
+        orderCardElement.className = 'newonInventOrderCard';
+        orderCardElement.setAttribute('data-order-id', order.id);
+        orderCardElement.style.display = 'none';
+        deliveryProcess.appendChild(orderCardElement);
+        
+        // Ajoute un écouteur pour le bouton de confirmation de livraison
+        document.getElementById('newonInventConfirmDelivery').addEventListener('click', function() {
+            confirmDelivery(order.id);
+        });
+        
+        // Ajoute un écouteur pour le bouton d'annulation
+        document.getElementById('newonInventCancelDelivery').addEventListener('click', function() {
+            document.getElementById('newonInventDeliveryProcess').style.display = 'none';
+        });
+        
+        // Affiche la zone de livraison
+        deliveryProcess.style.display = 'block';
+    }
+}
+
+// Confirme la livraison d'une commande
+function confirmDelivery(orderId) {
+    // Trouve la commande
+    const order = deliveryOrders.find(o => o.id === orderId);
+    
+    if (order) {
+        // Met à jour le statut de la commande
+        order.status = 'delivered';
+        order.deliveryTime = new Date();
+        
+        // Supprime la commande des commandes à livrer
+        deliveryOrders = deliveryOrders.filter(o => o.id !== orderId);
+        
+        // Génère le reçu
+        generateReceipt(order.clientName, order.items, order.paymentInfo);
+        
+        // Ouvre la modale du reçu
+        const receiptModal = new bootstrap.Modal(document.getElementById('newonInventReceiptModal'));
+        receiptModal.show();
+        
+        // Cache la zone de livraison
+        document.getElementById('newonInventDeliveryProcess').style.display = 'none';
+        
+        // Réaffiche la liste des commandes à livrer
+        updatePendingOrdersList();
+        
+        // Affiche un message de confirmation
+        alert(`Livraison confirmée pour ${order.clientName}.`);
+    }
+}
+
+// Données de démonstration pour les produits récemment vendus
+const ManualModeSaisie_recentProducts = [
+    { id: 'P001', name: 'Smartphone XYZ', price: 250, currency: 'usd', stock: 15 },
+    { id: 'P002', name: 'Chargeur USB', price: 15, currency: 'usd', stock: 30 },
+    { id: 'P003', name: 'Écouteurs sans fil', price: 45, currency: 'usd', stock: 10 }
+];
+
+// Initialisation de la recherche produit améliorée
+function ManualModeSaisie_initProductSearch() {
+    // Sélection des éléments d'interface pour chaque zone
+    const searchInputs = [
+        document.getElementById('newonInventManualCode'),
+        document.getElementById('newonInventManualCode2'),
+        document.getElementById('newonInventManualCode3')
+    ];
+    
+    const searchButtons = [
+        document.getElementById('newonInventFindProduct'),
+        document.getElementById('newonInventFindProduct2'),
+        document.getElementById('newonInventFindProduct3')
+    ];
+    
+    const resultLists = [
+        document.getElementById('ManualModeSaisie_resultsList'),
+        document.getElementById('ManualModeSaisie_resultsList2'),
+        document.getElementById('ManualModeSaisie_resultsList3')
+    ];
+    
+    const recentItemsContainers = [
+        document.getElementById('ManualModeSaisie_recentItems'),
+        document.getElementById('ManualModeSaisie_recentItems2'),
+        document.getElementById('ManualModeSaisie_recentItems3')
+    ];
+    
+    // Pour chaque zone de saisie
+    searchInputs.forEach((input, index) => {
+        if (!input) return;
+        
+        // Afficher les produits récents au chargement
+        ManualModeSaisie_displayRecentProducts(recentItemsContainers[index], index);
+        
+        // Événement de saisie pour recherche en temps réel
+        input.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.trim();
+            
+            if (searchTerm.length >= 2) {
+                // Effectuer la recherche
+                ManualModeSaisie_searchProducts(searchTerm, resultLists[index], index);
+            } else {
+                // Vider les résultats si moins de 2 caractères
+                resultLists[index].innerHTML = '';
+            }
+        });
+        
+        // Événement sur le bouton de recherche
+        if (searchButtons[index]) {
+            searchButtons[index].addEventListener('click', function() {
+                const searchTerm = input.value.trim();
+                
+                if (searchTerm.length > 0) {
+                    // Effectuer la recherche
+                    ManualModeSaisie_searchProducts(searchTerm, resultLists[index], index);
+                }
+            });
+        }
+        
+        // Événement pour touche Entrée
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const searchTerm = input.value.trim();
+                
+                if (searchTerm.length > 0) {
+                    e.preventDefault();
+                    // Effectuer la recherche
+                    ManualModeSaisie_searchProducts(searchTerm, resultLists[index], index);
+                }
+            }
+        });
+    });
+}
+
+// Fonction de recherche de produits
+function ManualModeSaisie_searchProducts(searchTerm, resultContainer, zoneIndex) {
+    if (!resultContainer) return;
+    
+    // Afficher un indicateur de chargement
+    resultContainer.innerHTML = `
+        <div class="ManualModeSaisie_loading">
+            <i class="fas fa-spinner"></i>
+            <span>Recherche en cours...</span>
+        </div>
+    `;
+    
+    // Simulation d'une recherche (à remplacer par votre véritable fonction de recherche)
+    setTimeout(() => {
+        // Filtrer les produits qui correspondent au terme de recherche
+        const results = inventoryData.filter(product => 
+            product.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            product.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        
+        // Afficher les résultats
+        ManualModeSaisie_displaySearchResults(results, resultContainer, zoneIndex);
+    }, 300); // Délai simulé de 300ms
+}
+
+// Afficher les résultats de recherche
+function ManualModeSaisie_displaySearchResults(products, container, zoneIndex) {
+    if (!container) return;
+    
+    // Vider le conteneur
+    container.innerHTML = '';
+    
+    // Si aucun résultat
+    if (products.length === 0) {
+        container.innerHTML = `
+            <div class="ManualModeSaisie_noResults">
+                <i class="fas fa-search"></i>
+                <p>Aucun produit trouvé</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Ajouter chaque produit aux résultats
+    products.forEach(product => {
+        const productElement = document.createElement('div');
+        productElement.className = 'ManualModeSaisie_productItem';
+        
+        const displayPrice = product.price.toFixed(2) + (product.currency === 'usd' ? ' $' : ' FC');
+        
+        productElement.innerHTML = `
+            <div class="ManualModeSaisie_productDetails">
+                <div class="ManualModeSaisie_productName">${product.name}</div>
+                <div class="ManualModeSaisie_productCode">${product.id} | Stock: ${product.stock}</div>
+            </div>
+            <div class="ManualModeSaisie_productPrice">${displayPrice}</div>
+            <button class="ManualModeSaisie_addBtn" data-product-id="${product.id}">
+                <i class="fas fa-plus"></i>
+            </button>
+        `;
+        
+        // Ajouter au conteneur
+        container.appendChild(productElement);
+        
+        // Événement de clic sur le produit entier pour l'ajouter
+        productElement.addEventListener('click', function() {
+            findAndAddProduct(product.id, zoneIndex);
+        });
+        
+        // Événement de clic sur le bouton d'ajout
+        const addButton = productElement.querySelector('.ManualModeSaisie_addBtn');
+        addButton.addEventListener('click', function(e) {
+            e.stopPropagation(); // Empêche le déclenchement du clic sur tout le produit
+            findAndAddProduct(product.id, zoneIndex);
+        });
+    });
+}
+
+// Afficher les produits récemment vendus
+function ManualModeSaisie_displayRecentProducts(container, zoneIndex) {
+    if (!container) return;
+    
+    // Vider le conteneur
+    container.innerHTML = '';
+    
+    // Ajouter chaque produit récent
+    ManualModeSaisie_recentProducts.forEach(product => {
+        const productElement = document.createElement('div');
+        productElement.className = 'ManualModeSaisie_productItem';
+        
+        const displayPrice = product.price.toFixed(2) + (product.currency === 'usd' ? ' $' : ' FC');
+        
+        productElement.innerHTML = `
+            <div class="ManualModeSaisie_productDetails">
+                <div class="ManualModeSaisie_productName">${product.name}</div>
+                <div class="ManualModeSaisie_productCode">${product.id}</div>
+            </div>
+            <div class="ManualModeSaisie_productPrice">${displayPrice}</div>
+            <button class="ManualModeSaisie_addBtn" data-product-id="${product.id}">
+                <i class="fas fa-plus"></i>
+            </button>
+        `;
+        
+        // Ajouter au conteneur
+        container.appendChild(productElement);
+        
+        // Événement de clic sur le produit entier pour l'ajouter
+        productElement.addEventListener('click', function() {
+            findAndAddProduct(product.id, zoneIndex);
+        });
+        
+        // Événement de clic sur le bouton d'ajout
+        const addButton = productElement.querySelector('.ManualModeSaisie_addBtn');
+        addButton.addEventListener('click', function(e) {
+            e.stopPropagation(); // Empêche le déclenchement du clic sur tout le produit
+            findAndAddProduct(product.id, zoneIndex);
+        });
+    });
+}
+
+// Mettre à jour la liste des produits récents après un ajout
+function ManualModeSaisie_updateRecentProducts(product) {
+    // Vérifier si le produit est déjà dans la liste des récents
+    const existingIndex = ManualModeSaisie_recentProducts.findIndex(p => p.id === product.id);
+    
+    if (existingIndex !== -1) {
+        // Supprimer le produit de sa position actuelle
+        ManualModeSaisie_recentProducts.splice(existingIndex, 1);
+    }
+    
+    // Ajouter le produit au début de la liste
+    ManualModeSaisie_recentProducts.unshift(product);
+    
+    // Limiter la liste à 5 produits
+    if (ManualModeSaisie_recentProducts.length > 5) {
+        ManualModeSaisie_recentProducts.pop();
+    }
+    
+    // Mettre à jour l'affichage dans chaque zone
+    const recentContainers = [
+        document.getElementById('ManualModeSaisie_recentItems'),
+        document.getElementById('ManualModeSaisie_recentItems2'),
+        document.getElementById('ManualModeSaisie_recentItems3')
+    ];
+    
+    recentContainers.forEach((container, index) => {
+        if (container) {
+            ManualModeSaisie_displayRecentProducts(container, index);
+        }
+    });
+}
+
+    
+// Initialise le module de point de vente
+function initSalesPoint() {
+    // Initialisation des services audio
+    ScannerFeedback.initAudio();
+    ManualEntryFeedback.initAudio();
+    PaymentFeedback.init();
+    
+    // Charge les données d'inventaire
+    loadInventoryData();
+    
+    // Initialise le sélecteur de mode
+    initModeSelectorCard();
+    
+    // Initialise les scanners
+    initScanners();
+    
+    // Initialise la saisie manuelle
+    initManualEntry();
+    
+    // Initialise les écouteurs d'événements
+    initSalesEventListeners();
+}
+
+
+    
+    // Initialise le module quand on clique sur le lien dans la barre latérale
+    document.querySelector('[data-section="newonInventSalesPoint"]').addEventListener('click', function() {
+        // Réinitialise les interfaces
+        resetAllInterfaces();
+        
+        // Affiche le sélecteur de mode
+        document.getElementById('newonInventSelectMode').style.display = 'block';
+        
+        // Initialise le point de vente si ce n'est pas déjà fait
+        if (!window.salesPointInitialized) {
+            initSalesPoint();
+            window.salesPointInitialized = true;
+        }
+    });
+    
+    // Initialise le point de vente quand on navigue directement vers cette section
+    if (window.location.hash === '#newonInventSalesPoint') {
+        document.querySelector('[data-section="newonInventSalesPoint"]').click();
+    }
+});
+
+
+
+
+
+
+  
+/*══════════════════════════════╗
+  🔴 JS PARTIE 9
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  🟠 JS PARTIE 10
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  🟡 JS PARTIE 11
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  🟢 JS PARTIE 12
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  🔵 JS PARTIE 13
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  🟣 JS PARTIE 14
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  🟤 JS PARTIE 15
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  ⚫ JS PARTIE 16
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  ⚪ JS PARTIE 17
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  🟥 JS PARTIE 18
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  🟧 JS PARTIE 19
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  🟨 JS PARTIE 20
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  🟩 JS PARTIE 21
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  🟦 JS PARTIE 22
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  🟪 JS PARTIE 23
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  🟫 JS PARTIE 24
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  ⬛ JS PARTIE 25
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  ⬜ JS PARTIE 26
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  ❤️ JS PARTIE 27
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  🧡 JS PARTIE 28
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  💛 JS PARTIE 29
+  ═════════════════════════════╝*/
+
+/*══════════════════════════════╗
+  💚 JS PARTIE 30
   ═════════════════════════════╝*/
