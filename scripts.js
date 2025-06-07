@@ -932,89 +932,328 @@ function loadInventoryTable() {
             
             generateQRCode(JSON.stringify(qrData), 'qrcode-preview');
         }
+        
+        // Service pour les effets sonores et vibrations du scanner moderne
+const NouvScanModernFeedback = {
+    // Contexte audio
+    audioContext: null,
+    
+    // Initialiser le contexte audio
+    initAudio: function() {
+        if (!this.audioContext) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.audioContext = new AudioContext();
+        }
+        
+        // Démarrer le contexte audio s'il est suspendu
+        if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+    },
+    
+    // Jouer un son de scanner
+    playSound: function() {
+        this.initAudio();
+        
+        // Durée très courte pour un beep net
+        const duration = 0.07;
+        
+        // Oscillateur principal pour le beep
+        const oscillator = this.audioContext.createOscillator();
+        
+        // Gain pour contrôler le volume et l'enveloppe du son
+        const gainNode = this.audioContext.createGain();
+        
+        // Filtre pour affiner le son
+        const filter = this.audioContext.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 2500;
+        filter.Q.value = 10;
+        
+        // Configuration de l'oscillateur
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(2500, this.audioContext.currentTime);
+        
+        // Enveloppe sonore pour un beep net et court
+        gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.7, this.audioContext.currentTime + 0.01);
+        gainNode.gain.setValueAtTime(0.7, this.audioContext.currentTime + duration - 0.01);
+        gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + duration);
+        
+        // Connexion des nœuds audio
+        oscillator.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        // Démarrage et arrêt de l'oscillateur
+        oscillator.start();
+        oscillator.stop(this.audioContext.currentTime + duration + 0.01);
+    },
+    
+    // Faire vibrer l'appareil
+    vibrate: function() {
+        if (navigator.vibrate) {
+            // Le pattern [40, 30, 70] signifie:
+            // - vibrer 40ms
+            // - pause 30ms
+            // - vibrer 70ms
+            navigator.vibrate([40, 30, 70]);
+            return true;
+        }
+        return false;
+    },
+    
+    // Déclencher le son et la vibration
+    feedback: function() {
+        this.playSound();
+        this.vibrate();
+    }
+};
 
-        function initBarcodeScanner(videoElementId) {
-            const videoElement = document.getElementById(videoElementId);
+
+function initBarcodeScanner(videoElementId) {
+    const videoElement = document.getElementById(videoElementId);
+    
+    // Identifier quel scanner est en cours d'utilisation
+    let scannerNumber = 0;
+    if (videoElementId === 'scanner-video') {
+        scannerNumber = 1;
+    } else if (videoElementId === 'scanner') {
+        scannerNumber = 2;
+    }
+    
+    // Afficher un message dans l'interface moderne
+    updateScannerMessage(scannerNumber, 'Initialisation...');
+    
+    if (scannerInitialized) {
+        Quagga.stop();
+        if (qrScannerInterval) {
+            clearInterval(qrScannerInterval);
+            qrScannerInterval = null;
+        }
+    }
+    
+    // Demander l'accès à la caméra
+    navigator.mediaDevices.getUserMedia({ 
+        video: { 
+            facingMode: "environment",
+            advanced: [{ torch: false }] // La lampe est éteinte par défaut
+        } 
+    })
+    .then(function(stream) {
+        videoElement.srcObject = stream;
+        videoElement.play();
+        
+        // Mise à jour du message
+        updateScannerMessage(scannerNumber, 'Caméra activée...');
+        
+        // Stocke le track vidéo pour le flash
+        const videoTrack = stream.getVideoTracks()[0];
+        
+        // Configure le flash si disponible
+        setupFlashButton(scannerNumber, videoTrack);
+        
+        // Initialiser Quagga pour la détection de code-barres
+        Quagga.init({
+            inputStream: {
+                name: "Live",
+                type: "LiveStream",
+                target: videoElement
+            },
+            decoder: {
+                readers: [
+                    "code_128_reader",
+                    "ean_reader",
+                    "ean_8_reader",
+                    "code_39_reader",
+                    "code_39_vin_reader",
+                    "codabar_reader",
+                    "upc_reader",
+                    "upc_e_reader",
+                    "i2of5_reader"
+                ]
+            }
+        }, function(err) {
+            if (err) {
+                console.error(err);
+                updateScannerMessage(scannerNumber, 'Erreur d\'initialisation');
+                return;
+            }
+            scannerInitialized = true;
+            Quagga.start();
+            updateScannerMessage(scannerNumber, 'Scanner prêt');
             
-            if (scannerInitialized) {
-                Quagga.stop();
-                if (qrScannerInterval) {
-                    clearInterval(qrScannerInterval);
-                    qrScannerInterval = null;
+            // Après 1,5 seconde, changer le message à "Recherche de codes..."
+            setTimeout(() => {
+                updateScannerMessage(scannerNumber, 'Positionnez le code dans le cadre');
+            }, 1500);
+        });
+        
+        // Écouter les résultats de Quagga
+        Quagga.onDetected(function(result) {
+            const code = result.codeResult.code;
+            console.log("Detected barcode:", code);
+            
+            // Indiquer visuellement qu'un code a été détecté
+            indicateDetection(scannerNumber);
+            
+            // Retour haptique et sonore
+            NouvScanModernFeedback.feedback();
+            
+            processScannedCode(code);
+        });
+        
+        // Initialiser le scanner QR
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        
+        qrScannerInterval = setInterval(() => {
+            if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
+                canvas.height = videoElement.videoHeight;
+                canvas.width = videoElement.videoWidth;
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+                
+                if (code) {
+                    console.log("Detected QR code:", code.data);
+                    
+                    // Indiquer visuellement qu'un code a été détecté
+                    indicateDetection(scannerNumber);
+                    
+                    // Retour haptique et sonore
+                    NouvScanModernFeedback.feedback();
+                    
+                    processScannedCode(code.data);
                 }
             }
-            
-            // Demander l'accès à la caméra
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-                .then(function(stream) {
-                    videoElement.srcObject = stream;
-                    videoElement.play();
-                    
-                    // Initialiser Quagga pour la détection de code-barres
-                    Quagga.init({
-                        inputStream: {
-                            name: "Live",
-                            type: "LiveStream",
-                            target: videoElement
-                        },
-                        decoder: {
-                            readers: [
-                                "code_128_reader",
-                                "ean_reader",
-                                "ean_8_reader",
-                                "code_39_reader",
-                                "code_39_vin_reader",
-                                "codabar_reader",
-                                "upc_reader",
-                                "upc_e_reader",
-                                "i2of5_reader"
-                            ]
-                        }
-                    }, function(err) {
-                        if (err) {
-                            console.error(err);
-                            return;
-                        }
-                        scannerInitialized = true;
-                        Quagga.start();
-                    });
-                    
-                    // Écouter les résultats de Quagga
-                    Quagga.onDetected(function(result) {
-                        const code = result.codeResult.code;
-                        console.log("Detected barcode:", code);
-                        processScannedCode(code);
-                    });
-                    
-                    // Initialiser le scanner QR
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    
-                    qrScannerInterval = setInterval(() => {
-                        if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
-                            canvas.height = videoElement.videoHeight;
-                            canvas.width = videoElement.videoWidth;
-                            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                            
-                            const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                                inversionAttempts: "dontInvert",
-                            });
-                            
-                            if (code) {
-                                console.log("Detected QR code:", code.data);
-                                processScannedCode(code.data);
-                            }
-                        }
-                    }, 500);
-                })
-                .catch(function(err) {
-                    console.error("Error accessing camera:", err);
-                    showNotification("Erreur", "Impossible d'accéder à la caméra.", "error");
-                });
-        }
+        }, 500);
+    })
+    .catch(function(err) {
+        console.error("Error accessing camera:", err);
+        showNotification("Erreur", "Impossible d'accéder à la caméra.", "error");
+        updateScannerMessage(scannerNumber, 'Erreur caméra');
+    });
+    
+    // Configurer les boutons de mode
+    setupModeButtons(scannerNumber);
+}
 
-        function processScannedCode(codeData) {
+// Fonction pour mettre à jour le message du scanner
+function updateScannerMessage(scannerNumber, message) {
+    if (scannerNumber === 1) {
+        const messageElement = document.querySelector('.NouvScanModernMessage');
+        if (messageElement) {
+            messageElement.textContent = message;
+        }
+    } else if (scannerNumber === 2) {
+        const messageElement = document.querySelector('.NouvScanModern2Message');
+        if (messageElement) {
+            messageElement.textContent = message;
+        }
+    }
+}
+
+// Fonction pour indiquer visuellement une détection de code
+function indicateDetection(scannerNumber) {
+    let frame, prefix;
+    
+    if (scannerNumber === 1) {
+        frame = document.querySelector('.NouvScanModernFrame');
+        prefix = 'NouvScanModern';
+    } else if (scannerNumber === 2) {
+        frame = document.querySelector('.NouvScanModern2Frame');
+        prefix = 'NouvScanModern2';
+    }
+    
+    if (frame) {
+        // Animation de détection
+        frame.style.borderColor = 'var(--primary)';
+        frame.style.boxShadow = '0 0 20px var(--primary), 0 0 0 5000px rgba(0, 0, 0, 0.7)';
+        
+        // Message de détection
+        updateScannerMessage(scannerNumber, 'Code détecté !');
+        
+        // Réinitialisation de l'interface après détection
+        setTimeout(() => {
+            if (frame) {
+                frame.style.borderColor = '';
+                frame.style.boxShadow = '';
+            }
+        }, 1000);
+    }
+}
+
+// Fonction pour configurer les boutons de mode
+function setupModeButtons(scannerNumber) {
+    let toggleModeBtn, barcodeIcon, qrCodeIcon, currentModeText, prefix;
+    
+    if (scannerNumber === 1) {
+        toggleModeBtn = document.getElementById('NouvScanModernToggleMode');
+        barcodeIcon = document.getElementById('NouvScanModernBarcode');
+        qrCodeIcon = document.getElementById('NouvScanModernQRCode');
+        currentModeText = document.getElementById('NouvScanModernCurrentMode');
+        prefix = 'NouvScanModern';
+    } else if (scannerNumber === 2) {
+        toggleModeBtn = document.getElementById('NouvScanModern2ToggleMode');
+        barcodeIcon = document.getElementById('NouvScanModern2Barcode');
+        qrCodeIcon = document.getElementById('NouvScanModern2QRCode');
+        currentModeText = document.getElementById('NouvScanModern2CurrentMode');
+        prefix = 'NouvScanModern2';
+    }
+    
+    if (toggleModeBtn && barcodeIcon && qrCodeIcon) {
+        toggleModeBtn.addEventListener('click', function() {
+            // Change le mode actif
+            if (barcodeIcon.classList.contains('active')) {
+                barcodeIcon.classList.remove('active');
+                qrCodeIcon.classList.add('active');
+                if (currentModeText) {
+                    currentModeText.textContent = 'QR Code';
+                }
+                
+                // Afficher un message de changement
+                updateScannerMessage(scannerNumber, 'Mode QR Code activé');
+                
+                setTimeout(() => {
+                    updateScannerMessage(scannerNumber, 'Positionnez le QR code dans le cadre');
+                }, 1500);
+            } else {
+                barcodeIcon.classList.add('active');
+                qrCodeIcon.classList.remove('active');
+                if (currentModeText) {
+                    currentModeText.textContent = 'Code-barres';
+                }
+                
+                // Afficher un message de changement
+                updateScannerMessage(scannerNumber, 'Mode Code-barres activé');
+                
+                setTimeout(() => {
+                    updateScannerMessage(scannerNumber, 'Positionnez le code-barres dans le cadre');
+                }, 1500);
+            }
+        });
+    }
+    
+    // Configurer bouton annuler
+    let cancelBtn;
+    if (scannerNumber === 1) {
+        cancelBtn = document.getElementById('NouvScanModernCancelScan');
+    } else if (scannerNumber === 2) {
+        cancelBtn = document.getElementById('NouvScanModern2CancelScan');
+    }
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            if (scannerNumber === 1) {
+                document.getElementById('scanner-container').classList.add('d-none');
+            } else if (scannerNumber === 2) {
+                document.getElementById('scanner-area').style.display = 'none';
+            }
+            
             // Arrêter le scanner
             Quagga.stop();
             if (qrScannerInterval) {
@@ -1032,42 +1271,117 @@ function loadInventoryTable() {
                     video.srcObject = null;
                 }
             });
+        });
+    }
+}
+
+// Fonction pour configurer le bouton de flash
+function setupFlashButton(scannerNumber, videoTrack) {
+    let flashBtn;
+    if (scannerNumber === 1) {
+        flashBtn = document.getElementById('NouvScanModernToggleLight');
+    } else if (scannerNumber === 2) {
+        flashBtn = document.getElementById('NouvScanModern2ToggleLight');
+    }
+    
+    if (flashBtn && videoTrack) {
+        // Vérifier si la fonction torch est disponible
+        const capabilities = videoTrack.getCapabilities();
+        const hasTorch = 'torch' in capabilities;
+        
+        flashBtn.addEventListener('click', async function() {
+            flashBtn.classList.toggle('active');
+            const torchState = flashBtn.classList.contains('active');
             
-            // Traiter le code en fonction du contexte
-            if (document.getElementById('add-product').style.display !== 'none') {
-                // Si on est dans la section d'ajout de produit
-                document.getElementById('scanner-container').classList.add('d-none');
-                document.getElementById('product-code-manual').value = codeData;
-                updateCodePreview();
-            } else if (document.getElementById('scan').style.display !== 'none') {
-                // Si on est dans la section de scan
-                document.getElementById('scanner-area').style.display = 'none';
-                document.getElementById('scan-result').style.display = 'block';
-                
-                // Essayer de parser le code comme JSON (QR code)
-                try {
-                    const jsonData = JSON.parse(codeData);
-                    const product = products.find(p => p.code === jsonData.code);
+            try {
+                if (hasTorch) {
+                    // Appliquer le changement de lampe torche
+                    await videoTrack.applyConstraints({
+                        advanced: [{ torch: torchState }]
+                    });
                     
-                    if (product) {
-                        displayScannedProduct(product);
-                    } else {
-                        showNotification("Erreur", "Produit non trouvé dans l'inventaire.", "error");
-                        document.getElementById('scan-another').click();
-                    }
-                } catch (e) {
-                    // Si ce n'est pas du JSON, c'est probablement un code-barres
-                    const product = products.find(p => p.code === codeData);
+                    // Message flash activé/désactivé
+                    updateScannerMessage(scannerNumber, torchState ? 'Flash activé' : 'Flash désactivé');
                     
-                    if (product) {
-                        displayScannedProduct(product);
-                    } else {
-                        showNotification("Erreur", "Produit non trouvé dans l'inventaire.", "error");
-                        document.getElementById('scan-another').click();
-                    }
+                    setTimeout(() => {
+                        updateScannerMessage(scannerNumber, 'Positionnez le code dans le cadre');
+                    }, 1000);
+                } else {
+                    console.warn("La lampe torche n'est pas prise en charge sur cet appareil");
+                    updateScannerMessage(scannerNumber, "Flash non disponible sur cet appareil");
+                    
+                    setTimeout(() => {
+                        updateScannerMessage(scannerNumber, 'Positionnez le code dans le cadre');
+                    }, 1500);
                 }
+            } catch (error) {
+                console.error("Erreur lors de l'activation de la lampe torche:", error);
+                updateScannerMessage(scannerNumber, "Erreur d'activation du flash");
+                
+                setTimeout(() => {
+                    updateScannerMessage(scannerNumber, 'Positionnez le code dans le cadre');
+                }, 1500);
+            }
+        });
+    }
+}
+
+
+function processScannedCode(codeData) {
+    // Arrêter le scanner
+    Quagga.stop();
+    if (qrScannerInterval) {
+        clearInterval(qrScannerInterval);
+        qrScannerInterval = null;
+    }
+    scannerInitialized = false;
+    
+    // Fermer les flux vidéo
+    const videos = document.querySelectorAll('video');
+    videos.forEach(video => {
+        if (video.srcObject) {
+            const tracks = video.srcObject.getTracks();
+            tracks.forEach(track => track.stop());
+            video.srcObject = null;
+        }
+    });
+    
+    // Traiter le code en fonction du contexte
+    if (document.getElementById('add-product').style.display !== 'none') {
+        // Si on est dans la section d'ajout de produit
+        document.getElementById('scanner-container').classList.add('d-none');
+        document.getElementById('product-code-manual').value = codeData;
+        updateCodePreview();
+    } else if (document.getElementById('scan').style.display !== 'none') {
+        // Si on est dans la section de scan
+        document.getElementById('scanner-area').style.display = 'none';
+        document.getElementById('scan-result').style.display = 'block';
+        
+        // Essayer de parser le code comme JSON (QR code)
+        try {
+            const jsonData = JSON.parse(codeData);
+            const product = products.find(p => p.code === jsonData.code);
+            
+            if (product) {
+                displayScannedProduct(product);
+            } else {
+                showNotification("Erreur", "Produit non trouvé dans l'inventaire.", "error");
+                document.getElementById('scan-another').click();
+            }
+        } catch (e) {
+            // Si ce n'est pas du JSON, c'est probablement un code-barres
+            const product = products.find(p => p.code === codeData);
+            
+            if (product) {
+                displayScannedProduct(product);
+            } else {
+                showNotification("Erreur", "Produit non trouvé dans l'inventaire.", "error");
+                document.getElementById('scan-another').click();
             }
         }
+    }
+}
+
 
         function displayScannedProduct(product) {
             document.getElementById('scanned-code').textContent = product.code;

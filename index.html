@@ -1931,9 +1931,85 @@
                                             <i class="fas fa-camera me-2"></i> Activer la caméra
                                         </button>
                                     </div>
-                                    <div id="scanner-container" class="mt-3 d-none">
-                                        <video id="scanner-video" style="width: 100%; max-height: 300px; object-fit: cover;"></video>
-                                    </div>
+<div id="scanner-container" class="mt-3 d-none">
+    <div class="NouvScanModernContainer">
+        <video id="scanner-video" style="width: 100%; max-height: 300px; object-fit: cover;"></video>
+        
+        <!-- Interface scanner futuriste -->
+        <div class="NouvScanModernOverlay">
+            <!-- Coins du scanner -->
+            <div class="NouvScanModernCorner NouvScanModernTopLeft">
+                <svg width="50" height="50" viewBox="0 0 50 50">
+                    <path d="M2 2 L2 20 L20 20 L20 2" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                </svg>
+            </div>
+            
+            <div class="NouvScanModernCorner NouvScanModernTopRight">
+                <svg width="50" height="50" viewBox="0 0 50 50">
+                    <path d="M48 2 L48 20 L30 20 L30 2" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                </svg>
+            </div>
+            
+            <div class="NouvScanModernCorner NouvScanModernBottomLeft">
+                <svg width="50" height="50" viewBox="0 0 50 50">
+                    <path d="M2 48 L2 30 L20 30 L20 48" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                </svg>
+            </div>
+            
+            <div class="NouvScanModernCorner NouvScanModernBottomRight">
+                <svg width="50" height="50" viewBox="0 0 50 50">
+                    <path d="M48 48 L48 30 L30 30 L30 48" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                </svg>
+            </div>
+            
+            <!-- Ligne de scan -->
+            <div class="NouvScanModernScanLine"></div>
+            
+            <!-- Indicateur d'état et mode -->
+            <div class="NouvScanModernStatus">
+                <div class="NouvScanModernModeIndicator">
+                    <div class="NouvScanModernModeIcon active" id="NouvScanModernBarcode">
+                        <i class="fas fa-barcode"></i>
+                    </div>
+                    <div class="NouvScanModernModeIcon" id="NouvScanModernQRCode">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                </div>
+                <div class="NouvScanModernMessage">Positionnez le code dans le cadre</div>
+            </div>
+            
+            <!-- Cadre de scan dynamique -->
+            <div class="NouvScanModernFrame">
+                <div class="NouvScanModernTargetDot"></div>
+            </div>
+            
+            <!-- Écran d'information technique -->
+            <div class="NouvScanModernTechOverlay">
+                <div class="NouvScanModernInfoPanel">
+                    <div class="NouvScanModernInfoLine">Scanner v2.5</div>
+                    <div class="NouvScanModernInfoLine">Mode: <span id="NouvScanModernCurrentMode">Auto-détection</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Boutons d'action scanner -->
+    <div class="NouvScanModernControls">
+        <button class="NouvScanModernBtn NouvScanModernModeBtn" id="NouvScanModernToggleMode">
+            <i class="fas fa-sync-alt"></i>
+            <span>Changer de mode</span>
+        </button>
+        <button class="NouvScanModernBtn NouvScanModernLightBtn" id="NouvScanModernToggleLight">
+            <i class="fas fa-lightbulb"></i>
+            <span>Flash</span>
+        </button>
+        <button class="NouvScanModernBtn NouvScanModernCancelBtn" id="NouvScanModernCancelScan">
+            <i class="fas fa-times"></i>
+            <span>Annuler</span>
+        </button>
+    </div>
+</div>
+
                                 </div>
                             </div>
                             
@@ -2161,24 +2237,91 @@
                             </div>
                         </div>
                         
-                        <div id="scanner-area" style="display: none;">
-                            <div class="row mb-4">
-                                <div class="col-md-12">
-                                    <div style="max-width: 500px; margin: 0 auto; position: relative;">
-                                        <video id="scanner" style="width: 100%; border: 2px solid #ddd; border-radius: 10px;"></video>
-                                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 2px solid #e60000; border-radius: 10px; pointer-events: none;"></div>
-                                    </div>
+<div id="scanner-area" style="display: none;">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div style="max-width: 500px; margin: 0 auto; position: relative;">
+                <div class="NouvScanModern2Container">
+                    <video id="scanner" style="width: 100%; border-radius: 10px;"></video>
+                    
+                    <!-- Interface scanner futuriste -->
+                    <div class="NouvScanModern2Overlay">
+                        <!-- Coins du scanner -->
+                        <div class="NouvScanModern2Corner NouvScanModern2TopLeft">
+                            <svg width="50" height="50" viewBox="0 0 50 50">
+                                <path d="M2 2 L2 20 L20 20 L20 2" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                            </svg>
+                        </div>
+                        
+                        <div class="NouvScanModern2Corner NouvScanModern2TopRight">
+                            <svg width="50" height="50" viewBox="0 0 50 50">
+                                <path d="M48 2 L48 20 L30 20 L30 2" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                            </svg>
+                        </div>
+                        
+                        <div class="NouvScanModern2Corner NouvScanModern2BottomLeft">
+                            <svg width="50" height="50" viewBox="0 0 50 50">
+                                <path d="M2 48 L2 30 L20 30 L20 48" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                            </svg>
+                        </div>
+                        
+                        <div class="NouvScanModern2Corner NouvScanModern2BottomRight">
+                            <svg width="50" height="50" viewBox="0 0 50 50">
+                                <path d="M48 48 L48 30 L30 30 L30 48" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                            </svg>
+                        </div>
+                        
+                        <!-- Ligne de scan -->
+                        <div class="NouvScanModern2ScanLine"></div>
+                        
+                        <!-- Indicateur d'état et mode -->
+                        <div class="NouvScanModern2Status">
+                            <div class="NouvScanModern2ModeIndicator">
+                                <div class="NouvScanModern2ModeIcon active" id="NouvScanModern2Barcode">
+                                    <i class="fas fa-barcode"></i>
+                                </div>
+                                <div class="NouvScanModern2ModeIcon" id="NouvScanModern2QRCode">
+                                    <i class="fas fa-qrcode"></i>
                                 </div>
                             </div>
-                            
-                            <div class="row">
-                                <div class="col-md-12 text-center">
-                                    <div class="alert alert-info">
-                                        <i class="fas fa-info-circle me-2"></i> Placez le code-barres ou QR code face à la caméra
-                                    </div>
-                                </div>
+                            <div class="NouvScanModern2Message">Positionnez le code dans le cadre</div>
+                        </div>
+                        
+                        <!-- Cadre de scan dynamique -->
+                        <div class="NouvScanModern2Frame">
+                            <div class="NouvScanModern2TargetDot"></div>
+                        </div>
+                        
+                        <!-- Écran d'information technique -->
+                        <div class="NouvScanModern2TechOverlay">
+                            <div class="NouvScanModern2InfoPanel">
+                                <div class="NouvScanModern2InfoLine">Scanner v2.5</div>
+                                <div class="NouvScanModern2InfoLine">Mode: <span id="NouvScanModern2CurrentMode">Auto-détection</span></div>
                             </div>
                         </div>
+                    </div>
+                </div>
+                
+                <!-- Boutons d'action scanner -->
+                <div class="NouvScanModern2Controls mt-3">
+                    <button class="NouvScanModern2Btn NouvScanModern2ModeBtn" id="NouvScanModern2ToggleMode">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Changer de mode</span>
+                    </button>
+                    <button class="NouvScanModern2Btn NouvScanModern2LightBtn" id="NouvScanModern2ToggleLight">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>Flash</span>
+                    </button>
+                    <button class="NouvScanModern2Btn NouvScanModern2CancelBtn" id="NouvScanModern2CancelScan">
+                        <i class="fas fa-times"></i>
+                        <span>Annuler</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
                         
                         <div id="scan-result" style="display: none;">
                             <div class="row mb-4">

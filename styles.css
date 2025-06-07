@@ -5762,6 +5762,564 @@
 /*═══════════════════════════*\
   🟠 PARTIE 11  
 \*═══════════════════════════*/
+/* Scanner moderne #1 - style futuriste */
+.NouvScanModernContainer {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    border-radius: 16px;
+    overflow: hidden;
+    background-color: #000;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+}
+
+.NouvScanModernOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Coins - Design futuriste */
+.NouvScanModernCorner {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    opacity: 0.9;
+    filter: drop-shadow(0 0 5px var(--primary)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+    animation: NouvScanModernPulse 2s infinite ease-in-out;
+}
+
+.NouvScanModernTopLeft {
+    top: 15px;
+    left: 15px;
+}
+
+.NouvScanModernTopRight {
+    top: 15px;
+    right: 15px;
+    transform: scaleX(-1);
+}
+
+.NouvScanModernBottomLeft {
+    bottom: 15px;
+    left: 15px;
+    transform: scaleY(-1);
+}
+
+.NouvScanModernBottomRight {
+    bottom: 15px;
+    right: 15px;
+    transform: scale(-1);
+}
+
+/* Ligne de scan animée */
+.NouvScanModernScanLine {
+    position: absolute;
+    width: 80%;
+    height: 2px;
+    background: linear-gradient(to right, 
+        rgba(230, 0, 0, 0), 
+        rgba(230, 0, 0, 0.8) 20%, 
+        rgba(230, 0, 0, 1) 50%, 
+        rgba(230, 0, 0, 0.8) 80%, 
+        rgba(230, 0, 0, 0));
+    box-shadow: 0 0 8px var(--primary), 0 0 12px rgba(255, 255, 255, 0.5);
+    animation: NouvScanModernScanAnimation 2s infinite ease-in-out;
+    z-index: 15;
+}
+
+/* Cadre de scan avec cible */
+.NouvScanModernFrame {
+    width: 70%;
+    height: 60%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    box-shadow: 0 0 0 5000px rgba(0, 0, 0, 0.6);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+.NouvScanModernTargetDot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    opacity: 0.7;
+    box-shadow: 0 0 10px var(--primary);
+    animation: NouvScanModernTargetPulse 2s infinite ease-in-out;
+}
+
+/* Indicateur d'état */
+.NouvScanModernStatus {
+    position: absolute;
+    bottom: 30px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 20;
+}
+
+.NouvScanModernModeIndicator {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.NouvScanModernModeIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.NouvScanModernModeIcon.active {
+    opacity: 1;
+    background-color: rgba(230, 0, 0, 0.2);
+    border-color: var(--primary);
+    box-shadow: 0 0 10px var(--primary);
+}
+
+.NouvScanModernModeIcon i {
+    color: white;
+    font-size: 18px;
+}
+
+.NouvScanModernMessage {
+    color: white;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Overlay technique */
+.NouvScanModernTechOverlay {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 20;
+}
+
+.NouvScanModernInfoPanel {
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    padding: 5px 10px;
+    border-left: 2px solid var(--primary);
+}
+
+.NouvScanModernInfoLine {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    margin: 2px 0;
+}
+
+/* Boutons de contrôle */
+.NouvScanModernControls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.NouvScanModernBtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 15px;
+    background-color: white;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    color: var(--dark);
+    flex: 1;
+    max-width: 120px;
+}
+
+.NouvScanModernBtn i {
+    font-size: 20px;
+    margin-bottom: 6px;
+    color: var(--primary);
+}
+
+.NouvScanModernBtn span {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.NouvScanModernBtn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+.NouvScanModernModeBtn i {
+    color: #7209b7;
+}
+
+.NouvScanModernLightBtn i {
+    color: #ff9e00;
+}
+
+.NouvScanModernLightBtn.active i {
+    color: #ffdd00;
+    text-shadow: 0 0 10px #ffdd00;
+}
+
+.NouvScanModernCancelBtn i {
+    color: var(--danger);
+}
+
+/* Animations */
+@keyframes NouvScanModernScanAnimation {
+    0%, 100% {
+        transform: translateY(-80px);
+        opacity: 0;
+    }
+    10%, 90% {
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(80px);
+    }
+}
+
+@keyframes NouvScanModernPulse {
+    0%, 100% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes NouvScanModernTargetPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 1;
+    }
+}
+
+/* Scanner moderne #2 - Mêmes styles avec des noms différents */
+.NouvScanModern2Container {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    border-radius: 16px;
+    overflow: hidden;
+    background-color: #000;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+}
+
+.NouvScanModern2Overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.NouvScanModern2Corner {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    opacity: 0.9;
+    filter: drop-shadow(0 0 5px var(--primary)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+    animation: NouvScanModern2Pulse 2s infinite ease-in-out;
+}
+
+.NouvScanModern2TopLeft {
+    top: 15px;
+    left: 15px;
+}
+
+.NouvScanModern2TopRight {
+    top: 15px;
+    right: 15px;
+    transform: scaleX(-1);
+}
+
+.NouvScanModern2BottomLeft {
+    bottom: 15px;
+    left: 15px;
+    transform: scaleY(-1);
+}
+
+.NouvScanModern2BottomRight {
+    bottom: 15px;
+    right: 15px;
+    transform: scale(-1);
+}
+
+.NouvScanModern2ScanLine {
+    position: absolute;
+    width: 80%;
+    height: 2px;
+    background: linear-gradient(to right, 
+        rgba(230, 0, 0, 0), 
+        rgba(230, 0, 0, 0.8) 20%, 
+        rgba(230, 0, 0, 1) 50%, 
+        rgba(230, 0, 0, 0.8) 80%, 
+        rgba(230, 0, 0, 0));
+    box-shadow: 0 0 8px var(--primary), 0 0 12px rgba(255, 255, 255, 0.5);
+    animation: NouvScanModern2ScanAnimation 2s infinite ease-in-out;
+    z-index: 15;
+}
+
+.NouvScanModern2Frame {
+    width: 70%;
+    height: 60%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    box-shadow: 0 0 0 5000px rgba(0, 0, 0, 0.6);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+.NouvScanModern2TargetDot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    opacity: 0.7;
+    box-shadow: 0 0 10px var(--primary);
+    animation: NouvScanModern2TargetPulse 2s infinite ease-in-out;
+}
+
+.NouvScanModern2Status {
+    position: absolute;
+    bottom: 30px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 20;
+}
+
+.NouvScanModern2ModeIndicator {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.NouvScanModern2ModeIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.NouvScanModern2ModeIcon.active {
+    opacity: 1;
+    background-color: rgba(230, 0, 0, 0.2);
+    border-color: var(--primary);
+    box-shadow: 0 0 10px var(--primary);
+}
+
+.NouvScanModern2ModeIcon i {
+    color: white;
+    font-size: 18px;
+}
+
+.NouvScanModern2Message {
+    color: white;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.NouvScanModern2TechOverlay {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 20;
+}
+
+.NouvScanModern2InfoPanel {
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    padding: 5px 10px;
+    border-left: 2px solid var(--primary);
+}
+
+.NouvScanModern2InfoLine {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    margin: 2px 0;
+}
+
+.NouvScanModern2Controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.NouvScanModern2Btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 15px;
+    background-color: white;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    color: var(--dark);
+    flex: 1;
+    max-width: 120px;
+}
+
+.NouvScanModern2Btn i {
+    font-size: 20px;
+    margin-bottom: 6px;
+    color: var(--primary);
+}
+
+.NouvScanModern2Btn span {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.NouvScanModern2Btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+.NouvScanModern2ModeBtn i {
+    color: #7209b7;
+}
+
+.NouvScanModern2LightBtn i {
+    color: #ff9e00;
+}
+
+.NouvScanModern2LightBtn.active i {
+    color: #ffdd00;
+    text-shadow: 0 0 10px #ffdd00;
+}
+
+.NouvScanModern2CancelBtn i {
+    color: var(--danger);
+}
+
+@keyframes NouvScanModern2ScanAnimation {
+    0%, 100% {
+        transform: translateY(-80px);
+        opacity: 0;
+    }
+    10%, 90% {
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(80px);
+    }
+}
+
+@keyframes NouvScanModern2Pulse {
+    0%, 100% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes NouvScanModern2TargetPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 1;
+    }
+}
+
+/* Ajustements responsifs */
+@media (max-width: 576px) {
+    .NouvScanModernContainer,
+    .NouvScanModern2Container {
+        height: 250px;
+    }
+    
+    .NouvScanModernCorner,
+    .NouvScanModern2Corner {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .NouvScanModernFrame,
+    .NouvScanModern2Frame {
+        width: 80%;
+        height: 50%;
+    }
+    
+    .NouvScanModernControls,
+    .NouvScanModern2Controls {
+        flex-wrap: wrap;
+    }
+    
+    .NouvScanModernBtn,
+    .NouvScanModern2Btn {
+        min-width: 90px;
+        padding: 8px 12px;
+    }
+    
+    .NouvScanModernBtn span,
+    .NouvScanModern2Btn span {
+        font-size: 11px;
+    }
+}
 
 /*═══════════════════════════*\
   🟡 PARTIE 12  
