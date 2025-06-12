@@ -9966,6 +9966,375 @@ function initSalesPoint() {
   🔴 JS PARTIE 9
   ═════════════════════════════╝*/
 
+  // Gestion des rôles d'administrateurs pour le point de vente
+document.addEventListener('DOMContentLoaded', function() {
+    // Configuration initiale
+    const GestVenteAdmin_config = {
+        type: 'solo', // Type de configuration (solo, medium, large)
+        assignments: {} // Assignations des administrateurs aux rôles
+    };
+    
+    // Liste fictive d'administrateurs (normalement chargée depuis la base de données)
+    const GestVenteAdmin_adminsList = [
+        { id: 'admin1', name: 'Admin Principal', badge: 'primary', role: 'admin', online: true, lastLogin: new Date(), createdAt: new Date('2025-04-25') },
+        { id: 'admin2', name: 'Jean Dupont', badge: 'standard', role: 'standard', online: false, lastLogin: new Date('2025-04-24 15:40'), createdAt: new Date('2025-04-23') },
+        { id: 'admin3', name: 'Likula Jean-Louis', badge: 'standard', role: 'standard', online: true, lastLogin: new Date('2025-04-25 09:15'), createdAt: new Date('2025-04-20') },
+        { id: 'admin4', name: 'Marie Laurent', badge: 'standard', role: 'standard', online: false, lastLogin: new Date('2025-04-23 11:30'), createdAt: new Date('2025-04-18') }
+    ];
+    
+    // Définition des rôles et leur description selon la configuration
+    const GestVenteAdmin_roleDefinitions = {
+        solo: {
+            type: 'Boutique individuelle',
+            roles: {
+                gestionnaire: {
+                    name: 'Gestionnaire',
+                    icon: 'user-tie',
+                    badge: 'solo',
+                    description: 'Gère toutes les étapes de la vente: accueil client, scan des produits, encaissement et livraison.'
+                }
+            },
+            explanation: 'Dans cette configuration, chaque gestionnaire peut traiter une vente complète, de l\'accueil du client jusqu\'à la livraison des produits.'
+        },
+        medium: {
+            type: 'Boutique moyenne',
+            roles: {
+                recepteur: {
+                    name: 'Récepteur de commandes',
+                    icon: 'clipboard-list',
+                    badge: 'recepteur',
+                    description: 'Accueille les clients, enregistre leurs besoins et transfère les commandes au caissier.'
+                },
+                caissier: {
+                    name: 'Caissier',
+                    icon: 'cash-register',
+                    badge: 'caissier',
+                    description: 'Reçoit les paiements et coordonne la livraison des produits au client.'
+                }
+            },
+            explanation: 'Cette configuration sépare la prise de commande et l\'encaissement. Le récepteur enregistre la commande et la transmet au caissier qui finalise la vente.'
+        },
+        large: {
+            type: 'Grand commerce',
+            roles: {
+                recepteur: {
+                    name: 'Récepteur de commandes',
+                    icon: 'clipboard-list',
+                    badge: 'recepteur',
+                    description: 'Accueille les clients, enregistre leurs besoins et transfère les commandes au caissier.'
+                },
+                caissier: {
+                    name: 'Caissier',
+                    icon: 'cash-register',
+                    badge: 'caissier',
+                    description: 'Reçoit les paiements et transmet les commandes payées au livreur.'
+                },
+                livreur: {
+                    name: 'Livreur',
+                    icon: 'box',
+                    badge: 'livreur',
+                    description: 'Prépare les produits demandés et les remet au client après paiement.'
+                }
+            },
+            explanation: 'Cette configuration convient aux grands commerces avec une séparation complète entre la prise de commande, l\'encaissement et la livraison des produits.'
+        }
+    };
+    
+    // Références aux éléments DOM
+    const GestVenteAdmin_currentType = document.getElementById('GestVenteAdmin_current-type');
+    const GestVenteAdmin_helpBtn = document.getElementById('GestVenteAdmin_help-btn');
+    const GestVenteAdmin_changeConfigBtn = document.getElementById('GestVenteAdmin_change-config');
+    const GestVenteAdmin_assignRolesBtn = document.getElementById('GestVenteAdmin_assign-roles');
+    const GestVenteAdmin_assignedRoles = document.getElementById('GestVenteAdmin_assigned-roles');
+    const GestVenteAdmin_saveConfigBtn = document.getElementById('GestVenteAdmin_save-config');
+    const GestVenteAdmin_saveAssignmentsBtn = document.getElementById('GestVenteAdmin_save-assignments');
+    const GestVenteAdmin_modalConfigType = document.getElementById('GestVenteAdmin_modal-config-type');
+    const GestVenteAdmin_rolesExplanation = document.getElementById('GestVenteAdmin_roles-explanation');
+    const GestVenteAdmin_roleAssignments = document.getElementById('GestVenteAdmin_role-assignments');
+    
+    // Modales Bootstrap
+    const GestVenteAdmin_helpModal = new bootstrap.Modal(document.getElementById('GestVenteAdmin_helpModal'));
+    const GestVenteAdmin_configModal = new bootstrap.Modal(document.getElementById('GestVenteAdmin_configModal'));
+    const GestVenteAdmin_assignRolesModal = new bootstrap.Modal(document.getElementById('GestVenteAdmin_assignRolesModal'));
+    
+    // Initialisation
+    function GestVenteAdmin_init() {
+        // Mise à jour de l'interface selon la configuration actuelle
+        GestVenteAdmin_updateConfigUI();
+        
+        // Mise à jour de la liste des rôles assignés
+        GestVenteAdmin_refreshAssignedRoles();
+        
+        // Gestion des événements
+        GestVenteAdmin_setupEventListeners();
+    }
+    
+    // Mise à jour de l'interface selon la configuration
+    function GestVenteAdmin_updateConfigUI() {
+        // Mise à jour du type de configuration affiché
+        const configType = GestVenteAdmin_roleDefinitions[GestVenteAdmin_config.type].type;
+        GestVenteAdmin_currentType.textContent = configType;
+        
+        // Mise à jour dans la modale d'assignation
+        GestVenteAdmin_modalConfigType.textContent = configType;
+        
+        // Mise à jour de l'explication des rôles
+        GestVenteAdmin_rolesExplanation.textContent = GestVenteAdmin_roleDefinitions[GestVenteAdmin_config.type].explanation;
+    }
+    
+    // Raffraîchir la liste des administrateurs assignés à des rôles
+    function GestVenteAdmin_refreshAssignedRoles() {
+        // Vider le conteneur
+        GestVenteAdmin_assignedRoles.innerHTML = '';
+        
+        const roleConfig = GestVenteAdmin_roleDefinitions[GestVenteAdmin_config.type];
+        const assignments = GestVenteAdmin_config.assignments[GestVenteAdmin_config.type] || {};
+        
+        // Vérifier s'il y a des assignations
+        let hasAssignments = false;
+        
+        // Parcourir les rôles pour cette configuration
+        for (const roleKey in roleConfig.roles) {
+            const role = roleConfig.roles[roleKey];
+            const assignedAdmins = assignments[roleKey] || [];
+            
+            // Ajouter les administrateurs assignés à ce rôle
+            assignedAdmins.forEach(adminId => {
+                hasAssignments = true;
+                const admin = GestVenteAdmin_adminsList.find(a => a.id === adminId);
+                if (admin) {
+                    const roleItem = document.createElement('div');
+                    roleItem.className = 'GestVenteAdmin_role-item';
+                    roleItem.dataset.adminId = admin.id;
+                    roleItem.dataset.roleKey = roleKey;
+                    
+                    roleItem.innerHTML = `
+                        <div class="GestVenteAdmin_role-header">
+                            <span class="GestVenteAdmin_role-badge ${role.badge}">
+                                <i class="fas fa-${role.icon}"></i> ${role.name}
+                            </span>
+                        </div>
+                        <span class="GestVenteAdmin_admin-name">${admin.name}</span>
+                        <span class="GestVenteAdmin_admin-joined">
+                            <i class="fas fa-calendar-alt"></i> Depuis le ${admin.createdAt.toLocaleDateString('fr-FR')}
+                        </span>
+                        <div class="GestVenteAdmin_role-actions">
+                            <div class="GestVenteAdmin_role-action" title="Retirer du rôle" onclick="GestVenteAdmin_removeAssignment('${admin.id}', '${roleKey}')">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
+                    `;
+                    
+                    GestVenteAdmin_assignedRoles.appendChild(roleItem);
+                }
+            });
+        }
+        
+        // Afficher un message si aucun administrateur n'est assigné
+        if (!hasAssignments) {
+            const emptyMessage = document.createElement('div');
+            emptyMessage.className = 'text-center py-4 text-muted';
+            emptyMessage.innerHTML = `
+                <i class="fas fa-user-tag fa-3x mb-3"></i>
+                <p>Aucun administrateur assigné aux rôles de vente</p>
+                <button class="btn btn-sm btn-outline-primary mt-2" onclick="document.getElementById('GestVenteAdmin_assign-roles').click()">
+                    <i class="fas fa-user-plus"></i> Assigner des administrateurs
+                </button>
+            `;
+            GestVenteAdmin_assignedRoles.appendChild(emptyMessage);
+        }
+    }
+    
+    // Générer le contenu de la modale d'assignation des rôles
+    function GestVenteAdmin_generateRoleAssignments() {
+        // Vider le conteneur
+        GestVenteAdmin_roleAssignments.innerHTML = '';
+        
+        const roleConfig = GestVenteAdmin_roleDefinitions[GestVenteAdmin_config.type];
+        const assignments = GestVenteAdmin_config.assignments[GestVenteAdmin_config.type] || {};
+        
+        // Parcourir les rôles pour cette configuration
+        for (const roleKey in roleConfig.roles) {
+            const role = roleConfig.roles[roleKey];
+            const assignedAdmins = assignments[roleKey] || [];
+            
+            // Créer le groupe de rôles
+            const roleGroup = document.createElement('div');
+            roleGroup.className = 'GestVenteAdmin_role-group';
+            roleGroup.dataset.roleKey = roleKey;
+            
+            // En-tête du groupe
+            roleGroup.innerHTML = `
+                <div class="GestVenteAdmin_role-group-header">
+                    <div class="GestVenteAdmin_role-group-icon ${role.badge}">
+                        <i class="fas fa-${role.icon}"></i>
+                    </div>
+                    <div>
+                        <h6 class="GestVenteAdmin_role-group-title">${role.name}</h6>
+                        <p class="GestVenteAdmin_role-group-description">${role.description}</p>
+                    </div>
+                </div>
+                <div class="GestVenteAdmin_role-selectors" data-role-key="${roleKey}">
+                    <!-- Les sélecteurs d'admins seront ajoutés ici -->
+                </div>
+            `;
+            
+            GestVenteAdmin_roleAssignments.appendChild(roleGroup);
+            
+            // Récupérer le conteneur des sélecteurs
+            const selectors = roleGroup.querySelector('.GestVenteAdmin_role-selectors');
+            
+            // Ajouter les sélecteurs pour chaque admin
+            GestVenteAdmin_adminsList.forEach(admin => {
+                const isAssigned = assignedAdmins.includes(admin.id);
+                const adminSelector = document.createElement('div');
+                adminSelector.className = `GestVenteAdmin_admin-selector ${isAssigned ? 'selected' : ''}`;
+                adminSelector.dataset.adminId = admin.id;
+                
+                adminSelector.innerHTML = `
+                    <div class="GestVenteAdmin_admin-selector-check"></div>
+                    <span class="GestVenteAdmin_admin-selector-name">${admin.name}</span>
+                `;
+                
+                adminSelector.addEventListener('click', function() {
+                    this.classList.toggle('selected');
+                });
+                
+                selectors.appendChild(adminSelector);
+            });
+            
+            // Ajouter le bouton pour ajouter un admin
+            const addAdminBtn = document.createElement('div');
+            addAdminBtn.className = 'GestVenteAdmin_add-admin-btn';
+            addAdminBtn.innerHTML = `
+                <i class="fas fa-plus"></i> Ajouter un administrateur
+            `;
+            addAdminBtn.addEventListener('click', function() {
+                // Cette fonctionnalité ouvrirait normalement une modale pour créer un nouvel admin
+                showNotification('Cette fonctionnalité permettrait de créer un nouvel administrateur.', 'info');
+            });
+            
+            selectors.appendChild(addAdminBtn);
+        }
+    }
+    
+    // Configuration des écouteurs d'événements
+    function GestVenteAdmin_setupEventListeners() {
+        // Bouton d'aide
+        GestVenteAdmin_helpBtn.addEventListener('click', function() {
+            GestVenteAdmin_helpModal.show();
+        });
+        
+        // Bouton de changement de configuration
+        GestVenteAdmin_changeConfigBtn.addEventListener('click', function() {
+            // Sélectionner la configuration actuelle
+            const configOptions = document.querySelectorAll('.GestVenteAdmin_config-option');
+            configOptions.forEach(option => {
+                option.classList.remove('selected');
+                if (option.dataset.configType === GestVenteAdmin_config.type) {
+                    option.classList.add('selected');
+                }
+            });
+            
+            GestVenteAdmin_configModal.show();
+        });
+        
+        // Bouton d'assignation des rôles
+        GestVenteAdmin_assignRolesBtn.addEventListener('click', function() {
+            GestVenteAdmin_generateRoleAssignments();
+            GestVenteAdmin_assignRolesModal.show();
+        });
+        
+        // Sélection d'une configuration
+        document.querySelectorAll('.GestVenteAdmin_config-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // Désélectionner toutes les options
+                document.querySelectorAll('.GestVenteAdmin_config-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Sélectionner cette option
+                this.classList.add('selected');
+            });
+        });
+        
+        // Sauvegarde de la configuration
+        GestVenteAdmin_saveConfigBtn.addEventListener('click', function() {
+            const selectedOption = document.querySelector('.GestVenteAdmin_config-option.selected');
+            if (selectedOption) {
+                const newConfigType = selectedOption.dataset.configType;
+                
+                // Vérifier si la configuration a changé
+                if (newConfigType !== GestVenteAdmin_config.type) {
+                    // Mettre à jour la configuration
+                    GestVenteAdmin_config.type = newConfigType;
+                    
+                    // Initialiser les assignations pour cette configuration si nécessaire
+                    if (!GestVenteAdmin_config.assignments[newConfigType]) {
+                        GestVenteAdmin_config.assignments[newConfigType] = {};
+                    }
+                    
+                    // Mettre à jour l'interface
+                    GestVenteAdmin_updateConfigUI();
+                    GestVenteAdmin_refreshAssignedRoles();
+                    
+                    showNotification('Configuration mise à jour avec succès.', 'success');
+                }
+                
+                GestVenteAdmin_configModal.hide();
+            }
+        });
+        
+        // Sauvegarde des assignations
+        GestVenteAdmin_saveAssignmentsBtn.addEventListener('click', function() {
+            // Réinitialiser les assignations pour la configuration actuelle
+            GestVenteAdmin_config.assignments[GestVenteAdmin_config.type] = {};
+            
+            // Parcourir les groupes de rôles
+            document.querySelectorAll('.GestVenteAdmin_role-group').forEach(group => {
+                const roleKey = group.dataset.roleKey;
+                
+                // Initialiser le tableau d'assignations pour ce rôle
+                GestVenteAdmin_config.assignments[GestVenteAdmin_config.type][roleKey] = [];
+                
+                // Ajouter les administrateurs sélectionnés
+                group.querySelectorAll('.GestVenteAdmin_admin-selector.selected').forEach(selector => {
+                    const adminId = selector.dataset.adminId;
+                    GestVenteAdmin_config.assignments[GestVenteAdmin_config.type][roleKey].push(adminId);
+                });
+            });
+            
+            // Mettre à jour l'interface
+            GestVenteAdmin_refreshAssignedRoles();
+            
+            GestVenteAdmin_assignRolesModal.hide();
+            showNotification('Rôles assignés avec succès.', 'success');
+        });
+    }
+    
+    // Fonction pour retirer un administrateur d'un rôle (appelée depuis le HTML)
+    window.GestVenteAdmin_removeAssignment = function(adminId, roleKey) {
+        // Vérifier si des assignations existent pour cette configuration
+        if (GestVenteAdmin_config.assignments[GestVenteAdmin_config.type] &&
+            GestVenteAdmin_config.assignments[GestVenteAdmin_config.type][roleKey]) {
+            
+            // Filtrer l'administrateur du tableau d'assignations
+            GestVenteAdmin_config.assignments[GestVenteAdmin_config.type][roleKey] = 
+                GestVenteAdmin_config.assignments[GestVenteAdmin_config.type][roleKey].filter(id => id !== adminId);
+            
+            // Mettre à jour l'interface
+            GestVenteAdmin_refreshAssignedRoles();
+            
+            showNotification('Administrateur retiré du rôle avec succès.', 'success');
+        }
+    };
+    
+    // Initialiser la gestion des rôles
+    GestVenteAdmin_init();
+});
+
+
+
 /*══════════════════════════════╗
   🟠 JS PARTIE 10
   ═════════════════════════════╝*/
