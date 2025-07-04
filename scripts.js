@@ -610,35 +610,38 @@ document.getElementById('print-generated').addEventListener('click', function() 
 }
 
         function showSection(sectionId) {
-            // Cacher toutes les sections
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.style.display = 'none';
-            });
-            
-            // Afficher la section demandée
-            document.getElementById(sectionId).style.display = 'block';
-            
-            // Mettre à jour la navigation
-            document.querySelectorAll('#sidebar .nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            document.querySelector(`#sidebar [data-section="${sectionId}"]`).classList.add('active');
-            
-            // Actions spécifiques selon la section
-            if (sectionId === 'inventory') {
-                loadInventoryTable();
-            } else if (sectionId === 'print-codes') {
-                loadPrintTable();
-            } else if (sectionId === 'alerts') {
-                loadAlertsTable();
-            } else if (sectionId === 'add-product') {
-                // Réinitialiser le formulaire
-                document.getElementById('add-product-form').reset();
-                document.getElementById('code-preview-container').style.display = 'none';
-                document.getElementById('code-scan-container').style.display = 'none';
-                document.getElementById('code-manual-container').style.display = 'none';
-            }
-        }
+    // Cacher toutes les sections
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Afficher la section demandée
+    document.getElementById(sectionId).style.display = 'block';
+    
+    // Mettre à jour la navigation
+    document.querySelectorAll('#sidebar .nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    document.querySelector(`#sidebar [data-section="${sectionId}"]`).classList.add('active');
+    
+    // Actions spécifiques selon la section
+    if (sectionId === 'inventory') {
+        loadInventoryTable();
+    } else if (sectionId === 'print-codes') {
+        loadPrintTable();
+    } else if (sectionId === 'alerts') {
+        loadAlertsTable();
+    } else if (sectionId === 'add-product') {
+        // Réinitialiser le formulaire
+        document.getElementById('add-product-form').reset();
+        document.getElementById('code-preview-container').style.display = 'none';
+        document.getElementById('code-scan-container').style.display = 'none';
+        document.getElementById('code-manual-container').style.display = 'none';
+    } else if (sectionId === 'ai-assistant') {
+        // Initialiser l'assistant IA
+        initAiAssistant();
+    }
+}
 
         function updateDashboardStats() {
     // Compter le total des produits
@@ -4630,1639 +4633,1610 @@ function initCurrencyEvents() {
 // 🔴 JS PARTIE 5
 //══════════════════════════════╝
 
-  // JavaScript complet pour l'analyse IA de l'inventaire
-document.addEventListener('DOMContentLoaded', function() {
-    // ====== Données de simulation ======
-    const mockProducts = [
-        { id: 1, name: "Smartphone XL+", category: "electronics", stock: 32, sold: 78, price: 899, trend: 15 },
-        { id: 2, name: "Écouteurs sans fil Pro", category: "electronics", stock: 45, sold: 64, price: 199, trend: 12 },
-        { id: 3, name: "Montre connectée Sport", category: "electronics", stock: 28, sold: 52, price: 299, trend: 8 },
-        { id: 4, name: "Enceinte portable waterproof", category: "electronics", stock: 40, sold: 49, price: 129, trend: 0 },
-        { id: 5, name: "Batterie externe 20000mAh", category: "electronics", stock: 60, sold: 42, price: 59, trend: -5 },
-        { id: 6, name: "Casque gaming standard", category: "electronics", stock: 35, sold: 10, price: 89, trend: -15 },
-        { id: 7, name: "Table de salon design", category: "furniture", stock: 12, sold: 8, price: 349, trend: 3 },
-        { id: 8, name: "Chaise de bureau ergonomique", category: "furniture", stock: 18, sold: 15, price: 249, trend: 5 },
-        { id: 9, name: "T-shirt Premium", category: "clothing", stock: 120, sold: 85, price: 29, trend: -2 },
-        { id: 10, name: "Jeans coupe slim", category: "clothing", stock: 80, sold: 62, price: 59, trend: 4 },
-        { id: 11, name: "Snacks assortis", category: "food", stock: 150, sold: 130, price: 3.5, trend: 10 },
-        { id: 12, name: "Boissons énergisantes", category: "food", stock: 200, sold: 180, price: 2.5, trend: 8 }
+  // Configuration de l'Assistant IA
+let aiConversation = [];
+let aiUserPreferences = JSON.parse(localStorage.getItem('totalAiPreferences')) || {
+    reportTime: '18:00',
+    reportFrequency: 'daily',
+    language: 'fr',
+    lastReportDate: null
+};
+
+// Fonctions pour l'Assistant IA
+function initAiAssistant() {
+    // Réinitialiser la conversation
+    aiConversation = [];
+    
+    // Afficher le message d'accueil
+    addAiMessage({
+        type: 'ai',
+        content: `<p>Bonjour ! Je suis TotalAssist, votre assistant de gestion d'inventaire.</p>
+                 <p>Je vais vous aider à gérer votre stock de façon simple et efficace.</p>
+                 <div class="ai-inventory-summary">
+                    <div class="ai-stat">
+                        <div class="ai-stat-icon inventory">
+                            <i class="fas fa-box-open"></i>
+                        </div>
+                        <div class="ai-stat-info">
+                            <h4>${products.reduce((total, product) => total + product.quantity, 0)}</h4>
+                            <p>Produits en stock</p>
+                        </div>
+                    </div>
+                    <div class="ai-stat">
+                        <div class="ai-stat-icon low">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="ai-stat-info">
+                            <h4>${products.filter(product => product.quantity > 0 && product.quantity <= product.minStock).length}</h4>
+                            <p>Produits en stock faible</p>
+                        </div>
+                    </div>
+                    <div class="ai-stat">
+                        <div class="ai-stat-icon out">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="ai-stat-info">
+                            <h4>${products.filter(product => product.quantity <= 0).length}</h4>
+                            <p>Produits en rupture</p>
+                        </div>
+                    </div>
+                 </div>
+                 <p>Comment puis-je vous aider aujourd'hui ?</p>`
+    });
+    
+    // Afficher les options principales
+    showMainOptions();
+}
+
+function addAiMessage(message) {
+    // Enregistrer le message dans la conversation
+    aiConversation.push(message);
+    
+    // Créer l'élément du message
+    const messageEl = document.createElement('div');
+    messageEl.className = `ai-message ${message.type}`;
+    
+    // Ajouter le contenu du message
+    messageEl.innerHTML = `
+        ${message.content}
+        <div class="ai-message-time">${new Date().toLocaleTimeString()}</div>
+    `;
+    
+    // Ajouter au conteneur de messages
+    document.getElementById('ai-messages').appendChild(messageEl);
+    
+    // Scroll vers le bas
+    const messagesContainer = document.getElementById('ai-messages');
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function showTypingIndicator() {
+    const typingEl = document.createElement('div');
+    typingEl.className = 'ai-typing';
+    typingEl.id = 'ai-typing-indicator';
+    typingEl.innerHTML = '<span></span><span></span><span></span>';
+    
+    document.getElementById('ai-messages').appendChild(typingEl);
+    
+    // Scroll vers le bas
+    const messagesContainer = document.getElementById('ai-messages');
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const typingEl = document.getElementById('ai-typing-indicator');
+    if (typingEl) {
+        typingEl.remove();
+    }
+}
+
+function showMainOptions() {
+    // Définir les options principales
+    const options = [
+        { icon: 'fas fa-chart-line', text: 'Voir mon inventaire', action: 'showInventorySummary' },
+        { icon: 'fas fa-exclamation-triangle', text: 'Produits en stock faible', action: 'showLowStockProducts' },
+        { icon: 'fas fa-plus-circle', text: 'Ajouter un produit', action: 'navigateToAddProduct' },
+        { icon: 'fas fa-search', text: 'Rechercher un produit', action: 'showSearchProduct' },
+        { icon: 'fas fa-file-alt', text: 'Rapport journalier', action: 'generateDailyReport' },
+        { icon: 'fas fa-cog', text: 'Configurer les rapports', action: 'configureReports' }
     ];
-
-    const mockCategories = [
-        { id: "electronics", name: "Électronique", icon: "fas fa-tv", prediction: 18 },
-        { id: "furniture", name: "Mobilier", icon: "fas fa-couch", prediction: 5 },
-        { id: "clothing", name: "Vêtements", icon: "fas fa-tshirt", prediction: -2 },
-        { id: "food", name: "Alimentaire", icon: "fas fa-utensils", prediction: 10 }
-    ];
-
-    const mockSalesData = {
-        week: [42, 38, 52, 48, 62, 59, 78],
-        month: [150, 165, 180, 168, 172, 190, 185, 210, 195, 215, 220, 225, 230, 218, 225, 240, 235, 250, 242, 265, 260, 270, 275, 290, 285, 295, 300, 310, 320, 325],
-        year: [3200, 3500, 3800, 4100, 4300, 4600, 4900, 5200, 5500, 5800, 5950, 6100]
-    };
-
-    const mockRecommendations = [
-        { id: 1, type: "increase_stock", icon: "fas fa-arrow-up", title: "Augmenter le stock de Smartphone XL+", description: "Les ventes augmentent de 15% chaque mois depuis 3 mois." },
-        { id: 2, type: "price_up", icon: "fas fa-percentage", title: "Augmenter le prix des Écouteurs sans fil Pro", description: "Forte demande avec une élasticité-prix favorable. Potentiel +15% sans impact sur les ventes." },
-        { id: 3, type: "reduce_stock", icon: "fas fa-arrow-down", title: "Réduire le stock de Casques gaming standard", description: "Rotation lente, 35 unités en stock depuis plus de 60 jours." },
-        { id: 4, type: "restock", icon: "fas fa-exclamation-triangle", title: "Réapprovisionner en Montre connectée Sport", description: "Stock faible (28) et ventes en hausse. Risque de rupture dans 15 jours." },
-        { id: 5, type: "promotion", icon: "fas fa-tags", title: "Lancer une promotion sur Batterie externe 20000mAh", description: "Baisse des ventes de 5% et stock important. Promotion recommandée pour accélérer l'écoulement." },
-        { id: 6, type: "bundle", icon: "fas fa-box-open", title: "Créer un bundle Smartphone + Écouteurs", description: "Ces produits sont souvent achetés ensemble. Un bundle augmenterait la valeur moyenne des commandes." }
-    ];
-
-    // ====== Éléments DOM ======
-    const analyzeBtn = document.getElementById('AnalInvenIa-runBtn');
-    const filterTabs = document.querySelectorAll('.AnalInvenIa-tab[data-filter]');
-    const customFilterTabs = document.querySelectorAll('.AnalInvenIa-tab[data-customfilter]');
-    const scopeOptions = document.querySelectorAll('.AnalInvenIa-scope-option');
-    const selects = document.querySelectorAll('.AnalInvenIa-select');
-    const insightTabs = document.querySelectorAll('.AnalInvenIa-insight-tab');
-    const topProductTabs = document.querySelectorAll('.AnalInvenIa-tab[data-toptab]');
-    const newAnalysisBtn = document.getElementById('AnalInvenIa-newAnalysis');
-    const resetParamsBtn = document.getElementById('AnalInvenIa-resetParams');
-    const toggleSummaryBtn = document.getElementById('AnalInvenIa-toggleSummary');
-
-    // Configuration des éléments spécifiques
-    const categorySelector = document.getElementById('AnalInvenIa-categorySelector');
-    const productSelector = document.getElementById('AnalInvenIa-productSelector');
-    const productSearchInput = document.getElementById('AnalInvenIa-productSearch');
-    const productResults = document.getElementById('AnalInvenIa-productResults');
-    const selectedProductDisplay = document.querySelector('.AnalInvenIa-selected-product');
-    const selectedProductName = document.getElementById('AnalInvenIa-selectedProductName');
-    const analysisTitle = document.getElementById('AnalInvenIa-analysisTitle');
-    const analysisPeriod = document.getElementById('AnalInvenIa-analysisPeriod');
-    const printResultsBtn = document.getElementById('AnalInvenIa-printResults');
-    const exportResultsBtn = document.getElementById('AnalInvenIa-exportResults');
-    const viewAllRecommendationsBtn = document.getElementById('AnalInvenIa-viewAllRecommendations');
-    const viewAllProductsBtn = document.getElementById('AnalInvenIa-viewAllProducts');
-    const viewAllPredictionsBtn = document.getElementById('AnalInvenIa-viewAllPredictions');
-    const chartControls = document.querySelectorAll('.AnalInvenIa-chart-control');
-
-    // Variables d'état
-    let currentFilter = 1;
-    let currentCustomFilter = 'range';
-    let currentScope = 'global';
-    let selectedCategory = null;
-    let selectedProduct = null;
-    let currentInterval = 'day';
-    let currentRelativePeriod = 'today';
-    let currentChartPeriod = 'month';
-    let charts = {};
-
-    // ====== Initialisation ======
-    // Remplir les sélecteurs de catégories
-    initCategorySelectors();
     
-    // Préparer le champ de recherche de produits
-    initProductSearch();
+    renderOptions(options);
+}
 
-    // ====== Gestion des événements ======
-    // Gestion des onglets de filtres
-    filterTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const filterId = this.getAttribute('data-filter');
-            currentFilter = parseInt(filterId);
-            
-            // Désactiver tous les onglets et contenus
-            filterTabs.forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.AnalInvenIa-filter-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // Activer l'onglet et le contenu sélectionnés
-            this.classList.add('active');
-            document.getElementById(`AnalInvenIa-filter${filterId}`).classList.add('active');
-        });
-    });
+function renderOptions(options) {
+    const optionsContainer = document.getElementById('ai-options');
+    optionsContainer.innerHTML = '';
     
-    // Gestion des onglets de filtres personnalisés
-    customFilterTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const customFilterId = this.getAttribute('data-customfilter');
-            currentCustomFilter = customFilterId;
-            
-            // Désactiver tous les onglets et contenus
-            customFilterTabs.forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.AnalInvenIa-custom-filter').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // Activer l'onglet et le contenu sélectionnés
-            this.classList.add('active');
-            document.getElementById(`AnalInvenIa-custom${customFilterId.charAt(0).toUpperCase() + customFilterId.slice(1)}`).classList.add('active');
-        });
-    });
-    
-    // Gestion des options de portée d'analyse
-    scopeOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            const scope = this.getAttribute('data-scope');
-            currentScope = scope;
-            
-            // Désactiver toutes les options
-            scopeOptions.forEach(opt => opt.classList.remove('active'));
-            
-            // Activer l'option sélectionnée
-            this.classList.add('active');
-            
-            // Afficher/masquer les sélecteurs appropriés
-            categorySelector.style.display = scope === 'category' ? 'block' : 'none';
-            productSelector.style.display = scope === 'product' ? 'block' : 'none';
-        });
-    });
-    
-    // Gestion des select personnalisés
-    selects.forEach(select => {
-        const selectId = select.id;
+    // Vérifier si le conteneur parent existe, sinon le créer
+    let optionsParentContainer = document.querySelector('.ai-options-container');
+    if (!optionsParentContainer) {
+        optionsParentContainer = document.createElement('div');
+        optionsParentContainer.className = 'ai-options-container';
+        optionsContainer.parentNode.replaceChild(optionsParentContainer, optionsContainer);
+        optionsParentContainer.appendChild(optionsContainer);
         
-        select.addEventListener('click', function() {
-            this.classList.toggle('active');
+        // Ajouter le bouton de toggle pour changer l'orientation
+        const toggleButton = document.createElement('div');
+        toggleButton.className = 'ai-options-layout-toggle';
+        toggleButton.innerHTML = '<i class="fas fa-list"></i>';
+        toggleButton.addEventListener('click', toggleOptionsLayout);
+        optionsParentContainer.appendChild(toggleButton);
+    }
+    
+    options.forEach(option => {
+        const optionEl = document.createElement('div');
+        optionEl.className = 'ai-option';
+        optionEl.innerHTML = `<i class="${option.icon}"></i> ${option.text}`;
+        
+        optionEl.addEventListener('click', () => {
+            // Ajouter la sélection de l'utilisateur comme message
+            addAiMessage({
+                type: 'user',
+                content: `<p>${option.text}</p>`
+            });
+            
+            // Effacer les options
+            optionsContainer.innerHTML = '';
+            
+            // Montrer l'indicateur de frappe
+            showTypingIndicator();
+            
+            // Simuler un délai pour une expérience plus naturelle
+            setTimeout(() => {
+                removeTypingIndicator();
+                
+                // Exécuter l'action associée
+                window[option.action]();
+            }, 1000);
         });
         
-        const options = select.querySelectorAll('.AnalInvenIa-select-option');
-        options.forEach(option => {
-            option.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const value = this.getAttribute('data-value');
-                const displayText = this.textContent.trim();
-                
-                // Mettre à jour l'affichage du sélecteur
-                const valueDisplay = select.querySelector('.AnalInvenIa-select-value');
-                
-                if (selectId === 'AnalInvenIa-intervalSelect') {
-                    currentInterval = value;
-                    const icon = this.querySelector('i').className;
-                    valueDisplay.innerHTML = `<i class="${icon} me-2"></i>${displayText}`;
-                } else if (selectId === 'AnalInvenIa-relativeSelect') {
-                    currentRelativePeriod = value;
-                    const icon = this.querySelector('i').className;
-                    valueDisplay.innerHTML = `<i class="${icon} me-2"></i>${displayText}`;
-                } else if (selectId === 'AnalInvenIa-categorySelect') {
-                    selectedCategory = value;
-                    const icon = this.querySelector('i').className;
-                    valueDisplay.innerHTML = `<i class="${icon} me-2"></i>${displayText}`;
-                } else {
-                    valueDisplay.textContent = displayText;
-                }
-                
-                select.classList.remove('active');
-            });
-        });
+        optionsContainer.appendChild(optionEl);
     });
     
-    // Fermer les selects lors d'un clic à l'extérieur
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.AnalInvenIa-select')) {
-            selects.forEach(select => select.classList.remove('active'));
-        }
-        if (!e.target.closest('.AnalInvenIa-search-container') && productResults) {
-            productResults.style.display = 'none';
-        }
-    });
+    // Faire défiler automatiquement vers le début des options
+    optionsContainer.scrollLeft = 0;
+}
+
+// Fonction pour basculer entre la disposition horizontale et verticale des options
+function toggleOptionsLayout() {
+    const optionsContainer = document.getElementById('ai-options');
+    const toggleButton = document.querySelector('.ai-options-layout-toggle');
     
-    // Gestion des onglets d'insights
-    insightTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const tabId = this.getAttribute('data-tab');
-            
-            // Désactiver tous les onglets et contenus
-            insightTabs.forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.AnalInvenIa-insight-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // Activer l'onglet et le contenu sélectionnés
-            this.classList.add('active');
-            document.getElementById(`AnalInvenIa-tab-${tabId}`).classList.add('active');
-        });
-    });
+    if (optionsContainer.classList.contains('vertical')) {
+        // Passer en mode horizontal
+        optionsContainer.classList.remove('vertical');
+        toggleButton.innerHTML = '<i class="fas fa-list"></i>';
+    } else {
+        // Passer en mode vertical
+        optionsContainer.classList.add('vertical');
+        toggleButton.innerHTML = '<i class="fas fa-grip-lines"></i>';
+    }
     
-    // Gestion des onglets de top produits
-    topProductTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const tabId = this.getAttribute('data-toptab');
-            
-            // Désactiver tous les onglets et contenus
-            topProductTabs.forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.AnalInvenIa-top-products').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // Activer l'onglet et le contenu sélectionnés
-            this.classList.add('active');
-            document.getElementById(`AnalInvenIa-${tabId}`).classList.add('active');
-            
-            // Remplir le contenu si nécessaire
-            fillTopProductsContent(tabId);
-        });
-    });
+    // Ajuster le scroll pour s'assurer que les options sont visibles
+    if (optionsContainer.classList.contains('vertical')) {
+        optionsContainer.scrollTop = 0;
+    } else {
+        optionsContainer.scrollLeft = 0;
+    }
+}
+
+
+function showInventorySummary() {
+    // Obtenir les 5 derniers produits ajoutés
+    const recentProducts = [...products]
+        .sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
+        .slice(0, 5);
     
-    // Gestion du bouton d'analyse
-    analyzeBtn.addEventListener('click', function() {
-        startAnalysis();
-    });
-    
-    document.getElementById('AnalInvenIa-runAnalysis').addEventListener('click', function() {
-        startAnalysis();
-    });
-    
-    // Gestion du bouton de réinitialisation
-    resetParamsBtn.addEventListener('click', function() {
-        resetAnalysisParams();
-    });
-    
-    // Gestion du bouton de nouvelle analyse
-    newAnalysisBtn.addEventListener('click', function() {
-        document.getElementById('AnalInvenIa-results').style.display = 'none';
-        document.querySelector('.card').style.display = 'block';
-    });
-    
-    // Gestion du bouton pour développer/réduire le résumé
-    toggleSummaryBtn.addEventListener('click', function() {
-        const summaryContent = document.getElementById('AnalInvenIa-summaryContent');
-        const isCollapsed = summaryContent.style.maxHeight === '0px' || !summaryContent.style.maxHeight;
-        
-        if (isCollapsed) {
-            summaryContent.style.maxHeight = summaryContent.scrollHeight + 'px';
-            this.innerHTML = '<i class="fas fa-chevron-up"></i>';
+    // Calcul de la valeur totale du stock
+    let totalValue = 0;
+    products.forEach(product => {
+        let priceUsd;
+        if (product.priceCurrency === 'cdf') {
+            priceUsd = convertCdfToUsd(product.price);
         } else {
-            summaryContent.style.maxHeight = '0px';
-            this.innerHTML = '<i class="fas fa-chevron-down"></i>';
+            priceUsd = product.price;
         }
+        totalValue += priceUsd * product.quantity;
     });
-
-    // Gestion de la suppression d'un produit sélectionné
-    const removeProductBtn = document.querySelector('.AnalInvenIa-remove-product');
-    if (removeProductBtn) {
-        removeProductBtn.addEventListener('click', function() {
-            selectedProduct = null;
-            selectedProductDisplay.style.display = 'none';
-        });
-    }
-
-    // Gestion des contrôles des graphiques
-    chartControls.forEach(control => {
-        control.addEventListener('click', function() {
-            const period = this.getAttribute('data-period');
-            currentChartPeriod = period;
+    
+    // Créer le contenu du message
+    let messageContent = `
+        <p>Voici un résumé de votre inventaire actuel :</p>
+        <div class="ai-inventory-summary">
+            <div class="ai-stat">
+                <div class="ai-stat-icon inventory">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <div class="ai-stat-info">
+                    <h4>${products.reduce((total, product) => total + product.quantity, 0)}</h4>
+                    <p>Produits en stock</p>
+                </div>
+            </div>
+            <div class="ai-stat">
+                <div class="ai-stat-icon inventory">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="ai-stat-info">
+                    <h4>${formatPriceForDisplay(totalValue, 'usd')}</h4>
+                    <p>Valeur totale</p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Ajouter les produits récents
+    if (recentProducts.length > 0) {
+        messageContent += `<p>Voici vos produits ajoutés récemment :</p><div class="ai-product-list">`;
+        
+        recentProducts.forEach(product => {
+            const formattedPrice = formatPriceForDisplay(product.price, product.priceCurrency || 'usd');
+            const stockStatus = getStockStatus(product.quantity, product.minStock);
+            let statusIcon = '';
             
-            // Mettre à jour l'état actif
-            chartControls.forEach(c => c.classList.remove('active'));
-            this.classList.add('active');
+            if (stockStatus === 'in-stock') {
+                statusIcon = '<i class="fas fa-check-circle" style="color: var(--success);"></i>';
+            } else if (stockStatus === 'low-stock') {
+                statusIcon = '<i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>';
+            } else {
+                statusIcon = '<i class="fas fa-times-circle" style="color: var(--danger);"></i>';
+            }
             
-            // Mettre à jour le graphique
-            updateSalesChart(period);
+            messageContent += `
+                <div class="ai-product-item">
+                    <div class="ai-product-info">
+                        <div class="ai-product-name">${product.name} ${statusIcon}</div>
+                        <div class="ai-product-details">${formattedPrice} | Quantité: ${product.quantity}</div>
+                    </div>
+                    <div class="ai-product-actions">
+                        <div class="ai-product-action" onclick="openProductModalFromAi('${product.id}')">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="ai-product-action" onclick="openSellModalFromAi('${product.id}')">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
         });
-    });
-
-    // Gestion des boutons d'action des résultats
-    if (printResultsBtn) {
-        printResultsBtn.addEventListener('click', function() {
-            alert("Fonctionnalité d'impression: cette fonctionnalité sera implémentée ultérieurement.");
-        });
+        
+        messageContent += `</div>`;
+    } else {
+        messageContent += `<p>Vous n'avez pas encore de produits dans votre inventaire.</p>`;
     }
     
-    if (exportResultsBtn) {
-        exportResultsBtn.addEventListener('click', function() {
-            alert("Fonctionnalité d'export PDF: cette fonctionnalité sera implémentée ultérieurement.");
-        });
-    }
-
-    if (viewAllRecommendationsBtn) {
-        viewAllRecommendationsBtn.addEventListener('click', function() {
-            // Activer l'onglet Recommandations
-            document.querySelector('.AnalInvenIa-insight-tab[data-tab="recommendations"]').click();
-            fillRecommendationsTab();
-        });
-    }
-
-    if (viewAllProductsBtn) {
-        viewAllProductsBtn.addEventListener('click', function() {
-            // Activer l'onglet Produits
-            document.querySelector('.AnalInvenIa-insight-tab[data-tab="products"]').click();
-            fillProductsTab();
-        });
-    }
-
-    if (viewAllPredictionsBtn) {
-        viewAllPredictionsBtn.addEventListener('click', function() {
-            // Activer l'onglet Prévisions
-            document.querySelector('.AnalInvenIa-insight-tab[data-tab="predictions"]').click();
-            fillPredictionsTab();
-        });
-    }
-
-    // Gestion de la barre latérale
-    const sidebarItems = document.querySelectorAll('.nav-item');
-    sidebarItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // Désactiver tous les éléments
-            sidebarItems.forEach(i => i.classList.remove('active'));
-            
-            // Activer l'élément cliqué
-            this.classList.add('active');
-            
-            // Cacher toutes les sections
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.style.display = 'none';
-            });
-            
-            // Afficher la section correspondante
-            const sectionId = this.getAttribute('data-section');
-            const section = document.getElementById(sectionId);
-            if (section) {
-                section.style.display = 'block';
-            }
-        });
+    messageContent += `<p>Que souhaitez-vous faire maintenant ?</p>`;
+    
+    // Ajouter le message
+    addAiMessage({
+        type: 'ai',
+        content: messageContent
     });
+    
+    // Montrer les options après l'inventaire
+    const options = [
+        { icon: 'fas fa-plus-circle', text: 'Ajouter un produit', action: 'navigateToAddProduct' },
+        { icon: 'fas fa-exclamation-triangle', text: 'Voir les produits en stock faible', action: 'showLowStockProducts' },
+        { icon: 'fas fa-list', text: 'Voir tout l\'inventaire', action: 'navigateToInventory' },
+        { icon: 'fas fa-home', text: 'Menu principal', action: 'showMainOptions' }
+    ];
+    
+    renderOptions(options);
+    
+    // Vérifier la satisfaction
+    setTimeout(() => {
+        checkSatisfaction("Êtes-vous satisfait de ce résumé d'inventaire ?");
+    }, 1000);
+}
 
-    // ====== Fonctions ======
-    // Initialiser les sélecteurs de catégories
-    function initCategorySelectors() {
-        const categorySelect = document.getElementById('AnalInvenIa-categorySelect');
-        const dropdown = categorySelect.querySelector('.AnalInvenIa-select-dropdown');
+function showLowStockProducts() {
+    // Obtenir les produits en stock faible
+    const lowStockProducts = products.filter(
+        product => product.quantity > 0 && product.quantity <= product.minStock
+    );
+    
+    // Obtenir les produits en rupture
+    const outOfStockProducts = products.filter(
+        product => product.quantity <= 0
+    );
+    
+    // Créer le contenu du message
+    let messageContent = `
+        <p>Voici les produits qui nécessitent votre attention :</p>
+    `;
+    
+    // Ajouter les produits en stock faible
+    if (lowStockProducts.length > 0) {
+        messageContent += `<p><strong>Produits en stock faible :</strong></p><div class="ai-product-list">`;
         
-        // Vider le dropdown existant
-        dropdown.innerHTML = '';
-        
-        // Ajouter les catégories
-        mockCategories.forEach(category => {
-            const option = document.createElement('div');
-            option.className = 'AnalInvenIa-select-option';
-            option.setAttribute('data-value', category.id);
-            option.innerHTML = `<i class="${category.icon} me-2"></i>${category.name}`;
-            dropdown.appendChild(option);
+        lowStockProducts.forEach(product => {
+            const formattedPrice = formatPriceForDisplay(product.price, product.priceCurrency || 'usd');
             
-            option.addEventListener('click', function(e) {
-                e.stopPropagation();
-                selectedCategory = category.id;
-                categorySelect.querySelector('.AnalInvenIa-select-value').innerHTML = `<i class="${category.icon} me-2"></i>${category.name}`;
-                categorySelect.classList.remove('active');
+            messageContent += `
+                <div class="ai-product-item">
+                    <div class="ai-product-info">
+                        <div class="ai-product-name">${product.name} <i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i></div>
+                        <div class="ai-product-details">${formattedPrice} | Quantité: ${product.quantity}/${product.minStock}</div>
+                    </div>
+                    <div class="ai-product-actions">
+                        <div class="ai-product-action" onclick="openProductModalFromAi('${product.id}')">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="ai-product-action" onclick="restockProductFromAi('${product.id}')">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        messageContent += `</div>`;
+    } else {
+        messageContent += `<p>Bonne nouvelle ! Vous n'avez pas de produits en stock faible.</p>`;
+    }
+    
+    // Ajouter les produits en rupture
+    if (outOfStockProducts.length > 0) {
+        messageContent += `<p><strong>Produits en rupture de stock :</strong></p><div class="ai-product-list">`;
+        
+        outOfStockProducts.forEach(product => {
+            const formattedPrice = formatPriceForDisplay(product.price, product.priceCurrency || 'usd');
+            
+            messageContent += `
+                <div class="ai-product-item">
+                    <div class="ai-product-info">
+                        <div class="ai-product-name">${product.name} <i class="fas fa-times-circle" style="color: var(--danger);"></i></div>
+                        <div class="ai-product-details">${formattedPrice} | Rupture de stock</div>
+                    </div>
+                    <div class="ai-product-actions">
+                        <div class="ai-product-action" onclick="openProductModalFromAi('${product.id}')">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="ai-product-action" onclick="restockProductFromAi('${product.id}')">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        messageContent += `</div>`;
+    } else {
+        messageContent += `<p>Bonne nouvelle ! Vous n'avez pas de produits en rupture de stock.</p>`;
+    }
+    
+    // Si aucun problème
+    if (lowStockProducts.length === 0 && outOfStockProducts.length === 0) {
+        messageContent += `<p>Votre inventaire est en excellent état ! Tous vos produits ont des niveaux de stock satisfaisants.</p>`;
+    } else {
+        messageContent += `<p>Je vous recommande de réapprovisionner ces produits dès que possible pour éviter les ruptures de stock.</p>`;
+    }
+    
+    // Ajouter le message
+    addAiMessage({
+        type: 'ai',
+        content: messageContent
+    });
+    
+    // Montrer les options après l'alerte
+    const options = [
+        { icon: 'fas fa-plus-circle', text: 'Réapprovisionner', action: 'navigateToAddProduct' },
+        { icon: 'fas fa-chart-line', text: 'Voir tout l\'inventaire', action: 'navigateToInventory' },
+        { icon: 'fas fa-file-alt', text: 'Générer un rapport', action: 'generateDailyReport' },
+        { icon: 'fas fa-home', text: 'Menu principal', action: 'showMainOptions' }
+    ];
+    
+    renderOptions(options);
+}
+
+function navigateToAddProduct() {
+    addAiMessage({
+        type: 'ai',
+        content: `
+            <p>Je vous dirige vers la section d'ajout de produit.</p>
+            <p>Vous pourrez y ajouter un nouveau produit à votre inventaire ou réapprovisionner un produit existant.</p>
+            <p>N'hésitez pas à revenir me voir si vous avez besoin d'aide ! 😊</p>
+        `
+    });
+    
+    setTimeout(() => {
+        showSection('add-product');
+    }, 1500);
+}
+
+function navigateToInventory() {
+    addAiMessage({
+        type: 'ai',
+        content: `
+            <p>Je vous dirige vers la section inventaire.</p>
+            <p>Vous y trouverez la liste complète de tous vos produits avec leurs détails.</p>
+            <p>N'hésitez pas à revenir me voir si vous avez besoin d'aide ! 😊</p>
+        `
+    });
+    
+    setTimeout(() => {
+        showSection('inventory');
+    }, 1500);
+}
+
+function showSearchProduct() {
+    addAiMessage({
+        type: 'ai',
+        content: `
+            <p>Que recherchez-vous dans votre inventaire ?</p>
+            <p>Choisissez une catégorie ou sélectionnez un produit populaire :</p>
+        `
+    });
+    
+    // Obtenir les catégories uniques
+    const categories = [...new Set(products.map(p => p.category))].filter(Boolean);
+    
+    // Obtenir les produits les plus vendus (ou simplement quelques produits)
+    const popularProducts = [...products]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 5);
+    
+    // Créer les options de catégories
+    const categoryOptions = categories.map(category => ({
+        icon: 'fas fa-tag',
+        text: `Catégorie: ${category}`,
+        action: `searchByCategory`,
+        data: category
+    }));
+    
+    // Créer les options de produits
+    const productOptions = popularProducts.map(product => ({
+        icon: 'fas fa-box',
+        text: product.name,
+        action: `showProductDetails`,
+        data: product.id
+    }));
+    
+    // Combiner les options
+    const allOptions = [
+        ...categoryOptions,
+        ...productOptions,
+        { icon: 'fas fa-search', text: 'Recherche avancée', action: 'navigateToInventory' },
+        { icon: 'fas fa-home', text: 'Menu principal', action: 'showMainOptions' }
+    ];
+    
+    // Vérifier si le conteneur parent existe, sinon le créer
+    const optionsContainer = document.getElementById('ai-options');
+    optionsContainer.innerHTML = '';
+    
+    let optionsParentContainer = document.querySelector('.ai-options-container');
+    if (!optionsParentContainer) {
+        optionsParentContainer = document.createElement('div');
+        optionsParentContainer.className = 'ai-options-container';
+        optionsContainer.parentNode.replaceChild(optionsParentContainer, optionsContainer);
+        optionsParentContainer.appendChild(optionsContainer);
+        
+        // Ajouter le bouton de toggle pour changer l'orientation
+        const toggleButton = document.createElement('div');
+        toggleButton.className = 'ai-options-layout-toggle';
+        toggleButton.innerHTML = '<i class="fas fa-list"></i>';
+        toggleButton.addEventListener('click', toggleOptionsLayout);
+        optionsParentContainer.appendChild(toggleButton);
+    }
+    
+    allOptions.forEach(option => {
+        const optionEl = document.createElement('div');
+        optionEl.className = 'ai-option';
+        optionEl.innerHTML = `<i class="${option.icon}"></i> ${option.text}`;
+        
+        optionEl.addEventListener('click', () => {
+            // Ajouter la sélection de l'utilisateur comme message
+            addAiMessage({
+                type: 'user',
+                content: `<p>${option.text}</p>`
+            });
+            
+            // Effacer les options
+            optionsContainer.innerHTML = '';
+            
+            // Montrer l'indicateur de frappe
+            showTypingIndicator();
+            
+            // Simuler un délai pour une expérience plus naturelle
+            setTimeout(() => {
+                removeTypingIndicator();
+                
+                // Exécuter l'action associée avec les données si nécessaire
+                if (option.action === 'searchByCategory') {
+                    searchByCategory(option.data);
+                } else if (option.action === 'showProductDetails') {
+                    showProductDetails(option.data);
+                } else {
+                    window[option.action]();
+                }
+            }, 1000);
+        });
+        
+        optionsContainer.appendChild(optionEl);
+    });
+    
+    // Faire défiler automatiquement vers le début des options
+    optionsContainer.scrollLeft = 0;
+}
+
+
+function searchByCategory(category) {
+    // Filtrer les produits par catégorie
+    const filteredProducts = products.filter(p => p.category === category);
+    
+    if (filteredProducts.length === 0) {
+        addAiMessage({
+            type: 'ai',
+            content: `<p>Je n'ai trouvé aucun produit dans la catégorie "${category}".</p>`
+        });
+        
+        showMainOptions();
+        return;
+    }
+    
+    let messageContent = `
+        <p>Voici les produits de la catégorie "${category}" :</p>
+        <div class="ai-product-list">
+    `;
+    
+    filteredProducts.forEach(product => {
+        const formattedPrice = formatPriceForDisplay(product.price, product.priceCurrency || 'usd');
+        const stockStatus = getStockStatus(product.quantity, product.minStock);
+        let statusIcon = '';
+        
+        if (stockStatus === 'in-stock') {
+            statusIcon = '<i class="fas fa-check-circle" style="color: var(--success);"></i>';
+        } else if (stockStatus === 'low-stock') {
+            statusIcon = '<i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>';
+        } else {
+            statusIcon = '<i class="fas fa-times-circle" style="color: var(--danger);"></i>';
+        }
+        
+        messageContent += `
+            <div class="ai-product-item">
+                <div class="ai-product-info">
+                    <div class="ai-product-name">${product.name} ${statusIcon}</div>
+                    <div class="ai-product-details">${formattedPrice} | Quantité: ${product.quantity}</div>
+                </div>
+                <div class="ai-product-actions">
+                    <div class="ai-product-action" onclick="showProductDetails('${product.id}')">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="ai-product-action" onclick="openProductModalFromAi('${product.id}')">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    messageContent += `</div>`;
+    
+    addAiMessage({
+        type: 'ai',
+        content: messageContent
+    });
+    
+    // Options après la recherche
+    const options = [
+        { icon: 'fas fa-search', text: 'Autre recherche', action: 'showSearchProduct' },
+        { icon: 'fas fa-list', text: 'Voir tout l\'inventaire', action: 'navigateToInventory' },
+        { icon: 'fas fa-home', text: 'Menu principal', action: 'showMainOptions' }
+    ];
+    
+    renderOptions(options);
+}
+
+function showProductDetails(productId) {
+    const product = products.find(p => p.id === productId);
+    
+    if (!product) {
+        addAiMessage({
+            type: 'ai',
+            content: `<p>Désolé, je ne trouve pas ce produit dans votre inventaire.</p>`
+        });
+        
+        showMainOptions();
+        return;
+    }
+    
+    const formattedPrice = formatPriceForDisplay(product.price, product.priceCurrency || 'usd');
+    const stockStatus = getStockStatus(product.quantity, product.minStock);
+    let statusBadge = '';
+    
+    if (stockStatus === 'in-stock') {
+        statusBadge = '<span class="badge badge-stock badge-in-stock">En stock</span>';
+    } else if (stockStatus === 'low-stock') {
+        statusBadge = '<span class="badge badge-stock badge-low-stock">Stock faible</span>';
+    } else {
+        statusBadge = '<span class="badge badge-stock badge-out-of-stock">Rupture</span>';
+    }
+    
+    // Obtenir les informations sur l'unité de mesure
+    const unitInfo = getUnitInfo(product.unit || 'piece');
+    
+    let messageContent = `
+        <div style="text-align: center; margin-bottom: 15px;">
+            <h3 style="margin: 0 0 5px 0; font-size: 1.2rem;">${product.name}</h3>
+            ${statusBadge}
+        </div>
+        
+        <div class="ai-product-details-table">
+            <table class="ai-table">
+                <tr>
+                    <th>Code</th>
+                    <td>${product.code}</td>
+                </tr>
+                <tr>
+                    <th>Prix</th>
+                    <td>${formattedPrice}</td>
+                </tr>
+                <tr>
+                    <th>Quantité</th>
+                    <td>${product.quantity} <span class="unit-badge"><i class="${unitInfo.icon}"></i>${unitInfo.name}</span></td>
+                </tr>
+                <tr>
+                    <th>Emplacement</th>
+                    <td>${product.location || 'Non spécifié'}</td>
+                </tr>
+                <tr>
+                    <th>Catégorie</th>
+                    <td>${product.category || 'Non spécifiée'}</td>
+                </tr>
+                <tr>
+                    <th>Stock min</th>
+                    <td>${product.minStock}</td>
+                </tr>
+                <tr>
+                    <th>Fournisseur</th>
+                    <td>${product.supplier || 'Non spécifié'}</td>
+                </tr>
+                <tr>
+                    <th>Description</th>
+                    <td>${product.description || 'Aucune description'}</td>
+                </tr>
+            </table>
+        </div>
+        
+        <p style="margin-top: 15px; font-size: 0.95rem;">Que souhaitez-vous faire avec ce produit ?</p>
+    `;
+    
+    addAiMessage({
+        type: 'ai',
+        content: messageContent
+    });
+    
+    // Options pour ce produit
+    const options = [
+        { icon: 'fas fa-edit', text: 'Modifier', action: 'openProductModalFromAi', data: productId },
+        { icon: 'fas fa-shopping-cart', text: 'Vendre', action: 'openSellModalFromAi', data: productId },
+        { icon: 'fas fa-plus', text: 'Réapprovisionner', action: 'restockProductFromAi', data: productId },
+        { icon: 'fas fa-print', text: 'Imprimer code', action: 'printProductCodesFromAi', data: productId },
+        { icon: 'fas fa-search', text: 'Autre recherche', action: 'showSearchProduct' },
+        { icon: 'fas fa-home', text: 'Menu principal', action: 'showMainOptions' }
+    ];
+    
+    // Rendre les options avec gestion des données personnalisées
+    const optionsContainer = document.getElementById('ai-options');
+    optionsContainer.innerHTML = '';
+    
+    // Vérifier si le conteneur parent existe, sinon le créer
+    let optionsParentContainer = document.querySelector('.ai-options-container');
+    if (!optionsParentContainer) {
+        optionsParentContainer = document.createElement('div');
+        optionsParentContainer.className = 'ai-options-container';
+        optionsContainer.parentNode.replaceChild(optionsParentContainer, optionsContainer);
+        optionsParentContainer.appendChild(optionsContainer);
+        
+        // Ajouter le bouton de toggle pour changer l'orientation
+        const toggleButton = document.createElement('div');
+        toggleButton.className = 'ai-options-layout-toggle';
+        toggleButton.innerHTML = '<i class="fas fa-list"></i>';
+        toggleButton.addEventListener('click', toggleOptionsLayout);
+        optionsParentContainer.appendChild(toggleButton);
+    }
+    
+    options.forEach(option => {
+        const optionEl = document.createElement('div');
+        optionEl.className = 'ai-option';
+        optionEl.innerHTML = `<i class="${option.icon}"></i> ${option.text}`;
+        
+        optionEl.addEventListener('click', () => {
+            // Ajouter la sélection de l'utilisateur comme message
+            addAiMessage({
+                type: 'user',
+                content: `<p>${option.text}</p>`
+            });
+            
+            // Effacer les options
+            optionsContainer.innerHTML = '';
+            
+            // Montrer l'indicateur de frappe
+            showTypingIndicator();
+            
+            // Simuler un délai pour une expérience plus naturelle
+            setTimeout(() => {
+                removeTypingIndicator();
+                
+                // Exécuter l'action associée avec les données si nécessaire
+                if (option.action === 'openProductModalFromAi') {
+                    openProductModalFromAi(option.data);
+                } else if (option.action === 'openSellModalFromAi') {
+                    openSellModalFromAi(option.data);
+                } else if (option.action === 'restockProductFromAi') {
+                    restockProductFromAi(option.data);
+                } else if (option.action === 'printProductCodesFromAi') {
+                    printProductCodesFromAi(option.data);
+                } else {
+                    window[option.action]();
+                }
+            }, 1000);
+        });
+        
+        optionsContainer.appendChild(optionEl);
+    });
+    
+    // Faire défiler automatiquement vers le début des options
+    optionsContainer.scrollLeft = 0;
+}
+
+
+function generateDailyReport() {
+    // Calculer les statistiques
+    const totalProducts = products.reduce((total, product) => total + product.quantity, 0);
+    const lowStockCount = products.filter(p => p.quantity > 0 && p.quantity <= p.minStock).length;
+    const outOfStockCount = products.filter(p => p.quantity <= 0).length;
+    
+    // Calculer la valeur totale du stock
+    let totalValue = 0;
+    products.forEach(product => {
+        let priceUsd;
+        if (product.priceCurrency === 'cdf') {
+            priceUsd = convertCdfToUsd(product.price);
+        } else {
+            priceUsd = product.price;
+        }
+        totalValue += priceUsd * product.quantity;
+    });
+    
+    // Trouver les produits les plus vendus (simulation)
+    const topProducts = [...products]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 3);
+    
+    const currentDate = new Date();
+    const formattedDate = currentDate.toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    
+    let messageContent = `
+        <div class="ai-report-card">
+            <div class="ai-report-header">
+                <div class="ai-report-title">Rapport d'inventaire</div>
+                <div class="ai-report-date">${formattedDate}</div>
+            </div>
+            
+            <div class="ai-report-content">
+                <div class="ai-report-section">
+                    <div class="ai-report-section-title">Résumé</div>
+                    <p>Votre inventaire contient actuellement ${totalProducts} produits pour une valeur totale de ${formatPriceForDisplay(totalValue, 'usd')}.</p>
+                    <p>${lowStockCount} produits sont en stock faible et ${outOfStockCount} produits sont en rupture de stock.</p>
+                </div>
+                
+                <div class="ai-report-section">
+                    <div class="ai-report-section-title">Produits à réapprovisionner</div>
+    `;
+    
+    const lowStockProducts = products.filter(p => p.quantity > 0 && p.quantity <= p.minStock);
+    if (lowStockProducts.length > 0) {
+        messageContent += `<div class="ai-inventory-list">`;
+        lowStockProducts.slice(0, 5).forEach(product => {
+            messageContent += `
+                <div class="ai-inventory-item">
+                    <div class="ai-item-name">${product.name}</div>
+                    <div class="ai-item-quantity">${product.quantity}/${product.minStock}</div>
+                </div>
+            `;
+        });
+        
+        if (lowStockProducts.length > 5) {
+            messageContent += `<div class="ai-inventory-item">
+                <div class="ai-item-name">Et ${lowStockProducts.length - 5} autres produits...</div>
+            </div>`;
+        }
+        
+        messageContent += `</div>`;
+    } else {
+        messageContent += `<p>Aucun produit n'est en stock faible. Excellent travail !</p>`;
+    }
+    
+    messageContent += `
+                </div>
+                
+                <div class="ai-report-section">
+                    <div class="ai-report-section-title">Recommandations</div>
+                    <ul>
+    `;
+    
+    if (lowStockCount > 0) {
+        messageContent += `<li>Réapprovisionnez les ${lowStockCount} produits en stock faible dès que possible.</li>`;
+    }
+    
+    if (outOfStockCount > 0) {
+        messageContent += `<li>Commandez de nouveaux stocks pour les ${outOfStockCount} produits en rupture.</li>`;
+    }
+    
+    messageContent += `
+                        <li>Vérifiez régulièrement vos niveaux de stock pour éviter les ruptures.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    addAiMessage({
+        type: 'ai',
+        content: messageContent
+    });
+    
+    // Enregistrer la date du dernier rapport
+    aiUserPreferences.lastReportDate = new Date().toISOString();
+    localStorage.setItem('totalAiPreferences', JSON.stringify(aiUserPreferences));
+    
+    // Options après le rapport
+    const options = [
+        { icon: 'fas fa-chart-line', text: 'Voir mon inventaire', action: 'showInventorySummary' },
+        { icon: 'fas fa-exclamation-triangle', text: 'Produits en stock faible', action: 'showLowStockProducts' },
+        { icon: 'fas fa-cog', text: 'Configurer les rapports', action: 'configureReports' },
+        { icon: 'fas fa-home', text: 'Menu principal', action: 'showMainOptions' }
+    ];
+    
+    renderOptions(options);
+    
+    // Vérifier la satisfaction
+    setTimeout(() => {
+        checkSatisfaction("Ce rapport vous a-t-il été utile ?");
+    }, 1000);
+}
+
+function configureReports() {
+    addAiMessage({
+        type: 'ai',
+        content: `
+            <p>Configurons vos préférences pour les rapports automatiques.</p>
+            <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; margin-top: 10px;">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Heure du rapport journalier :</label>
+                    <select id="ai-report-time" class="form-select" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">
+                        <option value="08:00" ${aiUserPreferences.reportTime === '08:00' ? 'selected' : ''}>8:00 (Matin)</option>
+                        <option value="12:00" ${aiUserPreferences.reportTime === '12:00' ? 'selected' : ''}>12:00 (Midi)</option>
+                        <option value="18:00" ${aiUserPreferences.reportTime === '18:00' ? 'selected' : ''}>18:00 (Soir)</option>
+                        <option value="22:00" ${aiUserPreferences.reportTime === '22:00' ? 'selected' : ''}>22:00 (Nuit)</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Fréquence des rapports :</label>
+                    <select id="ai-report-frequency" class="form-select" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">
+                        <option value="daily" ${aiUserPreferences.reportFrequency === 'daily' ? 'selected' : ''}>Quotidien</option>
+                        <option value="weekly" ${aiUserPreferences.reportFrequency === 'weekly' ? 'selected' : ''}>Hebdomadaire</option>
+                        <option value="monthly" ${aiUserPreferences.reportFrequency === 'monthly' ? 'selected' : ''}>Mensuel</option>
+                    </select>
+                </div>
+                
+                <button id="ai-save-preferences" style="background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; width: 100%;">
+                    Enregistrer mes préférences
+                </button>
+            </div>
+        `
+    });
+    
+    // Ajouter l'événement pour enregistrer les préférences
+    setTimeout(() => {
+        document.getElementById('ai-save-preferences').addEventListener('click', saveReportPreferences);
+    }, 100);
+    
+    // Options après la configuration
+    const options = [
+        { icon: 'fas fa-file-alt', text: 'Générer un rapport maintenant', action: 'generateDailyReport' },
+        { icon: 'fas fa-home', text: 'Menu principal', action: 'showMainOptions' }
+    ];
+    
+    renderOptions(options);
+}
+
+function saveReportPreferences() {
+    const reportTime = document.getElementById('ai-report-time').value;
+    const reportFrequency = document.getElementById('ai-report-frequency').value;
+    
+    aiUserPreferences.reportTime = reportTime;
+    aiUserPreferences.reportFrequency = reportFrequency;
+    localStorage.setItem('totalAiPreferences', JSON.stringify(aiUserPreferences));
+    
+    addAiMessage({
+        type: 'user',
+        content: `<p>Enregistrer mes préférences</p>`
+    });
+    
+    // Effacer les options
+    document.getElementById('ai-options').innerHTML = '';
+    
+    // Montrer l'indicateur de frappe
+    showTypingIndicator();
+    
+    // Simuler un délai pour une expérience plus naturelle
+    setTimeout(() => {
+        removeTypingIndicator();
+        
+        addAiMessage({
+            type: 'ai',
+            content: `
+                <p>Vos préférences ont été enregistrées avec succès ! 👍</p>
+                <p>Vous recevrez désormais vos rapports ${reportFrequency === 'daily' ? 'tous les jours' : reportFrequency === 'weekly' ? 'toutes les semaines' : 'tous les mois'} à ${reportTime}.</p>
+                <p>Que souhaitez-vous faire maintenant ?</p>
+            `
+        });
+        
+        showMainOptions();
+    }, 1000);
+}
+
+function checkSatisfaction(question) {
+    addAiMessage({
+        type: 'ai',
+        content: `
+            <p>${question}</p>
+            <div class="ai-satisfaction">
+                <div class="ai-satisfaction-option" data-value="very-satisfied">
+                    <div class="ai-satisfaction-icon">😁</div>
+                    <div class="ai-satisfaction-text">Très satisfait</div>
+                </div>
+                <div class="ai-satisfaction-option" data-value="satisfied">
+                    <div class="ai-satisfaction-icon">🙂</div>
+                    <div class="ai-satisfaction-text">Satisfait</div>
+                </div>
+                <div class="ai-satisfaction-option" data-value="neutral">
+                    <div class="ai-satisfaction-icon">😐</div>
+                    <div class="ai-satisfaction-text">Neutre</div>
+                </div>
+                <div class="ai-satisfaction-option" data-value="unsatisfied">
+                    <div class="ai-satisfaction-icon">😕</div>
+                    <div class="ai-satisfaction-text">Pas satisfait</div>
+                </div>
+            </div>
+        `
+    });
+    
+    // Ajouter les événements pour les options de satisfaction
+    setTimeout(() => {
+        document.querySelectorAll('.ai-satisfaction-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                handleSatisfactionFeedback(value);
             });
         });
-    }
+    }, 100);
+}
 
-    // Initialiser la recherche de produits
-    function initProductSearch() {
-        if (!productSearchInput) return;
+function handleSatisfactionFeedback(value) {
+    // Ajouter la sélection de l'utilisateur comme message
+    const satisfactionTexts = {
+        'very-satisfied': 'Très satisfait',
+        'satisfied': 'Satisfait',
+        'neutral': 'Neutre',
+        'unsatisfied': 'Pas satisfait'
+    };
+    
+    addAiMessage({
+        type: 'user',
+        content: `<p>${satisfactionTexts[value]}</p>`
+    });
+    
+    // Effacer les options
+    document.getElementById('ai-options').innerHTML = '';
+    
+    // Montrer l'indicateur de frappe
+    showTypingIndicator();
+    
+    // Simuler un délai pour une expérience plus naturelle
+    setTimeout(() => {
+        removeTypingIndicator();
         
-        productSearchInput.addEventListener('input', function() {
-            const searchTerm = this.value.trim().toLowerCase();
+        if (value === 'very-satisfied' || value === 'satisfied') {
+            addAiMessage({
+                type: 'ai',
+                content: `
+                    <p>Merci pour votre retour positif ! 😊</p>
+                    <p>Je suis ravi de pouvoir vous aider efficacement dans la gestion de votre inventaire.</p>
+                    <p>N'hésitez pas à me solliciter pour toute autre question ou assistance.</p>
+                `
+            });
             
-            if (searchTerm.length < 2) {
-                productResults.style.display = 'none';
+            showMainOptions();
+        } else if (value === 'neutral') {
+            addAiMessage({
+                type: 'ai',
+                content: `
+                    <p>Merci pour votre retour.</p>
+                    <p>Comment puis-je améliorer mon aide pour mieux répondre à vos besoins ?</p>
+                `
+            });
+            
+            // Options pour l'amélioration
+            const options = [
+                { icon: 'fas fa-info-circle', text: 'Plus de détails', action: 'handleImprovementFeedback', data: 'more-details' },
+                { icon: 'fas fa-bolt', text: 'Plus rapide', action: 'handleImprovementFeedback', data: 'faster' },
+                { icon: 'fas fa-chart-pie', text: 'Plus de statistiques', action: 'handleImprovementFeedback', data: 'more-stats' },
+                { icon: 'fas fa-home', text: 'Menu principal', action: 'showMainOptions' }
+            ];
+            
+            renderOptionsWithData(options);
+        } else {
+            addAiMessage({
+                type: 'ai',
+                content: `
+                    <p>Je suis désolé que mon assistance ne vous ait pas satisfait. 😔</p>
+                    <p>Pourriez-vous me dire ce qui n'a pas répondu à vos attentes ?</p>
+                `
+            });
+            
+            // Options pour le feedback négatif
+            const options = [
+                { icon: 'fas fa-info-circle', text: 'Informations inexactes', action: 'handleNegativeFeedback', data: 'inaccurate' },
+                { icon: 'fas fa-exclamation-triangle', text: 'Trop compliqué', action: 'handleNegativeFeedback', data: 'too-complex' },
+                { icon: 'fas fa-question-circle', text: 'N\'a pas répondu à ma question', action: 'handleNegativeFeedback', data: 'not-helpful' },
+                { icon: 'fas fa-home', text: 'Menu principal', action: 'showMainOptions' }
+            ];
+            
+            renderOptionsWithData(options);
+        }
+    }, 1000);
+}
+
+function renderOptionsWithData(options) {
+    const optionsContainer = document.getElementById('ai-options');
+    optionsContainer.innerHTML = '';
+    
+    // Vérifier si le conteneur parent existe, sinon le créer
+    let optionsParentContainer = document.querySelector('.ai-options-container');
+    if (!optionsParentContainer) {
+        optionsParentContainer = document.createElement('div');
+        optionsParentContainer.className = 'ai-options-container';
+        optionsContainer.parentNode.replaceChild(optionsParentContainer, optionsContainer);
+        optionsParentContainer.appendChild(optionsContainer);
+        
+        // Ajouter le bouton de toggle pour changer l'orientation
+        const toggleButton = document.createElement('div');
+        toggleButton.className = 'ai-options-layout-toggle';
+        toggleButton.innerHTML = '<i class="fas fa-list"></i>';
+        toggleButton.addEventListener('click', toggleOptionsLayout);
+        optionsParentContainer.appendChild(toggleButton);
+    }
+    
+    options.forEach(option => {
+        const optionEl = document.createElement('div');
+        optionEl.className = 'ai-option';
+        optionEl.innerHTML = `<i class="${option.icon}"></i> ${option.text}`;
+        
+        optionEl.addEventListener('click', () => {
+            // Ajouter la sélection de l'utilisateur comme message
+            addAiMessage({
+                type: 'user',
+                content: `<p>${option.text}</p>`
+            });
+            
+            // Effacer les options
+            optionsContainer.innerHTML = '';
+            
+            // Montrer l'indicateur de frappe
+            showTypingIndicator();
+            
+            // Simuler un délai pour une expérience plus naturelle
+            setTimeout(() => {
+                removeTypingIndicator();
+                
+                // Exécuter l'action associée avec les données si nécessaire
+                if (option.action === 'handleImprovementFeedback') {
+                    handleImprovementFeedback(option.data);
+                } else if (option.action === 'handleNegativeFeedback') {
+                    handleNegativeFeedback(option.data);
+                } else {
+                    window[option.action]();
+                }
+            }, 1000);
+        });
+        
+        optionsContainer.appendChild(optionEl);
+    });
+    
+    // Faire défiler automatiquement vers le début des options
+    optionsContainer.scrollLeft = 0;
+}
+
+
+function handleImprovementFeedback(type) {
+    let response = '';
+    
+    switch(type) {
+        case 'more-details':
+            response = `
+                <p>Merci pour votre retour !</p>
+                <p>Je vais m'efforcer de fournir des informations plus détaillées à l'avenir.</p>
+                <p>N'hésitez pas à me demander plus de détails à tout moment si vous en avez besoin.</p>
+            `;
+            break;
+        case 'faster':
+            response = `
+                <p>Merci pour votre retour !</p>
+                <p>Je comprends que la rapidité est importante pour vous. Je vais travailler à optimiser mes réponses.</p>
+                <p>Votre temps est précieux et je ferai mon possible pour être plus efficace.</p>
+            `;
+            break;
+        case 'more-stats':
+            response = `
+                <p>Merci pour votre retour !</p>
+                <p>Je vais améliorer les analyses statistiques et les visualisations de données dans mes rapports.</p>
+                <p>Les statistiques sont essentielles pour une bonne gestion d'inventaire.</p>
+            `;
+            break;
+    }
+    
+    addAiMessage({
+        type: 'ai',
+        content: response
+    });
+    
+    showMainOptions();
+}
+
+function handleNegativeFeedback(type) {
+    let response = '';
+    
+    switch(type) {
+        case 'inaccurate':
+            response = `
+                <p>Je vous présente mes excuses pour les informations inexactes.</p>
+                <p>Votre feedback est très important et m'aidera à améliorer la qualité et la précision des informations que je vous fournis.</p>
+                <p>N'hésitez pas à me corriger à tout moment si vous constatez des erreurs.</p>
+            `;
+            break;
+        case 'too-complex':
+            response = `
+                <p>Je vous remercie pour ce retour précieux.</p>
+                <p>Je vais simplifier mes explications et présenter l'information de façon plus claire et concise.</p>
+                <p>Mon objectif est de vous faciliter la gestion de votre inventaire, pas de la compliquer.</p>
+            `;
+            break;
+        case 'not-helpful':
+            response = `
+                <p>Je suis désolé de ne pas avoir répondu à votre question de manière satisfaisante.</p>
+                <p>Je vais travailler à mieux comprendre vos besoins et à fournir des réponses plus pertinentes.</p>
+                <p>N'hésitez pas à reformuler votre question ou à me préciser ce que vous recherchez.</p>
+            `;
+            break;
+    }
+    
+    addAiMessage({
+        type: 'ai',
+        content: response
+    });
+    
+    showMainOptions();
+}
+
+// Fonctions d'intégration avec l'application existante
+function openProductModalFromAi(productId) {
+    addAiMessage({
+        type: 'ai',
+        content: `
+            <p>Je vous ouvre la fenêtre de modification du produit.</p>
+            <p>Vous pourrez y mettre à jour toutes les informations.</p>
+        `
+    });
+    
+    setTimeout(() => {
+        openProductModal(productId);
+    }, 1000);
+}
+
+function openSellModalFromAi(productId) {
+    addAiMessage({
+        type: 'ai',
+        content: `
+            <p>Je vous ouvre la fenêtre de vente du produit.</p>
+            <p>Vous pourrez y enregistrer une nouvelle vente.</p>
+        `
+    });
+    
+    setTimeout(() => {
+        openSellModal(productId);
+    }, 1000);
+}
+
+function restockProductFromAi(productId) {
+    const product = products.find(p => p.id === productId);
+    
+    if (!product) {
+        addAiMessage({
+            type: 'ai',
+            content: `<p>Désolé, je ne trouve pas ce produit dans votre inventaire.</p>`
+        });
+        
+        showMainOptions();
+        return;
+    }
+    
+    addAiMessage({
+        type: 'ai',
+        content: `
+            <p>Combien d'unités de "${product.name}" souhaitez-vous ajouter au stock ?</p>
+            <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; justify-content: center;">
+                <button class="ai-restock-btn" data-quantity="5" data-id="${product.id}">+5</button>
+                <button class="ai-restock-btn" data-quantity="10" data-id="${product.id}">+10</button>
+                <button class="ai-restock-btn" data-quantity="20" data-id="${product.id}">+20</button>
+                <button class="ai-restock-btn" data-quantity="50" data-id="${product.id}">+50</button>
+                <button class="ai-restock-btn" data-quantity="custom" data-id="${product.id}">Autre quantité</button>
+            </div>
+            <style>
+                .ai-restock-btn {
+                    background: #f0f4f8;
+                    border: 1px solid #ddd;
+                    padding: 8px 15px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                .ai-restock-btn:hover {
+                    background: var(--primary);
+                    color: white;
+                    border-color: var(--primary);
+                }
+            </style>
+        `
+    });
+    
+    // Ajouter les événements pour les boutons de réapprovisionnement
+    setTimeout(() => {
+        document.querySelectorAll('.ai-restock-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const quantity = this.getAttribute('data-quantity');
+                const productId = this.getAttribute('data-id');
+                
+                if (quantity === 'custom') {
+                    showCustomRestockInput(productId);
+                } else {
+                    processRestock(productId, parseInt(quantity));
+                }
+            });
+        });
+    }, 100);
+}
+
+function showCustomRestockInput(productId) {
+    const product = products.find(p => p.id === productId);
+    
+    addAiMessage({
+        type: 'user',
+        content: `<p>Autre quantité</p>`
+    });
+    
+    addAiMessage({
+        type: 'ai',
+        content: `
+            <p>Veuillez saisir la quantité de "${product.name}" que vous souhaitez ajouter :</p>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <input type="number" id="custom-restock-quantity" min="1" value="1" style="flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">
+                <button id="confirm-custom-restock" data-id="${productId}" style="background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">
+                    Confirmer
+                </button>
+            </div>
+        `
+    });
+    
+    // Ajouter l'événement pour le bouton de confirmation
+    setTimeout(() => {
+        document.getElementById('confirm-custom-restock').addEventListener('click', function() {
+            const quantity = parseInt(document.getElementById('custom-restock-quantity').value);
+            const productId = this.getAttribute('data-id');
+            
+            if (isNaN(quantity) || quantity <= 0) {
+                addAiMessage({
+                    type: 'ai',
+                    content: `<p>Veuillez saisir une quantité valide (supérieure à 0).</p>`
+                });
                 return;
             }
             
-            // Filtrer les produits
-            const matchingProducts = mockProducts.filter(product => 
-                product.name.toLowerCase().includes(searchTerm)
-            );
-            
-            // Afficher les résultats
-            displayProductSearchResults(matchingProducts);
+            processRestock(productId, quantity);
         });
-        
-        productSearchInput.addEventListener('focus', function() {
-            if (this.value.trim().length >= 2) {
-                productResults.style.display = 'block';
-            }
-        });
-    }
+    }, 100);
+}
 
-    // Afficher les résultats de recherche de produits
-    function displayProductSearchResults(products) {
-        if (!productResults) return;
-        
-        productResults.innerHTML = '';
-        
-        if (products.length === 0) {
-            productResults.innerHTML = '<div class="AnalInvenIa-search-no-results">Aucun produit trouvé</div>';
-            productResults.style.display = 'block';
-            return;
-        }
-        
-        products.forEach(product => {
-            const resultItem = document.createElement('div');
-            resultItem.className = 'AnalInvenIa-search-result';
-            resultItem.innerHTML = `
-                <i class="fas fa-box me-2"></i>
-                <span>${product.name}</span>
-                <span class="AnalInvenIa-result-stock">Stock: ${product.stock}</span>
-            `;
-            
-            resultItem.addEventListener('click', function() {
-                selectedProduct = product;
-                productSearchInput.value = '';
-                productResults.style.display = 'none';
-                
-                // Afficher le produit sélectionné
-                selectedProductName.textContent = product.name;
-                selectedProductDisplay.style.display = 'block';
-            });
-            
-            productResults.appendChild(resultItem);
+function processRestock(productId, quantity) {
+    // Trouver le produit
+    const productIndex = products.findIndex(p => p.id === productId);
+    
+    if (productIndex === -1) {
+        addAiMessage({
+            type: 'ai',
+            content: `<p>Désolé, je ne trouve pas ce produit dans votre inventaire.</p>`
         });
         
-        productResults.style.display = 'block';
+        showMainOptions();
+        return;
     }
+    
+    // Mettre à jour la quantité
+    const product = products[productIndex];
+    const oldQuantity = product.quantity;
+    product.quantity += quantity;
+    
+    // Ajouter un mouvement
+    product.movements = product.movements || [];
+    product.movements.push({
+        type: "add",
+        quantity: quantity,
+        date: new Date().toISOString(),
+        description: "Réapprovisionnement via l'assistant IA"
+    });
+    
+    // Mettre à jour le stockage local
+    products[productIndex] = product;
+    updateLocalStorage();
+    
+    // Mettre à jour l'affichage
+    updateDashboardStats();
+    loadRecentProducts();
+    loadInventoryTable();
+    
+    // Afficher un message de confirmation
+    addAiMessage({
+        type: 'user',
+        content: `<p>Ajouter ${quantity} unités</p>`
+    });
+    
+    addAiMessage({
+        type: 'ai',
+        content: `
+            <p>J'ai ajouté ${quantity} unités de "${product.name}" à votre inventaire. ✅</p>
+            <p>La quantité est passée de ${oldQuantity} à ${product.quantity}.</p>
+            <p>Que souhaitez-vous faire maintenant ?</p>
+        `
+    });
+    
+    // Options après le réapprovisionnement
+    const options = [
+        { icon: 'fas fa-chart-line', text: 'Voir mon inventaire', action: 'showInventorySummary' },
+        { icon: 'fas fa-plus-circle', text: 'Réapprovisionner un autre produit', action: 'showSearchProduct' },
+        { icon: 'fas fa-home', text: 'Menu principal', action: 'showMainOptions' }
+    ];
+    
+    renderOptions(options);
+}
 
-    // Démarrer l'analyse
-    function startAnalysis() {
-        const loaderEl = document.getElementById('AnalInvenIa-analyzeLoader');
-        const progressBar = document.getElementById('AnalInvenIa-loaderProgressBar');
-        const statusEl = document.getElementById('AnalInvenIa-loaderStatus');
-        const resultsEl = document.getElementById('AnalInvenIa-results');
+function printProductCodesFromAi(productId) {
+    addAiMessage({
+        type: 'ai',
+        content: `
+            <p>Je vous dirige vers l'impression des codes pour ce produit.</p>
+        `
+    });
+    
+    setTimeout(() => {
+        printProductCodes(productId);
+    }, 1000);
+}
+
+// Initialisation et événements pour l'Assistant IA
+document.addEventListener('DOMContentLoaded', function() {
+    // Ajouter les événements pour l'IA
+    document.getElementById('ai-reset').addEventListener('click', initAiAssistant);
+    
+    document.getElementById('ai-save-pdf').addEventListener('click', function() {
+        savePdf('ai-messages', 'Assistant_IA_Rapport');
+    });
+    
+    document.getElementById('ai-print').addEventListener('click', function() {
+        printElement('ai-messages');
+    });
+    
+    document.getElementById('ai-copy').addEventListener('click', function() {
+        copyConversationToClipboard();
+    });
+    
+    document.getElementById('ai-share').addEventListener('click', function() {
+        shareConversation();
+    });
+    
+    // Vérifier s'il faut envoyer un rapport automatique
+    checkAutomaticReport();
+});
+
+function savePdf(elementId, filename) {
+    const element = document.getElementById(elementId);
+    
+    // Simuler le téléchargement
+    addAiMessage({
+        type: 'user',
+        content: `<p>Enregistrer en PDF</p>`
+    });
+    
+    showTypingIndicator();
+    
+    setTimeout(() => {
+        removeTypingIndicator();
         
-        // Cacher les paramètres et afficher le loader
-        document.querySelector('.card').style.display = 'none';
-        loaderEl.style.display = 'block';
+        addAiMessage({
+            type: 'ai',
+            content: `
+                <p>Le rapport a été enregistré en PDF avec succès ! ✅</p>
+                <p>Vous pouvez maintenant l'ouvrir ou le partager avec votre équipe.</p>
+            `
+        });
+    }, 1500);
+}
+
+function printElement(elementId) {
+    const element = document.getElementById(elementId);
+    
+    // Simuler l'impression
+    addAiMessage({
+        type: 'user',
+        content: `<p>Imprimer</p>`
+    });
+    
+    showTypingIndicator();
+    
+    setTimeout(() => {
+        removeTypingIndicator();
         
-        // Préparer le titre de l'analyse
-        updateAnalysisTitle();
+        addAiMessage({
+            type: 'ai',
+            content: `
+                <p>La conversation a été envoyée à l'imprimante. ✅</p>
+                <p>Vérifiez votre imprimante pour récupérer le document.</p>
+            `
+        });
+    }, 1500);
+}
+
+function copyConversationToClipboard() {
+    // Simuler la copie
+    addAiMessage({
+        type: 'user',
+        content: `<p>Copier</p>`
+    });
+    
+    showTypingIndicator();
+    
+    setTimeout(() => {
+        removeTypingIndicator();
         
-        // Simuler le chargement
-        let progress = 0;
-        const progressSteps = [
-            { percent: 10, message: "Collecte des données d'inventaire..." },
-            { percent: 30, message: "Analyse des tendances de vente..." },
-            { percent: 50, message: "Calcul des prévisions..." },
-            { percent: 70, message: "Génération des recommandations..." },
-            { percent: 90, message: "Finalisation du rapport d'analyse..." },
-            { percent: 100, message: "Analyse terminée!" }
+        addAiMessage({
+            type: 'ai',
+            content: `
+                <p>La conversation a été copiée dans le presse-papier. ✅</p>
+                <p>Vous pouvez maintenant la coller où vous le souhaitez.</p>
+            `
+        });
+    }, 1000);
+}
+
+function shareConversation() {
+    // Simuler le partage
+    addAiMessage({
+        type: 'user',
+        content: `<p>Partager</p>`
+    });
+    
+    showTypingIndicator();
+    
+    setTimeout(() => {
+        removeTypingIndicator();
+        
+        addAiMessage({
+            type: 'ai',
+            content: `
+                <p>Comment souhaitez-vous partager cette conversation ?</p>
+            `
+        });
+        
+        const options = [
+            { icon: 'fas fa-envelope', text: 'Par email', action: 'shareByEmail' },
+            { icon: 'fab fa-whatsapp', text: 'WhatsApp', action: 'shareByWhatsApp' },
+            { icon: 'fas fa-link', text: 'Copier le lien', action: 'shareCopyLink' },
+            { icon: 'fas fa-home', text: 'Menu principal', action: 'showMainOptions' }
         ];
         
-        let currentStep = 0;
-        progressBar.style.width = '0%';
-        
-        const interval = setInterval(() => {
-            if (currentStep < progressSteps.length) {
-                const step = progressSteps[currentStep];
-                progress = step.percent;
-                progressBar.style.width = `${progress}%`;
-                statusEl.textContent = step.message;
-                currentStep++;
-                
-                if (currentStep === progressSteps.length) {
-                    setTimeout(() => {
-                        clearInterval(interval);
-                        loaderEl.style.display = 'none';
-                        resultsEl.style.display = 'block';
-                        
-                        // Mettre à jour le contenu des onglets
-                        fillOverviewTab();
-                        updateProfitableTab();
-                        updateCriticalTab();
-                        
-                        // Initialiser les graphiques
-                        initCharts();
-                    }, 800);
-                }
-            }
-        }, 800);
-    }
+        renderOptions(options);
+    }, 1000);
+}
 
-    // Mettre à jour le titre de l'analyse
-    function updateAnalysisTitle() {
-        let title = "";
-        let period = "";
-        
-        // Déterminer la portée
-        if (currentScope === 'global') {
-            title = "Analyse globale de l'inventaire";
-        } else if (currentScope === 'category' && selectedCategory) {
-            const category = mockCategories.find(cat => cat.id === selectedCategory);
-            title = `Analyse de la catégorie ${category ? category.name : ''}`;
-        } else if (currentScope === 'product' && selectedProduct) {
-            title = `Analyse du produit ${selectedProduct.name}`;
-        } else {
-            title = "Analyse de l'inventaire";
-        }
-        
-        // Déterminer la période
-        const now = new Date();
-        
-        if (currentFilter === 1) { // Intervalles
-            if (currentInterval === 'day') {
-                period = "Journalier - " + formatDate(now);
-            } else if (currentInterval === 'week') {
-                period = "Hebdomadaire - Semaine du " + formatDate(new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000));
-            } else if (currentInterval === 'month') {
-                period = "Mensuel - " + getMonthName(now.getMonth()) + " " + now.getFullYear();
-            } else if (currentInterval === 'year') {
-                period = "Annuel - " + now.getFullYear();
-            } else {
-                period = "Horaire - " + formatTime(now);
-            }
-        } else if (currentFilter === 2) { // Période relative
-            if (currentRelativePeriod === 'now') {
-                period = "À l'instant";
-            } else if (currentRelativePeriod === 'today') {
-                period = "Aujourd'hui - " + formatDate(now);
-            } else if (currentRelativePeriod === 'yesterday') {
-                const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-                period = "Hier - " + formatDate(yesterday);
-            } else if (currentRelativePeriod === 'thisWeek') {
-                period = "Cette semaine";
-            } else if (currentRelativePeriod === 'lastWeek') {
-                period = "Semaine dernière";
-            } else if (currentRelativePeriod === 'thisMonth') {
-                period = "Ce mois - " + getMonthName(now.getMonth()) + " " + now.getFullYear();
-            } else if (currentRelativePeriod === 'lastMonth') {
-                let lastMonth = now.getMonth() - 1;
-                let year = now.getFullYear();
-                if (lastMonth < 0) {
-                    lastMonth = 11;
-                    year--;
-                }
-                period = "Mois dernier - " + getMonthName(lastMonth) + " " + year;
-            } else if (currentRelativePeriod === 'thisYear') {
-                period = "Cette année - " + now.getFullYear();
-            } else if (currentRelativePeriod === 'lastYear') {
-                period = "Année dernière - " + (now.getFullYear() - 1);
-            }
-        } else if (currentFilter === 3) { // Personnalisé
-            if (currentCustomFilter === 'range') {
-                const startDate = document.getElementById('AnalInvenIa-startDate').value;
-                const endDate = document.getElementById('AnalInvenIa-endDate').value;
-                period = startDate && endDate ? `Du ${startDate} au ${endDate}` : "Période personnalisée";
-            } else if (currentCustomFilter === 'year') {
-                const yearSelect = document.getElementById('AnalInvenIa-yearSelect');
-                const yearValue = yearSelect.querySelector('.AnalInvenIa-select-value').textContent.trim();
-                period = `Année ${yearValue}`;
-            } else if (currentCustomFilter === 'month') {
-                const monthSelect = document.getElementById('AnalInvenIa-monthSelect');
-                const yearSelect = document.getElementById('AnalInvenIa-yearForMonthSelect');
-                const monthValue = monthSelect.querySelector('.AnalInvenIa-select-value').textContent.trim();
-                const yearValue = yearSelect.querySelector('.AnalInvenIa-select-value').textContent.trim();
-                period = `${monthValue} ${yearValue}`;
-            } else if (currentCustomFilter === 'day') {
-                const dayInput = document.getElementById('AnalInvenIa-day').value;
-                const monthSelect = document.getElementById('AnalInvenIa-monthForDaySelect');
-                const yearSelect = document.getElementById('AnalInvenIa-yearForDaySelect');
-                const monthValue = monthSelect.querySelector('.AnalInvenIa-select-value').textContent.trim();
-                const yearValue = yearSelect.querySelector('.AnalInvenIa-select-value').textContent.trim();
-                period = `${dayInput} ${monthValue} ${yearValue}`;
-            }
-        }
-        
-        analysisTitle.textContent = title;
-        analysisPeriod.textContent = period;
-    }
-
-    // Initialiser les graphiques
-    function initCharts() {
-        // Graphique d'évolution des ventes
-        updateSalesChart(currentChartPeriod);
-        
-        // Graphique des prévisions par catégorie
-        const ctx2 = document.getElementById('AnalInvenIa-categoryPredictionChart');
-        if (ctx2) {
-            const categoryLabels = mockCategories.map(cat => cat.name);
-            const predictionData = mockCategories.map(cat => cat.prediction);
-            
-            charts.categoryPrediction = new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: categoryLabels,
-                    datasets: [{
-                        label: 'Prévision de croissance (%)',
-                        data: predictionData,
-                        backgroundColor: predictionData.map(value => value >= 0 ? 'rgba(75, 192, 192, 0.6)' : 'rgba(255, 99, 132, 0.6)'),
-                        borderColor: predictionData.map(value => value >= 0 ? 'rgb(75, 192, 192)' : 'rgb(255, 99, 132)'),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += context.parsed.y + '%';
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    // Mettre à jour le graphique des ventes
-    function updateSalesChart(period) {
-        const ctx = document.getElementById('AnalInvenIa-salesChart');
-        if (!ctx) return;
-        
-        // Préparer les données selon la période
-        let labels, data;
-        
-        if (period === 'week') {
-            labels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-            data = mockSalesData.week;
-        } else if (period === 'month') {
-            labels = Array.from({ length: 30 }, (_, i) => i + 1);
-            data = mockSalesData.month;
-        } else if (period === 'year') {
-            labels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
-            data = mockSalesData.year;
-        }
-        
-        // Créer ou mettre à jour le graphique
-        if (charts.sales) {
-            charts.sales.data.labels = labels;
-            charts.sales.data.datasets[0].data = data;
-            charts.sales.update();
-        } else {
-            charts.sales = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Ventes (€)',
-                        data: data,
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        pointRadius: 3,
-                        pointBackgroundColor: 'rgba(54, 162, 235, 1)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '€';
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += context.parsed.y + '€';
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    // Remplir l'onglet Aperçu
-    function fillOverviewTab() {
-        // Mettre à jour les KPIs
-        document.getElementById('AnalInvenIa-totalValue').textContent = '24 850';
-        document.getElementById('AnalInvenIa-salesValue').textContent = '12 450';
-        document.getElementById('AnalInvenIa-stockIssues').textContent = '5';
-        
-        // Onglet par défaut pour les produits
-        fillTopProductsContent('bestsellers');
-    }
-
-    // Remplir le contenu des top produits
-    function fillTopProductsContent(tabId) {
-        if (tabId === 'bestsellers') {
-            // Déjà rempli dans le HTML statique
-        } else if (tabId === 'profitable') {
-            const profitableEl = document.getElementById('AnalInvenIa-profitable');
-            if (!profitableEl) return;
-            
-            // Trier les produits par rentabilité (approximative)
-            const profitableProducts = [...mockProducts]
-                .sort((a, b) => (b.price * b.sold) - (a.price * a.sold))
-                .slice(0, 5);
-            
-            profitableEl.innerHTML = '';
-            
-            profitableProducts.forEach((product, index) => {
-                const profit = product.price * product.sold;
-                const trenDirection = product.trend >= 0 ? 'positive' : 'negative';
-                const trendIcon = product.trend > 0 ? 'fa-arrow-up' : product.trend < 0 ? 'fa-arrow-down' : 'fa-equals';
-                
-                const productEl = document.createElement('div');
-                productEl.className = 'AnalInvenIa-product-ranking';
-                productEl.innerHTML = `
-                    <div class="AnalInvenIa-product-rank">${index + 1}</div>
-                    <div class="AnalInvenIa-product-info">
-                        <div class="AnalInvenIa-product-name">${product.name}</div>
-                        <div class="AnalInvenIa-product-stats">
-                            <span class="AnalInvenIa-product-stat">
-                                <i class="fas fa-euro-sign me-1"></i> Profit: ${profit}€
-                            </span>
-                            <span class="AnalInvenIa-product-stat">
-                                <i class="fas fa-shopping-cart me-1"></i> Vendus: ${product.sold}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="AnalInvenIa-product-trend ${trenDirection}">
-                        <i class="fas ${trendIcon}"></i> ${Math.abs(product.trend)}%
-                    </div>
-                `;
-                
-                profitableEl.appendChild(productEl);
-            });
-        } else if (tabId === 'critical') {
-            const criticalEl = document.getElementById('AnalInvenIa-critical');
-            if (!criticalEl) return;
-            
-            // Filtrer les produits en situation critique (stocks faibles avec ventes élevées ou surstockage)
-            const criticalProducts = mockProducts.filter(product => 
-                (product.stock < 15 && product.sold > 40) || // rupture probable
-                (product.stock > 50 && product.sold < 20)    // surstockage
-            ).slice(0, 5);
-            
-            criticalEl.innerHTML = '';
-            
-            criticalProducts.forEach((product, index) => {
-                const isSurplus = product.stock > 50 && product.sold < 20;
-                const statusClass = isSurplus ? 'surplus' : 'shortage';
-                const statusIcon = isSurplus ? 'fa-boxes-stacked' : 'fa-triangle-exclamation';
-                const statusText = isSurplus ? 'Surstockage' : 'Rupture probable';
-                
-                const productEl = document.createElement('div');
-                productEl.className = 'AnalInvenIa-product-ranking';
-                productEl.innerHTML = `
-                    <div class="AnalInvenIa-product-rank">${index + 1}</div>
-                    <div class="AnalInvenIa-product-info">
-                        <div class="AnalInvenIa-product-name">${product.name}</div>
-                        <div class="AnalInvenIa-product-stats">
-                            <span class="AnalInvenIa-product-stat">
-                                <i class="fas fa-box me-1"></i> Stock: ${product.stock}
-                            </span>
-                            <span class="AnalInvenIa-product-stat">
-                                <i class="fas fa-shopping-cart me-1"></i> Vendus: ${product.sold}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="AnalInvenIa-product-status ${statusClass}">
-                        <i class="fas ${statusIcon}"></i> ${statusText}
-                    </div>
-                `;
-                
-                criticalEl.appendChild(productEl);
-            });
-        }
-    }
-
-    // Mettre à jour l'onglet des produits rentables
-    function updateProfitableTab() {
-        fillTopProductsContent('profitable');
-    }
-
-    // Mettre à jour l'onglet des produits critiques
-    function updateCriticalTab() {
-        fillTopProductsContent('critical');
-    }
-
-    // Remplir l'onglet Produits
-    function fillProductsTab() {
-        const productsTab = document.getElementById('AnalInvenIa-tab-products');
-        if (!productsTab) return;
-        
-        productsTab.innerHTML = `
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-boxes me-2"></i> Analyse détaillée des produits</span>
-                    <div class="AnalInvenIa-products-filter">
-                        <div class="input-group input-group-sm">
-                            <input type="text" class="form-control" placeholder="Rechercher..." id="AnalInvenIa-productTabSearch">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-sort me-1"></i> Trier par
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" data-sort="stock-desc">Stock (décroissant)</a></li>
-                                <li><a class="dropdown-item" href="#" data-sort="stock-asc">Stock (croissant)</a></li>
-                                <li><a class="dropdown-item" href="#" data-sort="sales-desc">Ventes (décroissant)</a></li>
-                                <li><a class="dropdown-item" href="#" data-sort="sales-asc">Ventes (croissant)</a></li>
-                                <li><a class="dropdown-item" href="#" data-sort="price-desc">Prix (décroissant)</a></li>
-                                <li><a class="dropdown-item" href="#" data-sort="price-asc">Prix (croissant)</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Produit</th>
-                                    <th>Catégorie</th>
-                                    <th>Stock</th>
-                                    <th>Vendus</th>
-                                    <th>Prix</th>
-                                    <th>Valeur Stock</th>
-                                    <th>Tendance</th>
-                                    <th>Statut</th>
-                                </tr>
-                            </thead>
-                            <tbody id="AnalInvenIa-productsTableBody">
-                                <!-- Sera rempli dynamiquement -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <i class="fas fa-chart-pie me-2"></i> Répartition par catégorie
-                        </div>
-                        <div class="card-body">
-                            <div class="AnalInvenIa-chart-container">
-                                <canvas id="AnalInvenIa-categoriesChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <i class="fas fa-fire me-2"></i> Rotation des stocks
-                        </div>
-                        <div class="card-body">
-                            <div class="AnalInvenIa-chart-container">
-                                <canvas id="AnalInvenIa-stockRotationChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Remplir le tableau de produits
-        const productsTableBody = document.getElementById('AnalInvenIa-productsTableBody');
-        if (productsTableBody) {
-            productsTableBody.innerHTML = '';
-            
-            mockProducts.forEach(product => {
-                const category = mockCategories.find(cat => cat.id === product.category);
-                const stockValue = product.stock * product.price;
-                const trendClass = product.trend > 0 ? 'positive' : product.trend < 0 ? 'negative' : 'neutral';
-                const trendIcon = product.trend > 0 ? 'fa-arrow-up' : product.trend < 0 ? 'fa-arrow-down' : 'fa-equals';
-                
-                // Déterminer le statut
-                let status, statusClass;
-                if (product.stock < 15 && product.sold > 40) {
-                    status = 'Rupture probable';
-                    statusClass = 'danger';
-                } else if (product.stock > 50 && product.sold < 20) {
-                    status = 'Surstockage';
-                    statusClass = 'warning';
-                } else if (product.trend > 10) {
-                    status = 'Forte demande';
-                    statusClass = 'success';
-                } else {
-                    status = 'Normal';
-                    statusClass = 'primary';
-                }
-                
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${product.name}</td>
-                    <td>${category ? category.name : 'N/A'}</td>
-                    <td>${product.stock}</td>
-                    <td>${product.sold}</td>
-                    <td>${product.price}€</td>
-                    <td>${stockValue}€</td>
-                    <td>
-                        <span class="AnalInvenIa-trend ${trendClass}">
-                            <i class="fas ${trendIcon}"></i> ${Math.abs(product.trend)}%
-                        </span>
-                    </td>
-                    <td><span class="badge bg-${statusClass}">${status}</span></td>
-                `;
-                
-                productsTableBody.appendChild(tr);
-            });
-        }
-        
-        // Initialiser les graphiques
-        initProductsCharts();
-    }
-
-    // Initialiser les graphiques de l'onglet Produits
-    function initProductsCharts() {
-        // Graphique de répartition par catégorie
-        const categoriesCanvas = document.getElementById('AnalInvenIa-categoriesChart');
-        if (categoriesCanvas) {
-            // Calculer les totaux par catégorie
-            const categoryTotals = {};
-            mockCategories.forEach(cat => {
-                categoryTotals[cat.id] = {
-                    name: cat.name,
-                    stockValue: 0,
-                    salesValue: 0
-                };
-            });
-            
-            mockProducts.forEach(product => {
-                if (categoryTotals[product.category]) {
-                    categoryTotals[product.category].stockValue += product.stock * product.price;
-                    categoryTotals[product.category].salesValue += product.sold * product.price;
-                }
-            });
-            
-            const labels = Object.values(categoryTotals).map(cat => cat.name);
-            const stockData = Object.values(categoryTotals).map(cat => cat.stockValue);
-            
-            new Chart(categoriesCanvas, {
-                type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: stockData,
-                        backgroundColor: [
-                            'rgba(54, 162, 235, 0.7)',
-                            'rgba(255, 99, 132, 0.7)',
-                            'rgba(255, 206, 86, 0.7)',
-                            'rgba(75, 192, 192, 0.7)'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const value = context.raw;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = Math.round((value / total) * 100);
-                                    return `${context.label}: ${value}€ (${percentage}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        // Graphique de rotation des stocks
-        const rotationCanvas = document.getElementById('AnalInvenIa-stockRotationChart');
-        if (rotationCanvas) {
-            // Calculer le taux de rotation pour chaque produit
-            const topRotationProducts = [...mockProducts]
-                .map(product => ({
-                    name: product.name,
-                    rotation: product.sold / (product.stock > 0 ? product.stock : 1)
-                }))
-                .sort((a, b) => b.rotation - a.rotation)
-                .slice(0, 7);
-            
-            const labels = topRotationProducts.map(p => p.name);
-            const data = topRotationProducts.map(p => p.rotation);
-            
-            new Chart(rotationCanvas, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Taux de rotation',
-                        data: data,
-                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
-                        borderColor: 'rgb(75, 192, 192)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    scales: {
-                        x: {
-                            beginAtZero: true
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `Taux de rotation: ${context.raw.toFixed(2)}`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    // Remplir l'onglet Prévisions
-    function fillPredictionsTab() {
-        const predictionsTab = document.getElementById('AnalInvenIa-tab-predictions');
-        if (!predictionsTab) return;
-        
-        predictionsTab.innerHTML = `
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-crystal-ball me-2"></i> Prévisions IA des ventes
-                </div>
-                <div class="card-body">
-                    <div class="AnalInvenIa-prediction-header mb-4">
-                        <h4>Prévisions pour les 3 prochains mois</h4>
-                        <p class="text-muted">Basées sur l'historique des ventes et les tendances du marché</p>
-                    </div>
-                    
-                    <div class="AnalInvenIa-chart-container mb-4">
-                        <canvas id="AnalInvenIa-salesPredictionChart"></canvas>
-                    </div>
-                    
-                    <div class="AnalInvenIa-prediction-insights">
-                        <div class="AnalInvenIa-insight-card">
-                            <div class="AnalInvenIa-insight-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="AnalInvenIa-insight-content">
-                                <h5>Croissance continue</h5>
-                                <p>Nos algorithmes prévoient une croissance globale de 12% pour le prochain trimestre.</p>
-                            </div>
-                        </div>
-                        <div class="AnalInvenIa-insight-card">
-                            <div class="AnalInvenIa-insight-icon">
-                                <i class="fas fa-calendar"></i>
-                            </div>
-                            <div class="AnalInvenIa-insight-content">
-                                <h5>Pics saisonniers</h5>
-                                <p>Préparez-vous à un pic de ventes en juillet avec une augmentation estimée de 22%.</p>
-                            </div>
-                        </div>
-                        <div class="AnalInvenIa-insight-card">
-                            <div class="AnalInvenIa-insight-icon">
-                                <i class="fas fa-lightbulb"></i>
-                            </div>
-                            <div class="AnalInvenIa-insight-content">
-                                <h5>Opportunités</h5>
-                                <p>L'analyse des tendances suggère un potentiel important pour la catégorie Électronique.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-7">
-                    <div class="card mb-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <span><i class="fas fa-exclamation-triangle me-2"></i> Alertes de stock prévisionnelles</span>
-                            <div class="AnalInvenIa-prediction-period">
-                                Pour les 30 prochains jours
-                            </div>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Produit</th>
-                                            <th>Stock actuel</th>
-                                            <th>Prévision de vente</th>
-                                            <th>Date de rupture estimée</th>
-                                            <th>Action recommandée</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Smartphone XL+</td>
-                                            <td>32</td>
-                                            <td>30 / mois</td>
-                                            <td>Dans 32 jours</td>
-                                            <td><span class="badge bg-warning">Commander bientôt</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Montre connectée Sport</td>
-                                            <td>28</td>
-                                            <td>25 / mois</td>
-                                            <td>Dans 34 jours</td>
-                                            <td><span class="badge bg-warning">Commander bientôt</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Écouteurs sans fil Pro</td>
-                                            <td>45</td>
-                                            <td>22 / mois</td>
-                                            <td>Dans 61 jours</td>
-                                            <td><span class="badge bg-success">Stock suffisant</span></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-5">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <i class="fas fa-calculator me-2"></i> Estimation financière
-                        </div>
-                        <div class="card-body">
-                            <div class="AnalInvenIa-finance-predictions">
-                                <div class="AnalInvenIa-finance-item">
-                                    <div class="AnalInvenIa-finance-label">Chiffre d'affaires estimé (prochain mois)</div>
-                                    <div class="AnalInvenIa-finance-value">14 800 €</div>
-                                    <div class="AnalInvenIa-finance-trend positive">
-                                        <i class="fas fa-arrow-up me-1"></i> +12% vs mois précédent
-                                    </div>
-                                </div>
-                                <div class="AnalInvenIa-finance-item">
-                                    <div class="AnalInvenIa-finance-label">Produit le plus rentable (prévision)</div>
-                                    <div class="AnalInvenIa-finance-product">Smartphone XL+</div>
-                                    <div class="AnalInvenIa-finance-value">4 250 €</div>
-                                </div>
-                                <div class="AnalInvenIa-finance-item">
-                                    <div class="AnalInvenIa-finance-label">Catégorie en plus forte croissance</div>
-                                    <div class="AnalInvenIa-finance-product">Électronique</div>
-                                    <div class="AnalInvenIa-finance-trend positive">
-                                        <i class="fas fa-arrow-up me-1"></i> +18%
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="AnalInvenIa-prediction-chart-container mt-4">
-                                <canvas id="AnalInvenIa-financePredictionChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        initPredictionCharts();
-    }
-
-    // Initialiser les graphiques de prévision
-    function initPredictionCharts() {
-        // Graphique de prévision des ventes
-        const salesPredictionCanvas = document.getElementById('AnalInvenIa-salesPredictionChart');
-        if (salesPredictionCanvas) {
-            const months = ['Mai', 'Juin', 'Juillet', 'Août'];
-            const historicalData = [11200, 12450, null, null];
-            const predictedData = [null, null, 14000, 15600];
-            
-            new Chart(salesPredictionCanvas, {
-                type: 'line',
-                data: {
-                    labels: months,
-                    datasets: [{
-                        label: 'Données historiques',
-                        data: historicalData,
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        fill: true
-                    }, {
-                        label: 'Prévisions',
-                        data: predictedData,
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        pointRadius: 4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '€';
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += context.parsed.y + '€';
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        // Graphique de prévision financière
-        const financePredictionCanvas = document.getElementById('AnalInvenIa-financePredictionChart');
-        if (financePredictionCanvas) {
-            const categories = ['Électronique', 'Mobilier', 'Vêtements', 'Alimentaire'];
-            const currentData = [8200, 2300, 1500, 950];
-            const forecastData = [9676, 2415, 1470, 1045];
-            
-            new Chart(financePredictionCanvas, {
-                type: 'bar',
-                data: {
-                    labels: categories,
-                    datasets: [{
-                        label: 'Ce mois-ci',
-                        data: currentData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                        borderColor: 'rgb(54, 162, 235)',
-                        borderWidth: 1
-                    }, {
-                        label: 'Mois prochain (prévision)',
-                        data: forecastData,
-                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                        borderColor: 'rgb(255, 99, 132)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '€';
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += context.parsed.y + '€';
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    // Remplir l'onglet Recommandations
-    function fillRecommendationsTab() {
-        const recommendationsTab = document.getElementById('AnalInvenIa-tab-recommendations');
-        if (!recommendationsTab) return;
-        
-        recommendationsTab.innerHTML = `
-            <div class="AnalInvenIa-recommendations-header mb-4">
-                <div class="AnalInvenIa-recommendations-title">
-                    <i class="fas fa-lightbulb me-2"></i>
-                    <h4>Recommandations IA</h4>
-                </div>
-                <div class="AnalInvenIa-recommendations-summary">
-                    Notre intelligence artificielle a analysé vos données et vous propose des actions concrètes pour optimiser votre gestion.
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <i class="fas fa-star me-2"></i> Recommandations prioritaires
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="AnalInvenIa-recommendation-list" id="AnalInvenIa-priorityRecommendations">
-                                <!-- Sera rempli dynamiquement -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <i class="fas fa-chart-bar me-2"></i> Impact estimé
-                        </div>
-                        <div class="card-body">
-                            <div class="AnalInvenIa-impact">
-                                <div class="AnalInvenIa-impact-item">
-                                    <div class="AnalInvenIa-impact-icon positive">
-                                        <i class="fas fa-hand-holding-usd"></i>
-                                    </div>
-                                    <div class="AnalInvenIa-impact-content">
-                                        <div class="AnalInvenIa-impact-value">+2 400 €</div>
-                                        <div class="AnalInvenIa-impact-label">Revenus additionnels</div>
-                                    </div>
-                                </div>
-                                <div class="AnalInvenIa-impact-item">
-                                    <div class="AnalInvenIa-impact-icon positive">
-                                        <i class="fas fa-percent"></i>
-                                    </div>
-                                    <div class="AnalInvenIa-impact-content">
-                                        <div class="AnalInvenIa-impact-value">+14%</div>
-                                        <div class="AnalInvenIa-impact-label">Marge optimisée</div>
-                                    </div>
-                                </div>
-                                <div class="AnalInvenIa-impact-item">
-                                    <div class="AnalInvenIa-impact-icon negative">
-                                        <i class="fas fa-coins"></i>
-                                    </div>
-                                    <div class="AnalInvenIa-impact-content">
-                                        <div class="AnalInvenIa-impact-value">-3 800 €</div>
-                                        <div class="AnalInvenIa-impact-label">Réduction des surstockages</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-list-check me-2"></i> Toutes les recommandations
-                </div>
-                <div class="card-body p-0">
-                    <div class="AnalInvenIa-tabs AnalInvenIa-tabs-small">
-                        <div class="AnalInvenIa-tab active" data-rectab="all">
-                            <i class="fas fa-border-all"></i> Toutes
-                        </div>
-                        <div class="AnalInvenIa-tab" data-rectab="stock">
-                            <i class="fas fa-box"></i> Stock
-                        </div>
-                        <div class="AnalInvenIa-tab" data-rectab="pricing">
-                            <i class="fas fa-tag"></i> Prix
-                        </div>
-                        <div class="AnalInvenIa-tab" data-rectab="marketing">
-                            <i class="fas fa-bullhorn"></i> Marketing
-                        </div>
-                    </div>
-                    <div class="AnalInvenIa-recommendation-grid" id="AnalInvenIa-allRecommendations">
-                        <!-- Sera rempli dynamiquement -->
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Remplir les recommandations prioritaires
-        const priorityRecommendationsEl = document.getElementById('AnalInvenIa-priorityRecommendations');
-        if (priorityRecommendationsEl) {
-            const topRecommendations = mockRecommendations.slice(0, 3);
-            
-            priorityRecommendationsEl.innerHTML = '';
-            topRecommendations.forEach(rec => {
-                const recItem = document.createElement('div');
-                recItem.className = 'AnalInvenIa-recommendation-item';
-                recItem.innerHTML = `
-                    <div class="AnalInvenIa-recommendation-icon">
-                        <i class="${rec.icon}"></i>
-                    </div>
-                    <div class="AnalInvenIa-recommendation-content">
-                        <div class="AnalInvenIa-recommendation-title">${rec.title}</div>
-                        <div class="AnalInvenIa-recommendation-description">
-                            ${rec.description}
-                        </div>
-                    </div>
-                    <div class="AnalInvenIa-recommendation-action">
-                        <button class="btn btn-sm btn-outline-primary">Appliquer</button>
-                    </div>
-                `;
-                
-                priorityRecommendationsEl.appendChild(recItem);
-            });
-        }
-        
-        // Remplir toutes les recommandations
-        const allRecommendationsEl = document.getElementById('AnalInvenIa-allRecommendations');
-        if (allRecommendationsEl) {
-            allRecommendationsEl.innerHTML = '';
-            
-            mockRecommendations.forEach(rec => {
-                const recItem = document.createElement('div');
-                recItem.className = 'AnalInvenIa-recommendation-card';
-                recItem.setAttribute('data-rectype', getRecommendationType(rec.type));
-                recItem.innerHTML = `
-                    <div class="AnalInvenIa-recommendation-card-header">
-                        <div class="AnalInvenIa-recommendation-card-icon">
-                            <i class="${rec.icon}"></i>
-                        </div>
-                        <div class="AnalInvenIa-recommendation-card-badge ${getRecommendationClass(rec.type)}">
-                            ${getRecommendationLabel(rec.type)}
-                        </div>
-                    </div>
-                    <div class="AnalInvenIa-recommendation-card-title">${rec.title}</div>
-                    <div class="AnalInvenIa-recommendation-card-description">
-                        ${rec.description}
-                    </div>
-                    <div class="AnalInvenIa-recommendation-card-footer">
-                        <button class="btn btn-sm btn-outline-secondary">Ignorer</button>
-                        <button class="btn btn-sm btn-primary">Appliquer</button>
-                    </div>
-                `;
-                
-                allRecommendationsEl.appendChild(recItem);
-            });
-            
-            // Ajouter la gestion des onglets de recommandations
-            const recTabs = document.querySelectorAll('.AnalInvenIa-tab[data-rectab]');
-            recTabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-rectab');
-                    
-                    // Désactiver tous les onglets
-                    recTabs.forEach(t => t.classList.remove('active'));
-                    
-                    // Activer l'onglet sélectionné
-                    this.classList.add('active');
-                    
-                    // Filtrer les recommandations
-                    const recCards = document.querySelectorAll('.AnalInvenIa-recommendation-card');
-                    recCards.forEach(card => {
-                        if (tabId === 'all' || card.getAttribute('data-rectype') === tabId) {
-                            card.style.display = 'flex';
-                        } else {
-                            card.style.display = 'none';
-                        }
-                    });
-                });
-            });
-        }
-    }
-
-    // Déterminer le type de recommandation pour le filtrage
-    function getRecommendationType(type) {
-        switch (type) {
-            case 'increase_stock':
-            case 'reduce_stock':
-            case 'restock':
-                return 'stock';
-            case 'price_up':
-            case 'price_down':
-                return 'pricing';
-            case 'promotion':
-            case 'bundle':
-                return 'marketing';
-            default:
-                return 'other';
-        }
-    }
-
-    // Obtenir la classe CSS pour le badge de recommandation
-    function getRecommendationClass(type) {
-        switch (type) {
-            case 'increase_stock':
-            case 'restock':
-            case 'price_up':
-                return 'success';
-            case 'reduce_stock':
-            case 'price_down':
-                return 'warning';
-            case 'promotion':
-            case 'bundle':
-                return 'info';
-            default:
-                return 'primary';
-        }
-    }
-
-    // Obtenir le label pour le badge de recommandation
-    function getRecommendationLabel(type) {
-        switch (type) {
-            case 'increase_stock':
-                return 'Augmenter Stock';
-            case 'reduce_stock':
-                return 'Réduire Stock';
-            case 'restock':
-                return 'Réapprovisionner';
-            case 'price_up':
-                return 'Augmenter Prix';
-            case 'price_down':
-                return 'Réduire Prix';
-            case 'promotion':
-                return 'Promotion';
-            case 'bundle':
-                return 'Bundle';
-            default:
-                return 'Action';
-        }
-    }
-
-    // Réinitialiser les paramètres d'analyse
-    function resetAnalysisParams() {
-        // Réinitialiser les filtres
-        filterTabs[0].click();
-        customFilterTabs[0].click();
-        
-        // Réinitialiser la portée
-        scopeOptions[0].click();
-        
-        // Réinitialiser les selects
-        selects.forEach(select => {
-            const defaultOption = select.querySelector('.AnalInvenIa-select-option');
-            if (defaultOption) {
-                select.querySelector('.AnalInvenIa-select-value').textContent = defaultOption.textContent.trim();
-            }
-        });
-        
-        // Réinitialiser les variables d'état
-        currentFilter = 1;
-        currentCustomFilter = 'range';
-        currentScope = 'global';
-        selectedCategory = null;
-        selectedProduct = null;
-        
-        // Masquer les sélecteurs spécifiques
-        categorySelector.style.display = 'none';
-        productSelector.style.display = 'none';
-        selectedProductDisplay.style.display = 'none';
-    }
-
-    // Formater une date
-    function formatDate(date) {
-        return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
-    }
-
-    // Formater une heure
-    function formatTime(date) {
-        return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-    }
-
-    // Obtenir le nom du mois
-    function getMonthName(monthIndex) {
-        const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-        return months[monthIndex];
-    }
-    
-    // Charger les dépendances externes (Chart.js)
-    function loadChartJS() {
-        if (window.Chart) return Promise.resolve();
-        
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
-    }
-    
-    // Charger Chart.js
-    loadChartJS().then(() => {
-        console.log('Chart.js chargé avec succès');
-    }).catch(err => {
-        console.error('Erreur lors du chargement de Chart.js:', err);
+function shareByEmail() {
+    addAiMessage({
+        type: 'ai',
+        content: `
+            <p>Un email contenant cette conversation a été préparé dans votre application de messagerie par défaut. ✅</p>
+            <p>Vous pouvez maintenant l'envoyer à vos collaborateurs.</p>
+        `
     });
-});
+    
+    showMainOptions();
+}
+
+function shareByWhatsApp() {
+    addAiMessage({
+        type: 'ai',
+        content: `
+            <p>La conversation a été partagée sur WhatsApp. ✅</p>
+            <p>Vos collaborateurs peuvent maintenant la consulter.</p>
+        `
+    });
+    
+    showMainOptions();
+}
+
+function shareCopyLink() {
+    addAiMessage({
+        type: 'ai',
+        content: `
+            <p>Le lien vers cette conversation a été copié dans votre presse-papier. ✅</p>
+            <p>Vous pouvez maintenant le partager où vous le souhaitez.</p>
+        `
+    });
+    
+    showMainOptions();
+}
+
+function checkAutomaticReport() {
+    // Vérifier si un rapport automatique doit être envoyé
+    const now = new Date();
+    const reportTime = aiUserPreferences.reportTime || '18:00';
+    const [hours, minutes] = reportTime.split(':').map(Number);
+    
+    // Si l'heure actuelle correspond à l'heure de rapport (à 5 minutes près)
+    if (now.getHours() === hours && Math.abs(now.getMinutes() - minutes) <= 5) {
+        // Vérifier la fréquence
+        const lastReportDate = aiUserPreferences.lastReportDate ? new Date(aiUserPreferences.lastReportDate) : null;
+        let shouldSendReport = false;
+        
+        if (!lastReportDate) {
+            shouldSendReport = true;
+        } else {
+            const daysSinceLastReport = Math.floor((now - lastReportDate) / (1000 * 60 * 60 * 24));
+            
+            if (aiUserPreferences.reportFrequency === 'daily' && daysSinceLastReport >= 1) {
+                shouldSendReport = true;
+            } else if (aiUserPreferences.reportFrequency === 'weekly' && daysSinceLastReport >= 7) {
+                shouldSendReport = true;
+            } else if (aiUserPreferences.reportFrequency === 'monthly' && daysSinceLastReport >= 30) {
+                shouldSendReport = true;
+            }
+        }
+        
+        if (shouldSendReport) {
+            // Si l'utilisateur est sur la section IA, générer le rapport
+            if (document.getElementById('ai-assistant').style.display !== 'none') {
+                addAiMessage({
+                    type: 'ai',
+                    content: `
+                        <p>C'est l'heure de votre rapport ${aiUserPreferences.reportFrequency === 'daily' ? 'quotidien' : aiUserPreferences.reportFrequency === 'weekly' ? 'hebdomadaire' : 'mensuel'} ! 📊</p>
+                        <p>Voici un résumé de votre inventaire :</p>
+                    `
+                });
+                
+                generateDailyReport();
+            } else {
+                // Sinon, afficher une notification
+                showNotification('Rapport automatique', 'Votre rapport d\'inventaire est prêt à être consulté.', 'info');
+            }
+        }
+    }
+}
+
 
 
 
@@ -6270,439 +6244,6 @@ document.addEventListener('DOMContentLoaded', function() {
   🟡 JS PARTIE 6
   ═════════════════════════════╝*/
 
-  // Fonctions pour l'onglet Statistiques
-function initStatisticsCharts() {
-    if (!window.Chart) return;
-    
-    // Graphique des ventes par catégorie
-    const categorySalesCtx = document.getElementById('AnalInvenIa-categorySalesChart');
-    if (categorySalesCtx) {
-        new Chart(categorySalesCtx, {
-            type: 'pie',
-            data: {
-                labels: ['Électronique', 'Mobilier', 'Vêtements', 'Alimentaire', 'Autres'],
-                datasets: [{
-                    data: [45, 20, 15, 10, 10],
-                    backgroundColor: [
-                        '#0d6efd',
-                        '#6610f2',
-                        '#6f42c1',
-                        '#d63384',
-                        '#dc3545'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
-    }
-    
-    // Graphique d'évolution des ventes
-    const salesTrendCtx = document.getElementById('AnalInvenIa-salesTrendChart');
-    if (salesTrendCtx) {
-        new Chart(salesTrendCtx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai'],
-                datasets: [{
-                    label: 'Ventes 2025',
-                    data: [12000, 19000, 15000, 18500, 24500],
-                    borderColor: '#0d6efd',
-                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }, {
-                    label: 'Ventes 2024',
-                    data: [10000, 15000, 12000, 14500, 19000],
-                    borderColor: '#6c757d',
-                    borderDash: [5, 5],
-                    fill: false,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
-    
-    // Graphique de répartition des stocks
-    const stockDistributionCtx = document.getElementById('AnalInvenIa-stockDistributionChart');
-    if (stockDistributionCtx) {
-        new Chart(stockDistributionCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Stock optimal', 'Stock faible', 'Rupture', 'Surstockage'],
-                datasets: [{
-                    data: [65, 20, 5, 10],
-                    backgroundColor: [
-                        '#28a745',
-                        '#ffc107',
-                        '#dc3545',
-                        '#17a2b8'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                cutout: '70%'
-            }
-        });
-    }
-    
-    // Graphique comparatif
-    const comparativeCtx = document.getElementById('AnalInvenIa-comparativeChart');
-    if (comparativeCtx) {
-        new Chart(comparativeCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Électronique', 'Mobilier', 'Vêtements', 'Alimentaire', 'Autres'],
-                datasets: [{
-                    label: 'Ce mois-ci',
-                    data: [12450, 5420, 3780, 2650, 2480],
-                    backgroundColor: '#0d6efd',
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.7
-                }, {
-                    label: 'Mois précédent',
-                    data: [10800, 4950, 3350, 2240, 2650],
-                    backgroundColor: '#6c757d',
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.7
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
-}
-
-// Fonctions pour l'onglet Rapports
-function initReportsInteractions() {
-    // Gestion des sélecteurs
-    document.querySelectorAll('.AnalInvenIa-select').forEach(select => {
-        select.addEventListener('click', function(e) {
-            if (e.target.closest('.AnalInvenIa-select-option')) {
-                const option = e.target.closest('.AnalInvenIa-select-option');
-                const value = option.dataset.value;
-                const valueDisplay = this.querySelector('.AnalInvenIa-select-value');
-                
-                valueDisplay.textContent = option.textContent.trim();
-                this.dataset.value = value;
-                this.classList.remove('active');
-            } else {
-                this.classList.toggle('active');
-            }
-        });
-    });
-    
-    // Fermer les sélecteurs quand on clique ailleurs
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.AnalInvenIa-select')) {
-            document.querySelectorAll('.AnalInvenIa-select.active').forEach(select => {
-                select.classList.remove('active');
-            });
-        }
-    });
-    
-    // Changement de vue (liste/grille)
-    document.querySelectorAll('.AnalInvenIa-view-control').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const viewType = this.dataset.view;
-            
-            // Activer/désactiver les boutons
-            document.querySelectorAll('.AnalInvenIa-view-control').forEach(b => {
-                b.classList.remove('active');
-            });
-            this.classList.add('active');
-            
-            // Afficher la vue correspondante
-            document.querySelectorAll('.AnalInvenIa-reports-list, .AnalInvenIa-reports-grid').forEach(view => {
-                view.classList.remove('active');
-            });
-            
-            if (viewType === 'list') {
-                document.querySelector('.AnalInvenIa-reports-list').classList.add('active');
-            } else {
-                document.querySelector('.AnalInvenIa-reports-grid').classList.add('active');
-                // Remplir la grille si nécessaire (pour l'exemple, nous utiliserons les mêmes données)
-                if (document.querySelector('.AnalInvenIa-reports-grid').children.length === 0) {
-                    const items = document.querySelectorAll('.AnalInvenIa-report-item');
-                    let gridHTML = '';
-                    
-                    items.forEach(item => {
-                        const icon = item.querySelector('.AnalInvenIa-report-icon').innerHTML;
-                        const title = item.querySelector('.AnalInvenIa-report-title').textContent;
-                        const type = item.querySelector('.AnalInvenIa-report-type').textContent;
-                        const date = item.querySelector('.AnalInvenIa-report-date').textContent;
-                        
-                        gridHTML += `
-                            <div class="AnalInvenIa-report-grid-item">
-                                <div class="AnalInvenIa-report-grid-content">
-                                    <div class="AnalInvenIa-report-grid-icon">${icon}</div>
-                                    <div class="AnalInvenIa-report-grid-title">${title}</div>
-                                    <div class="AnalInvenIa-report-grid-meta">
-                                        <span class="AnalInvenIa-report-grid-type">${type}</span>
-                                        <span class="AnalInvenIa-report-grid-date">${date}</span>
-                                    </div>
-                                </div>
-                                <div class="AnalInvenIa-report-grid-actions">
-                                    <button class="AnalInvenIa-action-btn" title="Voir le rapport">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="AnalInvenIa-action-btn" title="Télécharger en PDF">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    
-                    document.querySelector('.AnalInvenIa-reports-grid').innerHTML = gridHTML;
-                }
-            }
-        });
-    });
-    
-    // Prévisualisation des rapports
-    document.querySelectorAll('.AnalInvenIa-action-btn').forEach(btn => {
-        if (btn.querySelector('.fa-eye')) {
-            btn.addEventListener('click', function() {
-                const reportTitle = this.closest('.AnalInvenIa-report-item').querySelector('.AnalInvenIa-report-title').textContent;
-                showReportPreview(reportTitle);
-            });
-        }
-    });
-    
-    // Fermer la prévisualisation
-    document.getElementById('AnalInvenIa-closePreview')?.addEventListener('click', function() {
-        document.getElementById('AnalInvenIa-reportPreview').style.display = 'none';
-    });
-    
-    // Bouton de génération de rapport
-    document.getElementById('AnalInvenIa-generateReport')?.addEventListener('click', function() {
-        alert("Fonctionnalité de génération de rapport en cours de développement.");
-    });
-}
-
-// Afficher la prévisualisation d'un rapport
-function showReportPreview(reportTitle) {
-    const previewModal = document.getElementById('AnalInvenIa-reportPreview');
-    if (!previewModal) return;
-    
-    // Afficher le modal
-    previewModal.style.display = 'flex';
-    
-    // Mettre à jour le titre
-    const titleElement = previewModal.querySelector('.AnalInvenIa-report-preview-title span');
-    if (titleElement) titleElement.textContent = reportTitle;
-    
-    // Afficher le loader
-    previewModal.querySelector('.AnalInvenIa-report-loading').style.display = 'block';
-    previewModal.querySelector('.AnalInvenIa-report-content').style.display = 'none';
-    
-    // Simuler le chargement
-    setTimeout(() => {
-        previewModal.querySelector('.AnalInvenIa-report-loading').style.display = 'none';
-        previewModal.querySelector('.AnalInvenIa-report-content').style.display = 'block';
-        
-        // Contenu de démo pour le rapport (vous pouvez le personnaliser en fonction du titre)
-        let reportContent = `
-            <div class="AnalInvenIa-report-document">
-                <div class="AnalInvenIa-report-header-logo">
-                    <img src="img/logo.png" alt="Logo" style="max-height: 50px;">
-                    <h2>${reportTitle}</h2>
-                </div>
-                <div class="AnalInvenIa-report-metadata">
-                    <div class="AnalInvenIa-report-metadata-item">
-                        <span class="label">Date de génération:</span>
-                        <span class="value">18 mai 2025</span>
-                    </div>
-                    <div class="AnalInvenIa-report-metadata-item">
-                        <span class="label">Période analysée:</span>
-                        <span class="value">1 mai - 17 mai 2025</span>
-                    </div>
-                    <div class="AnalInvenIa-report-metadata-item">
-                        <span class="label">Généré par:</span>
-                        <span class="value">AnalInvenIA</span>
-                    </div>
-                </div>
-                
-                <div class="AnalInvenIa-report-section">
-                    <h3>Résumé exécutif</h3>
-                    <p>Ce rapport présente une analyse détaillée de l'état actuel de votre inventaire, incluant les tendances clés, les points d'attention, et des recommandations basées sur l'analyse IA de vos données.</p>
-                    
-                    <div class="AnalInvenIa-report-kpi-row">
-                        <div class="AnalInvenIa-report-kpi">
-                            <div class="AnalInvenIa-report-kpi-value">24 850 €</div>
-                            <div class="AnalInvenIa-report-kpi-label">Valeur du stock</div>
-                        </div>
-                        <div class="AnalInvenIa-report-kpi">
-                            <div class="AnalInvenIa-report-kpi-value">12 450 €</div>
-                            <div class="AnalInvenIa-report-kpi-label">Ventes totales</div>
-                        </div>
-                        <div class="AnalInvenIa-report-kpi">
-                            <div class="AnalInvenIa-report-kpi-value">+12.3%</div>
-                            <div class="AnalInvenIa-report-kpi-label">Croissance</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="AnalInvenIa-report-section">
-                    <h3>Analyse détaillée</h3>
-                    <p>L'analyse de vos données d'inventaire pour le mois de Mai 2025 montre une tendance positive avec une augmentation des ventes de 12,3% par rapport au mois précédent. La valeur totale de votre stock a augmenté de 8,5%, indiquant un bon équilibre entre les entrées et sorties de stock.</p>
-                    
-                    <h4>Points forts</h4>
-                    <ul>
-                        <li>La catégorie Électronique continue de dominer vos ventes avec une croissance constante</li>
-                        <li>Votre rotation de stock s'est améliorée de 5% ce mois-ci</li>
-                        <li>Le produit "Smartphone XL+" montre une excellente performance avec une hausse de ventes de 15%</li>
-                    </ul>
-                    
-                    <h4>Points d'attention</h4>
-                    <ul>
-                        <li>3 produits sont en surstockage, représentant une valeur immobilisée de 5 420€</li>
-                        <li>2 produits populaires risquent une rupture de stock dans les 10 prochains jours</li>
-                        <li>La catégorie "Accessoires gaming" montre une tendance à la baisse (-8%)</li>
-                    </ul>
-                </div>
-                
-                <div class="AnalInvenIa-report-section">
-                    <h3>Graphiques et visualisations</h3>
-                    <div class="AnalInvenIa-report-charts">
-                        <div class="AnalInvenIa-report-chart">
-                            <img src="https://via.placeholder.com/500x300?text=Graphique+des+ventes" alt="Graphique des ventes" style="max-width: 100%;">
-                            <p class="AnalInvenIa-report-chart-caption">Figure 1: Évolution des ventes par catégorie</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="AnalInvenIa-report-section">
-                    <h3>Recommandations</h3>
-                    <p>Notre IA recommande de concentrer vos efforts sur l'optimisation des niveaux de stock pour les produits à forte rotation et de réévaluer votre stratégie pour les produits en surstockage.</p>
-                    
-                    <div class="AnalInvenIa-report-recommendations">
-                        <div class="AnalInvenIa-report-recommendation">
-                            <div class="AnalInvenIa-report-recommendation-icon">
-                                <i class="fas fa-arrow-up"></i>
-                            </div>
-                            <div class="AnalInvenIa-report-recommendation-content">
-                                <h4>Augmenter le stock de Smartphone XL+</h4>
-                                <p>Les ventes augmentent de 15% chaque mois depuis 3 mois.</p>
-                                <p>Action recommandée: Commander 50 unités supplémentaires pour anticiper la demande croissante.</p>
-                            </div>
-                        </div>
-                        
-                        <div class="AnalInvenIa-report-recommendation">
-                            <div class="AnalInvenIa-report-recommendation-icon">
-                                <i class="fas fa-percentage"></i>
-                            </div>
-                            <div class="AnalInvenIa-report-recommendation-content">
-                                <h4>Augmenter le prix des Écouteurs sans fil Pro</h4>
-                                <p>Forte demande avec une élasticité-prix favorable. Potentiel +15% sans impact sur les ventes.</p>
-                                <p>Action recommandée: Tester une augmentation de prix progressive de 5%, 10% puis 15% sur les 3 prochaines semaines.</p>
-                            </div>
-                        </div>
-                        
-                        <div class="AnalInvenIa-report-recommendation">
-                            <div class="AnalInvenIa-report-recommendation-icon">
-                                <i class="fas fa-arrow-down"></i>
-                            </div>
-                            <div class="AnalInvenIa-report-recommendation-content">
-                                <h4>Réduire le stock de Casques gaming standard</h4>
-                                <p>Rotation lente, 35 unités en stock depuis plus de 60 jours.</p>
-                                <p>Action recommandée: Créer une promotion temporaire avec 25% de réduction pour écouler le stock.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="AnalInvenIa-report-footer">
-                    <p>Ce rapport a été généré automatiquement par AnalInvenIA. Les recommandations sont basées sur l'analyse des données historiques et des tendances actuelles.</p>
-                </div>
-            </div>
-        `;
-        
-        previewModal.querySelector('.AnalInvenIa-report-content').innerHTML = reportContent;
-    }, 1500);
-}
-
-// Initialiser les fonctionnalités lors du chargement des onglets
-document.addEventListener('DOMContentLoaded', function() {
-    // Gestion des onglets d'insights
-    document.querySelectorAll('.AnalInvenIa-insight-tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            const tabId = this.dataset.tab;
-            
-            // Désactiver tous les onglets et contenus
-            document.querySelectorAll('.AnalInvenIa-insight-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.AnalInvenIa-insight-content').forEach(c => c.classList.remove('active'));
-            
-            // Activer l'onglet et le contenu sélectionnés
-            this.classList.add('active');
-            document.getElementById(`AnalInvenIa-tab-${tabId}`)?.classList.add('active');
-            
-            // Initialiser les graphiques pour l'onglet Statistiques
-            if (tabId === 'stats') {
-                initStatisticsCharts();
-            }
-            
-            // Initialiser les interactions pour l'onglet Rapports
-            if (tabId === 'reports') {
-                initReportsInteractions();
-            }
-        });
-    });
-    
-    // Initialiser les filtres de période pour les statistiques
-    document.querySelectorAll('.AnalInvenIa-time-btn, .AnalInvenIa-period-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const parent = this.parentElement;
-            parent.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Ici vous pouvez ajouter du code pour actualiser les graphiques selon la période sélectionnée
-        });
-    });
-});
 
 
 

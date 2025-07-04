@@ -1793,1123 +1793,570 @@
   🟠 PARTIE 4  
 \*═══════════════════════════*/
 
-  /* Styles pour la section d'analyse IA */
-#AnalInvenIa-dashboard {
-    background-color: #f8f9fa;
+
+/* Styles pour l'Assistant IA - Version améliorée responsive */
+.ai-interface-container {
+    max-width: 100%;
+    margin: 0 auto;
 }
 
-.AnalInvenIa-intro-card {
+.ai-chat-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 150px);
+    min-height: 400px;
+}
+
+.ai-header {
     display: flex;
     align-items: center;
-    padding: 1.5rem;
-    background: linear-gradient(135deg, #0d6efd, #6610f2);
-    border-radius: 10px;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: white;
-    margin-bottom: 2rem;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-.AnalInvenIa-intro-icon {
-    font-size: 2.5rem;
-    margin-right: 1.5rem;
-    background-color: rgba(255, 255, 255, 0.2);
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.AnalInvenIa-intro-content h3 {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.AnalInvenIa-intro-content p {
-    opacity: 0.9;
-    margin-bottom: 0;
-}
-
-.AnalInvenIa-tabs {
-    display: flex;
-    background-color: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    margin-top: 0.5rem;
-}
-
-.AnalInvenIa-tab {
-    padding: 0.75rem 1.25rem;
-    cursor: pointer;
-    flex: 1;
-    text-align: center;
-    font-weight: 500;
-    transition: all 0.3s;
-    border-bottom: 3px solid transparent;
-}
-
-.AnalInvenIa-tab.active {
-    background-color: #f8f9fa;
-    border-bottom: 3px solid var(--primary);
-    color: var(--primary);
-}
-
-.AnalInvenIa-tab:hover:not(.active) {
-    background-color: #f1f3f5;
-}
-
-.AnalInvenIa-tabs-small .AnalInvenIa-tab {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
-}
-
-.AnalInvenIa-filter-content {
-    display: none;
-    padding: 1rem;
-    background-color: #f8f9fa;
-    border-radius: 0 0 8px 8px;
-}
-
-.AnalInvenIa-filter-content.active {
-    display: block;
-}
-
-.AnalInvenIa-select-container {
-    position: relative;
-    margin-bottom: 0.5rem;
-}
-
-.AnalInvenIa-select {
-    position: relative;
-    background-color: white;
-    border: 1px solid #dee2e6;
-    border-radius: 5px;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.AnalInvenIa-select:hover {
-    border-color: #adb5bd;
-}
-
-.AnalInvenIa-select-arrow {
-    transition: transform 0.3s;
-}
-
-.AnalInvenIa-select.active .AnalInvenIa-select-arrow {
-    transform: rotate(180deg);
-}
-
-.AnalInvenIa-select-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background-color: white;
-    border: 1px solid #dee2e6;
-    border-top: none;
-    border-radius: 0 0 5px 5px;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 100;
-    display: none;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.AnalInvenIa-select.active .AnalInvenIa-select-dropdown {
-    display: block;
-}
-
-.AnalInvenIa-select-option {
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.AnalInvenIa-select-option:hover {
-    background-color: #f8f9fa;
-}
-
-.AnalInvenIa-custom-filter {
-    display: none;
-    margin-top: 1rem;
-}
-
-.AnalInvenIa-custom-filter.active {
-    display: block;
-}
-
-.AnalInvenIa-form-group {
-    margin-bottom: 1rem;
-}
-
-.AnalInvenIa-form-group label {
-    display: block;
-    margin-bottom: 0.25rem;
-    font-weight: 500;
-}
-
-.AnalInvenIa-scope-selector {
-    display: flex;
-    gap: 1rem;
-    margin-top: 0.5rem;
-}
-
-.AnalInvenIa-scope-option {
-    flex: 1;
-    background-color: white;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    padding: 1rem;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.AnalInvenIa-scope-option:hover {
-    border-color: #adb5bd;
-    transform: translateY(-2px);
-}
-
-.AnalInvenIa-scope-option.active {
-    border-color: var(--primary);
-    background-color: rgba(230, 0, 0, 0.05);
-    box-shadow: 0 2px 8px rgba(230, 0, 0, 0.1);
-}
-
-.AnalInvenIa-scope-icon {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    color: var(--primary);
-}
-
-.AnalInvenIa-scope-label {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.AnalInvenIa-scope-desc {
-    font-size: 0.8rem;
-    color: #6c757d;
-}
-
-.AnalInvenIa-search-container {
-    position: relative;
-}
-
-.AnalInvenIa-search-results {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background-color: white;
-    border: 1px solid #dee2e6;
-    border-top: none;
-    border-radius: 0 0 5px 5px;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 100;
-    display: none;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.AnalInvenIa-search-result {
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid #f1f3f5;
-}
-
-.AnalInvenIa-search-result:hover {
-    background-color: #f8f9fa;
-}
-
-.AnalInvenIa-search-result:last-child {
-    border-bottom: none;
-}
-
-.AnalInvenIa-selected-product {
-    margin-top: 0.5rem;
-}
-
-.AnalInvenIa-product-badge {
-    display: inline-flex;
-    align-items: center;
-    background-color: #e9ecef;
-    padding: 0.5rem 0.75rem;
-    border-radius: 50px;
-}
-
-.AnalInvenIa-remove-product {
-    background: none;
-    border: none;
-    color: #6c757d;
-    cursor: pointer;
-    margin-left: 0.5rem;
-    font-size: 0.8rem;
-}
-
-.AnalInvenIa-analysis-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #dee2e6;
-}
-
-.AnalInvenIa-analysis-status {
-    color: #6c757d;
-}
-
-.AnalInvenIa-results-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.AnalInvenIa-results-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-}
-
-.AnalInvenIa-period-badge {
-    background-color: #e9ecef;
-    border-radius: 50px;
-    padding: 0.25rem 0.75rem;
-    font-size: 0.85rem;
-    margin-left: 0.75rem;
-}
-
-.AnalInvenIa-insights-nav {
-    display: flex;
-    background-color: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    margin-bottom: 1.5rem;
-}
-
-.AnalInvenIa-insight-tab {
-    padding: 1rem 1.25rem;
-    cursor: pointer;
-    flex: 1;
-    text-align: center;
-    font-weight: 500;
-    transition: all 0.3s;
-    border-bottom: 3px solid transparent;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.AnalInvenIa-insight-tab i {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
-}
-
-.AnalInvenIa-insight-tab.active {
-    background-color: #f8f9fa;
-    border-bottom: 3px solid var(--primary);
-    color: var(--primary);
-}
-
-.AnalInvenIa-insight-tab:hover:not(.active) {
-    background-color: #f1f3f5;
-}
-
-.AnalInvenIa-insight-content {
-    display: none;
-}
-
-.AnalInvenIa-insight-content.active {
-    display: block;
-}
-
-.AnalInvenIa-kpi-card {
-    background-color: white;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    display: flex;
-    align-items: center;
-    height: 100%;
-}
-
-.AnalInvenIa-kpi-icon {
-    font-size: 2rem;
-    width: 60px;
-    height: 60px;
-    background-color: rgba(13, 110, 253, 0.1);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 1.25rem;
-    color: #0d6efd;
-}
-
-.AnalInvenIa-kpi-content {
-    flex: 1;
-}
-
-.AnalInvenIa-kpi-value {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
-}
-
-.AnalInvenIa-kpi-label {
-    color: #6c757d;
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-}
-
-.AnalInvenIa-kpi-trend {
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-.AnalInvenIa-kpi-trend.positive {
-    color: #198754;
-}
-
-.AnalInvenIa-kpi-trend.negative {
-    color: #dc3545;
-}
-
-.AnalInvenIa-kpi-trend.neutral {
-    color: #6c757d;
-}
-
-.AnalInvenIa-chart-container {
-    height: 200px;
-    position: relative;
-}
-
-.AnalInvenIa-chart-controls {
-    display: flex;
-    gap: 0.25rem;
-}
-
-.AnalInvenIa-chart-control {
-    border: none;
-    background: none;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    cursor: pointer;
-    border-radius: 3px;
-}
-
-.AnalInvenIa-chart-control.active {
-    background-color: #e9ecef;
-    font-weight: 600;
-}
-
-.AnalInvenIa-recommendation-list {
-    display: flex;
-    flex-direction: column;
-}
-
-.AnalInvenIa-recommendation-item {
-    display: flex;
-    padding: 1rem;
-    border-bottom: 1px solid #f1f3f5;
-}
-
-.AnalInvenIa-recommendation-item:last-child {
-    border-bottom: none;
-}
-
-.AnalInvenIa-recommendation-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background-color: #e9ecef;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 1rem;
-    flex-shrink: 0;
-}
-
-.AnalInvenIa-recommendation-content {
-    flex: 1;
-}
-
-.AnalInvenIa-recommendation-title {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.AnalInvenIa-recommendation-description {
-    font-size: 0.85rem;
-    color: #6c757d;
-}
-
-.AnalInvenIa-top-products {
-    display: none;
-}
-
-.AnalInvenIa-top-products.active {
-    display: block;
-}
-
-.AnalInvenIa-product-ranking {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    border-bottom: 1px solid #f1f3f5;
-}
-
-.AnalInvenIa-product-ranking:last-child {
-    border-bottom: none;
-}
-
-.AnalInvenIa-product-rank {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background-color: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    margin-right: 1rem;
-    flex-shrink: 0;
-}
-
-.AnalInvenIa-product-info {
-    flex: 1;
-}
-
-.AnalInvenIa-product-name {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.AnalInvenIa-product-stats {
-    display: flex;
-    gap: 0.75rem;
-    font-size: 0.8rem;
-    color: #6c757d;
-}
-
-.AnalInvenIa-product-trend {
-    font-weight: 600;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    padding: 0.25rem 0.5rem;
-    border-radius: 5px;
-}
-
-.AnalInvenIa-product-trend.positive {
-    color: #198754;
-    background-color: rgba(25, 135, 84, 0.1);
-}
-
-.AnalInvenIa-product-trend.negative {
-    color: #dc3545;
-    background-color: rgba(220, 53, 69, 0.1);
-}
-
-.AnalInvenIa-product-trend.neutral {
-    color: #6c757d;
-    background-color: rgba(108, 117, 125, 0.1);
-}
-
-.AnalInvenIa-prediction-container {
-    padding: 0.5rem;
-}
-
-.AnalInvenIa-prediction-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.AnalInvenIa-prediction-title {
-    font-weight: 600;
-}
-
-.AnalInvenIa-prediction-period {
-    font-size: 0.85rem;
-    color: #6c757d;
-}
-
-.AnalInvenIa-prediction-insight {
-    margin-top: 1rem;
-    padding: 0.75rem;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-    font-size: 0.9rem;
-}
-
-.AnalInvenIa-report-summary {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    margin-top: 1.5rem;
-}
-
-.AnalInvenIa-report-header {
-    padding: 1rem 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #f1f3f5;
-}
-
-.AnalInvenIa-report-title {
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-
-.AnalInvenIa-report-expand {
-    background: none;
-    border: none;
-    cursor: pointer;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-}
-
-.AnalInvenIa-report-expand:hover {
-    background-color: #f8f9fa;
-}
-
-.AnalInvenIa-report-content {
-    padding: 1.5rem;
-    font-size: 0.95rem;
-    line-height: 1.5;
-}
-
-.AnalInvenIa-report-content p {
-    margin-bottom: 0.75rem;
-}
-
-.AnalInvenIa-loader-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.AnalInvenIa-loader-content {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    padding: 2rem;
-    text-align: center;
-    max-width: 400px;
-    width: 100%;
-}
-
-.AnalInvenIa-loader-animation {
-    position: relative;
-    margin-bottom: 1.5rem;
-}
-
-.AnalInvenIa-loader-brain {
-    font-size: 3rem;
-    color: var(--primary);
-    margin-bottom: 1rem;
-    animation: pulse 2s infinite;
-}
-
-.AnalInvenIa-loader-pulse {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    background-color: rgba(230, 0, 0, 0.1);
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: translate(-50%, -50%) scale(1.2);
-        opacity: 0.5;
-    }
-    100% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
-    }
-}
-
-.AnalInvenIa-loader-text h3 {
-    margin-bottom: 0.5rem;
-}
-
-.AnalInvenIa-loader-progress {
-    height: 8px;
-    background-color: #f1f3f5;
-    border-radius: 4px;
-    margin-top: 1rem;
-    overflow: hidden;
-}
-
-.AnalInvenIa-loader-progress-bar {
-    height: 100%;
-    width: 0%;
-    background-color: var(--primary);
-    border-radius: 4px;
-    transition: width 0.3s;
-}
-
-/* Media queries pour la responsivité */
-@media (max-width: 767px) {
-    .AnalInvenIa-intro-card {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .AnalInvenIa-intro-icon {
-        margin-right: 0;
-        margin-bottom: 1rem;
-    }
-    
-    .AnalInvenIa-scope-selector {
-        flex-direction: column;
-    }
-    
-    .AnalInvenIa-insights-nav {
-        flex-wrap: wrap;
-    }
-    
-    .AnalInvenIa-insight-tab {
-        flex: auto;
-        min-width: 33.33%;
-    }
-    
-    .AnalInvenIa-tab-container {
-        overflow-x: auto;
-    }
-    
-    .AnalInvenIa-kpi-card,
-    .AnalInvenIa-product-ranking,
-    .AnalInvenIa-recommendation-item {
-        padding: 0.75rem;
-    }
-    
-    .AnalInvenIa-analysis-footer {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .AnalInvenIa-analysis-status {
-        margin-bottom: 1rem;
-    }
-    
-    .AnalInvenIa-results-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .AnalInvenIa-results-actions {
-        margin-top: 1rem;
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-    }
-}
-
-/* Ajout d'icônes manquantes pour Font Awesome */
-.fa-crystal-ball:before {
-    content: "\f6e8"; /* fa-gem alternatif */
-}
-
-
-
-  /* Styles pour la section des recommandations IA */
-.AnalInvenIa-recommendations-header {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.AnalInvenIa-recommendations-title {
-    display: flex;
-    align-items: center;
-    font-weight: 600;
-}
-
-.AnalInvenIa-recommendations-title i {
-    color: var(--primary);
-    margin-right: 0.5rem;
-    font-size: 1.25rem;
-}
-
-.AnalInvenIa-recommendations-title h4 {
-    margin: 0;
-}
-
-.AnalInvenIa-recommendations-summary {
-    color: #6c757d;
-    font-size: 0.9rem;
-    line-height: 1.4;
-}
-
-.AnalInvenIa-impact {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.AnalInvenIa-impact-item {
-    display: flex;
-    align-items: center;
-}
-
-.AnalInvenIa-impact-icon {
+.ai-avatar {
     width: 40px;
     height: 40px;
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 1rem;
+    margin-right: 10px;
     flex-shrink: 0;
 }
 
-.AnalInvenIa-impact-icon.positive {
-    background-color: rgba(25, 135, 84, 0.1);
-    color: #198754;
+.ai-avatar i {
+    font-size: 20px;
 }
 
-.AnalInvenIa-impact-icon.negative {
-    background-color: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
-}
-
-.AnalInvenIa-impact-content {
-    flex: 1;
-}
-
-.AnalInvenIa-impact-value {
-    font-weight: 700;
+.ai-info h3 {
+    margin: 0;
     font-size: 1.1rem;
+    font-weight: 600;
 }
 
-.AnalInvenIa-impact-label {
-    font-size: 0.85rem;
-    color: #6c757d;
+.ai-info p {
+    margin: 0;
+    font-size: 0.8rem;
+    opacity: 0.9;
 }
 
-.AnalInvenIa-recommendation-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1rem;
-    padding: 1rem;
-}
-
-.AnalInvenIa-recommendation-card {
-    background-color: white;
-    border-radius: 8px;
-    border: 1px solid #f1f3f5;
-    padding: 1.25rem;
+.ai-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 15px;
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s, box-shadow 0.2s;
-    height: 100%;
+    gap: 15px;
 }
 
-.AnalInvenIa-recommendation-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+.ai-message {
+    max-width: 85%;
+    padding: 12px 15px;
+    border-radius: 15px;
+    animation: fadeIn 0.3s ease-out;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    position: relative;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-size: 0.95rem;
 }
 
-.AnalInvenIa-recommendation-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
+.ai-message.ai {
+    align-self: flex-start;
+    background-color: #f0f4f8;
+    border-bottom-left-radius: 5px;
 }
 
-.AnalInvenIa-recommendation-card-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background-color: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--primary);
+.ai-message.user {
+    align-self: flex-end;
+    background-color: var(--primary);
+    color: white;
+    border-bottom-right-radius: 5px;
 }
 
-.AnalInvenIa-recommendation-card-badge {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
+.ai-message-time {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-top: 5px;
+    text-align: right;
+}
+
+.ai-options {
+    padding: 10px;
+    border-top: 1px solid #eee;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.2) transparent;
+    transition: all 0.3s ease;
+}
+
+.ai-options.vertical {
+    white-space: normal;
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.ai-options::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+}
+
+.ai-options::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.2);
     border-radius: 4px;
 }
 
-.AnalInvenIa-recommendation-card-badge.stock {
-    background-color: rgba(13, 110, 253, 0.1);
-    color: #0d6efd;
-}
-
-.AnalInvenIa-recommendation-card-badge.pricing {
-    background-color: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
-}
-
-.AnalInvenIa-recommendation-card-badge.marketing {
-    background-color: rgba(25, 135, 84, 0.1);
-    color: #198754;
-}
-
-.AnalInvenIa-recommendation-card-title {
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-    line-height: 1.3;
-}
-
-.AnalInvenIa-recommendation-card-description {
-    font-size: 0.85rem;
-    color: #6c757d;
-    line-height: 1.5;
-    margin-bottom: 1.25rem;
-    flex: 1;
-}
-
-.AnalInvenIa-recommendation-card-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    margin-top: auto;
-}
-
-.AnalInvenIa-recommendation-action {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-}
-
-
-  /* Styles uniquement pour les cartes de prédictions dans l'onglet des prédictions */
-#AnalInvenIa-tab-predictions .AnalInvenIa-prediction-insights {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: space-between;
-    margin-top: 1.5rem;
-}
-
-#AnalInvenIa-tab-predictions .AnalInvenIa-insight-card {
-    background-color: white;
-    border-radius: 8px;
-    padding: 1.25rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    display: flex;
-    align-items: flex-start;
-    flex: 1;
-    min-width: 280px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-#AnalInvenIa-tab-predictions .AnalInvenIa-insight-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-#AnalInvenIa-tab-predictions .AnalInvenIa-insight-icon {
-    flex-shrink: 0;
-    width: 45px;
-    height: 45px;
-    background-color: rgba(13, 110, 253, 0.1);
+.ai-options-layout-toggle {
+    position: absolute;
+    right: 10px;
+    top: -30px;
+    background: rgba(255,255,255,0.9);
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 1rem;
-    color: #0d6efd;
-    font-size: 1.25rem;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 5;
+    color: var(--gray);
+    transition: all 0.2s ease;
 }
 
-#AnalInvenIa-tab-predictions .AnalInvenIa-insight-content {
-    flex: 1;
-    display: block !important; /* Forcer l'affichage du contenu */
+.ai-options-layout-toggle:hover {
+    background: var(--primary);
+    color: white;
 }
 
-#AnalInvenIa-tab-predictions .AnalInvenIa-insight-content h5 {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: var(--dark);
-    font-size: 1rem;
-}
-
-#AnalInvenIa-tab-predictions .AnalInvenIa-insight-content p {
-    color: #6c757d;
-    font-size: 0.9rem;
-    margin-bottom: 0;
-    line-height: 1.5;
-}
-
-/* Styles pour les finances prédictives dans l'onglet des prédictions */
-#AnalInvenIa-tab-predictions .AnalInvenIa-finance-predictions {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-#AnalInvenIa-tab-predictions .AnalInvenIa-finance-item {
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    padding: 1rem;
-}
-
-#AnalInvenIa-tab-predictions .AnalInvenIa-finance-label {
-    font-size: 0.85rem;
-    color: #6c757d;
-    margin-bottom: 0.5rem;
-}
-
-#AnalInvenIa-tab-predictions .AnalInvenIa-finance-value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
-}
-
-#AnalInvenIa-tab-predictions .AnalInvenIa-finance-product {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-#AnalInvenIa-tab-predictions .AnalInvenIa-finance-trend {
-    font-size: 0.85rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-}
-
-#AnalInvenIa-tab-predictions .AnalInvenIa-finance-trend.positive {
-    color: #198754;
-}
-
-#AnalInvenIa-tab-predictions .AnalInvenIa-finance-trend.negative {
-    color: #dc3545;
-}
-
-#AnalInvenIa-tab-predictions .AnalInvenIa-prediction-chart-container {
-    height: 180px;
+.ai-options-container {
     position: relative;
+    border-top: 1px solid #eee;
 }
 
-/* Media queries pour la responsivité des cartes de prédiction */
-@media (max-width: 768px) {
-    #AnalInvenIa-tab-predictions .AnalInvenIa-prediction-insights {
-        flex-direction: column;
-    }
-    
-    #AnalInvenIa-tab-predictions .AnalInvenIa-insight-card {
-        width: 100%;
-    }
+.ai-option {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 10px 15px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    margin: 5px;
+    white-space: nowrap;
+    font-size: 0.9rem;
 }
 
-
-  /* Styles pour les boutons "Voir tous..." */
-#AnalInvenIa-viewAllProducts,
-#AnalInvenIa-viewAllPredictions,
-#AnalInvenIa-viewAllRecommendations {
-    background-color: var(--primary);
-    color: white;
-    border: none;
-    padding: 0.4rem 0.8rem;
-    transition: background-color 0.3s, transform 0.2s;
+.ai-options.vertical .ai-option {
+    display: flex;
+    width: calc(100% - 10px);
+    margin: 5px;
+    white-space: normal;
+    text-align: left;
 }
 
-#AnalInvenIa-viewAllProducts:hover,
-#AnalInvenIa-viewAllPredictions:hover,
-#AnalInvenIa-viewAllRecommendations:hover {
-    background-color: var(--primary-dark);
+.ai-option:hover {
+    background: #f8f9fa;
+    border-color: var(--primary);
     transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-/* Styles pour les boutons "Appliquer" dans les recommandations prioritaires */
-.AnalInvenIa-recommendation-action .btn-outline-primary {
-    background-color: var(--primary);
-    color: white;
+.ai-option i {
+    margin-right: 8px;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.ai-actions {
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #eee;
+    background: #f8f9fa;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.ai-export-actions {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.ai-action-button {
+    background: transparent;
     border: none;
-    padding: 0.4rem 0.8rem;
-    transition: background-color 0.3s, transform 0.2s;
+    padding: 6px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--gray);
+    font-size: 0.85rem;
+    white-space: nowrap;
 }
 
-.AnalInvenIa-recommendation-action .btn-outline-primary:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-2px);
-}
-
-/* Amélioration de la section des recommandations IA */
-.AnalInvenIa-recommendations-header {
-    background-color: #f8f9fa;
-    padding: 1.25rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.AnalInvenIa-recommendations-title {
-    margin-bottom: 0.75rem;
-}
-
-.AnalInvenIa-recommendations-title h4 {
-    font-size: 1.4rem;
-    color: var(--secondary);
-}
-
-.AnalInvenIa-recommendations-title i {
-    font-size: 1.6rem;
+.ai-action-button:hover {
+    background: rgba(0,0,0,0.05);
     color: var(--primary);
 }
 
-.AnalInvenIa-recommendations-summary {
-    line-height: 1.6;
-    color: #495057;
-    max-width: 90%;
+.ai-stat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 12px;
 }
 
-/* Style spécifique pour le bouton "Nouvelle analyse" */
-#AnalInvenIa-newAnalysis {
-    background-color: var(--primary);
+.ai-stat-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
     color: white;
-    border-color: var(--primary);
+    flex-shrink: 0;
 }
 
-#AnalInvenIa-newAnalysis:hover {
-    background-color: var(--primary-dark);
-    border-color: var(--primary-dark);
+.ai-stat-icon.inventory {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
 }
 
-#AnalInvenIa-newAnalysis i {
+.ai-stat-icon.low {
+    background: linear-gradient(135deg, #f6d365, #fda085);
+}
+
+.ai-stat-icon.out {
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+}
+
+.ai-stat-info h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.ai-stat-info p {
+    margin: 0;
+    color: var(--gray);
+    font-size: 0.8rem;
+}
+
+.ai-inventory-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ai-product-list {
+    margin-top: 10px;
+}
+
+.ai-product-item {
+    padding: 10px;
+    border-radius: 8px;
+    background: white;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.ai-product-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 60%;
+}
+
+.ai-product-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.ai-product-details {
+    font-size: 0.8rem;
+    color: var(--gray);
+}
+
+.ai-product-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.ai-product-action {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: #f8f9fa;
+    transition: all 0.2s;
+    color: var(--gray);
+}
+
+.ai-product-action:hover {
+    background: var(--primary);
     color: white;
+}
+
+.ai-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    font-size: 0.9rem;
+}
+
+.ai-table th {
+    background: #f8f9fa;
+    padding: 10px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--gray);
+}
+
+.ai-table td {
+    padding: 10px;
+    border-top: 1px solid #eee;
+    word-break: break-word;
+}
+
+.ai-table tr:hover {
+    background: #f8f9fa;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.ai-typing {
+    display: flex;
+    gap: 5px;
+    padding: 8px;
+    align-self: flex-start;
+}
+
+.ai-typing span {
+    width: 6px;
+    height: 6px;
+    background: var(--gray);
+    border-radius: 50%;
+    display: inline-block;
+    animation: typingAnimation 1.4s infinite;
+}
+
+.ai-typing span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.ai-typing span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typingAnimation {
+    0%, 100% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+    50% {
+        transform: translateY(-5px);
+        opacity: 1;
+    }
+}
+
+.ai-chart-container {
+    margin-top: 15px;
+    height: 200px;
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.ai-satisfaction {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.ai-satisfaction-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 10px;
+    transition: all 0.2s;
+}
+
+.ai-satisfaction-option:hover {
+    background: #f0f4f8;
+}
+
+.ai-satisfaction-icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+
+.ai-satisfaction-text {
+    font-size: 0.75rem;
+    color: var(--gray);
+}
+
+.ai-report-card {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin-top: 15px;
+}
+
+.ai-report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.ai-report-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.ai-report-date {
+    color: var(--gray);
+    font-size: 0.85rem;
+}
+
+.ai-report-content {
+    margin-bottom: 15px;
+}
+
+.ai-report-section {
+    margin-bottom: 12px;
+}
+
+.ai-report-section-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--primary);
+    font-size: 0.95rem;
+}
+
+.ai-inventory-item {
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.ai-item-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.ai-item-quantity {
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+/* Styles pour les écrans très petits */
+@media (max-width: 480px) {
+    .ai-message {
+        max-width: 90%;
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .ai-header {
+        padding: 10px;
+    }
+    
+    .ai-avatar {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .ai-info h3 {
+        font-size: 1rem;
+    }
+    
+    .ai-info p {
+        font-size: 0.75rem;
+    }
+    
+    .ai-actions {
+        padding: 8px;
+    }
+    
+    .ai-action-button {
+        padding: 5px 8px;
+        font-size: 0.8rem;
+    }
+    
+    .ai-option {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .ai-stat-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+    
+    .ai-stat-info h4 {
+        font-size: 1rem;
+    }
+    
+    .ai-stat-info p {
+        font-size: 0.75rem;
+    }
+    
+    .ai-report-title {
+        font-size: 1rem;
+    }
+    
+    .ai-table th, .ai-table td {
+        padding: 8px;
+        font-size: 0.85rem;
+    }
 }
 
 
@@ -2918,446 +2365,6 @@
   🔴 PARTIE 5  
 \*═══════════════════════════*/
 
-  /* Styles pour l'onglet Statistiques */
-.AnalInvenIa-section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-}
-
-.AnalInvenIa-time-selector, .AnalInvenIa-period-selector {
-    display: flex;
-    background-color: #f1f3f5;
-    border-radius: 6px;
-    overflow: hidden;
-}
-
-.AnalInvenIa-time-btn, .AnalInvenIa-period-btn {
-    border: none;
-    background: transparent;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.AnalInvenIa-time-btn.active, .AnalInvenIa-period-btn.active {
-    background-color: var(--primary);
-    color: white;
-}
-
-.AnalInvenIa-chart-insight {
-    padding: 0.75rem;
-    background-color: #f8f9fa;
-    border-radius: 6px;
-    margin-top: 1rem;
-    border-left: 3px solid var(--primary);
-}
-
-.AnalInvenIa-insight-text {
-    display: flex;
-    align-items: center;
-}
-
-.AnalInvenIa-stock-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.AnalInvenIa-legend-item {
-    display: flex;
-    align-items: center;
-}
-
-.AnalInvenIa-legend-color {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    margin-right: 0.5rem;
-}
-
-.AnalInvenIa-rotation-indicator, .AnalInvenIa-trend-indicator {
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    display: inline-flex;
-    align-items: center;
-    font-size: 0.8rem;
-    font-weight: 500;
-}
-
-.AnalInvenIa-rotation-indicator.high {
-    background-color: rgba(40, 167, 69, 0.15);
-    color: #28a745;
-}
-
-.AnalInvenIa-rotation-indicator.medium {
-    background-color: rgba(255, 193, 7, 0.15);
-    color: #ffc107;
-}
-
-.AnalInvenIa-rotation-indicator.low {
-    background-color: rgba(220, 53, 69, 0.15);
-    color: #dc3545;
-}
-
-.AnalInvenIa-trend-indicator.positive {
-    background-color: rgba(40, 167, 69, 0.15);
-    color: #28a745;
-}
-
-.AnalInvenIa-trend-indicator.neutral {
-    background-color: rgba(108, 117, 125, 0.15);
-    color: #6c757d;
-}
-
-.AnalInvenIa-trend-indicator.negative {
-    background-color: rgba(220, 53, 69, 0.15);
-    color: #dc3545;
-}
-
-.AnalInvenIa-rotation-indicator i, .AnalInvenIa-trend-indicator i {
-    margin-right: 0.25rem;
-    font-size: 0.7rem;
-}
-
-.AnalInvenIa-chart-insights {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.AnalInvenIa-insight-card {
-    flex: 1;
-    min-width: 200px;
-    padding: 1rem;
-    border-radius: 8px;
-    background-color: #f8f9fa;
-    display: flex;
-    align-items: center;
-}
-
-.AnalInvenIa-insight-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: rgba(40, 167, 69, 0.15);
-    color: #28a745;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 1rem;
-    font-size: 1.2rem;
-}
-
-.AnalInvenIa-insight-icon.negative {
-    background-color: rgba(220, 53, 69, 0.15);
-    color: #dc3545;
-}
-
-.AnalInvenIa-insight-content h5 {
-    font-size: 1rem;
-    margin-bottom: 0.25rem;
-    font-weight: 600;
-}
-
-.AnalInvenIa-insight-content p {
-    font-size: 0.8rem;
-    color: #6c757d;
-    margin-bottom: 0;
-}
-
-.AnalInvenIa-export-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    margin-top: 1.5rem;
-}
-
-/* Styles pour l'onglet Rapports */
-.AnalInvenIa-reports-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-}
-
-.AnalInvenIa-report-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    padding: 1rem;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-}
-
-.AnalInvenIa-filter-group {
-    flex: 1;
-    min-width: 200px;
-}
-
-.AnalInvenIa-filter-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-}
-
-.AnalInvenIa-view-controls {
-    display: flex;
-    background-color: #f1f3f5;
-    border-radius: 6px;
-    overflow: hidden;
-}
-
-.AnalInvenIa-view-control {
-    border: none;
-    background: transparent;
-    padding: 0.5rem 0.75rem;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.AnalInvenIa-view-control.active {
-    background-color: var(--primary);
-    color: white;
-}
-
-.AnalInvenIa-reports-list, .AnalInvenIa-reports-grid {
-    display: none;
-}
-
-.AnalInvenIa-reports-list.active, .AnalInvenIa-reports-grid.active {
-    display: block;
-}
-
-.AnalInvenIa-report-item {
-    display: flex;
-    padding: 1.25rem;
-    border-bottom: 1px solid #dee2e6;
-    transition: background-color 0.2s;
-}
-
-.AnalInvenIa-report-item:hover {
-    background-color: #f8f9fa;
-}
-
-.AnalInvenIa-report-icon {
-    width: 45px;
-    height: 45px;
-    border-radius: 8px;
-    background-color: #e9ecef;
-    color: #6c757d;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 1rem;
-    font-size: 1.2rem;
-}
-
-.AnalInvenIa-report-icon.sales {
-    background-color: rgba(0, 123, 255, 0.15);
-    color: #007bff;
-}
-
-.AnalInvenIa-report-icon.forecast {
-    background-color: rgba(102, 16, 242, 0.15);
-    color: #6610f2;
-}
-
-.AnalInvenIa-report-icon.audit {
-    background-color: rgba(23, 162, 184, 0.15);
-    color: #17a2b8;
-}
-
-.AnalInvenIa-report-icon.low-stock {
-    background-color: rgba(255, 193, 7, 0.15);
-    color: #ffc107;
-}
-
-.AnalInvenIa-report-info {
-    flex: 1;
-}
-
-.AnalInvenIa-report-title {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.AnalInvenIa-report-meta {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
-}
-
-.AnalInvenIa-report-type {
-    font-size: 0.8rem;
-    padding: 0.15rem 0.5rem;
-    background-color: #e9ecef;
-    border-radius: 4px;
-    color: #6c757d;
-}
-
-.AnalInvenIa-report-date {
-    font-size: 0.8rem;
-    color: #6c757d;
-}
-
-.AnalInvenIa-report-description {
-    font-size: 0.9rem;
-    color: #6c757d;
-    line-height: 1.4;
-}
-
-.AnalInvenIa-report-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.AnalInvenIa-action-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    border: 1px solid #dee2e6;
-    background-color: white;
-    color: #6c757d;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.AnalInvenIa-action-btn:hover {
-    background-color: #f8f9fa;
-    color: var(--primary);
-    border-color: #ced4da;
-}
-
-.AnalInvenIa-pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-}
-
-.AnalInvenIa-pagination-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    border: 1px solid #dee2e6;
-    background-color: white;
-    color: #6c757d;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.AnalInvenIa-pagination-btn:not(.disabled):hover {
-    background-color: #f8f9fa;
-    color: var(--primary);
-    border-color: #ced4da;
-}
-
-.AnalInvenIa-pagination-btn.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.AnalInvenIa-report-preview-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 2000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-}
-
-.AnalInvenIa-report-preview-content {
-    width: 90%;
-    max-width: 1200px;
-    height: 90%;
-    background-color: white;
-    border-radius: 8px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.AnalInvenIa-report-preview-header {
-    padding: 1rem;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.AnalInvenIa-report-preview-title {
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-}
-
-.AnalInvenIa-report-preview-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.AnalInvenIa-preview-action, .AnalInvenIa-preview-close {
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    border: 1px solid #dee2e6;
-    background-color: white;
-    color: #6c757d;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.AnalInvenIa-preview-action:hover {
-    background-color: #f8f9fa;
-    color: var(--primary);
-    border-color: #ced4da;
-}
-
-.AnalInvenIa-preview-close:hover {
-    background-color: #f8f9fa;
-    color: #dc3545;
-    border-color: #ced4da;
-}
-
-.AnalInvenIa-report-preview-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1.5rem;
-    position: relative;
-}
-
-.AnalInvenIa-report-loading {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-}
-
-.AnalInvenIa-report-summary .AnalInvenIa-report-content p {
-    font-size: 1rem;
-    color: inherit;
-    margin-bottom: 0.5rem;
-}
 
 
 /*═══════════════════════════*\
@@ -6918,6 +5925,7 @@
 /*═══════════════════════════*\
   🔵 PARTIE 14  
 \*═══════════════════════════*/
+
 
 /*═══════════════════════════*\
   🟣 PARTIE 15  
