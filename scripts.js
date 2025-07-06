@@ -6836,7 +6836,7 @@ function initInfoUnitMesureTooltips() {
   ⚫ JS PARTIE 8
   ═════════════════════════════╝*/
   
-  // Point de Vente / Sales Point
+// Point de Vente / Sales Point
 // ----------------------------------------
 document.addEventListener('DOMContentLoaded', function() {
     // Initialisation des variables globales
@@ -6848,8 +6848,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let inventoryData = []; // Sera rempli par vos données d'inventaire existantes
     
     // Éléments d'interface
-    const modeSelector = document.getElementById('newonInventSelectMode');
     const roleInterfaces = document.querySelectorAll('.newonInventRoleInterface');
+    
+ 
+
     
     // Service pour les effets sonores et vibrations
 const ScannerFeedback = {
@@ -7072,6 +7074,173 @@ const PaymentFeedback = {
     }
 };
 
+    // Nouvelle fonction pour vérifier les rôles de l'administrateur connecté
+    async function PovConfigAdmin_checkAdminRoles() {
+        try {
+            // Récupérer l'ID de l'administrateur connecté
+            const adminId = localStorage.getItem('currentAdminId');
+            if (!adminId) {
+                console.error('Aucun administrateur connecté');
+                return false;
+            }
+            
+            // Récupérer la configuration de vente actuelle
+            const { data: configData, error: configError } = await supabase
+                .from('sales_config')
+                .select('*')
+                .limit(1)
+                .single();
+                
+            if (configError) {
+                console.error('Erreur lors de la récupération de la configuration:', configError);
+                showPovConfigMessage('config');
+                return false;
+            }
+            
+            if (!configData) {
+                console.error('Aucune configuration de vente trouvée');
+                showPovConfigMessage('config');
+                return false;
+            }
+            
+            // Récupérer l'assignation de rôle pour l'administrateur connecté
+            const { data: roleData, error: roleError } = await supabase
+                .from('sales_role_assignments')
+                .select('*')
+                .eq('admin_id', adminId)
+                .eq('config_type', configData.config_type)
+                .maybeSingle();
+                
+            if (roleError) {
+                console.error('Erreur lors de la récupération du rôle:', roleError);
+                return false;
+            }
+            
+            if (!roleData) {
+                console.error('Aucun rôle assigné à cet administrateur');
+                showPovConfigMessage('access');
+                return false;
+            }
+            
+            // Mapper le rôle d'admin au rôle du point de vente
+            const configType = configData.config_type;
+            const roleKey = roleData.role_key;
+            
+            let salesMode, roleName;
+            
+            if (configType === 'solo') {
+                salesMode = 'oneSeller';
+                if (roleKey === 'gestionnaire') {
+                    roleName = 'seller1';
+                    showRoleInterface('oneSeller');
+                    updateRoleInfo('Gestionnaire', 'user-tie', 'solo');
+                    return true;
+                }
+            } else if (configType === 'medium') {
+                salesMode = 'twoSellers';
+                if (roleKey === 'recepteur') {
+                    roleName = 'seller1';
+                    showRoleInterface('twoSellers', 'seller1');
+                    updateRoleInfo('Récepteur de commandes', 'clipboard-list', 'recepteur');
+                    return true;
+                } else if (roleKey === 'caissier') {
+                    roleName = 'seller2';
+                    showRoleInterface('twoSellers', 'seller2');
+                    updateRoleInfo('Caissier', 'cash-register', 'caissier');
+                    return true;
+                }
+            } else if (configType === 'large') {
+                salesMode = 'threeSellers';
+                if (roleKey === 'recepteur') {
+                    roleName = 'seller1';
+                    showRoleInterface('threeSellers', 'seller1');
+                    updateRoleInfo('Récepteur de commandes', 'clipboard-list', 'recepteur');
+                    return true;
+                } else if (roleKey === 'caissier') {
+                    roleName = 'seller2';
+                    showRoleInterface('threeSellers', 'seller2');
+                    updateRoleInfo('Caissier', 'cash-register', 'caissier');
+                    return true;
+                } else if (roleKey === 'livreur') {
+                    roleName = 'seller3';
+                    showRoleInterface('threeSellers', 'seller3');
+                    updateRoleInfo('Livreur', 'box', 'livreur');
+                    return true;
+                }
+            }
+            
+            // Si on arrive ici, c'est que le rôle n'a pas été correctement mappé
+            console.error('Rôle non reconnu:', configType, roleKey);
+            showPovConfigMessage('access');
+            return false;
+        } catch (err) {
+            console.error('Erreur lors de la vérification des rôles:', err);
+            return false;
+        }
+    }
+    
+    // Afficher l'interface du rôle approprié
+    function showRoleInterface(mode, role) {
+        resetAllInterfaces();
+        
+        if (mode === 'oneSeller') {
+            document.getElementById('newonInventSingleSellerMode').style.display = 'block';
+            currentSalesMode = 'oneSeller';
+            currentRole = { role: 'seller1', mode: 'oneSeller' };
+        } else if (mode === 'twoSellers') {
+            if (role === 'seller1') {
+                document.getElementById('newonInventTwoSellers_Seller1').style.display = 'block';
+                currentSalesMode = 'twoSellers';
+                currentRole = { role: 'seller1', mode: 'twoSellers' };
+            } else if (role === 'seller2') {
+                document.getElementById('newonInventTwoSellers_Seller2').style.display = 'block';
+                currentSalesMode = 'twoSellers';
+                currentRole = { role: 'seller2', mode: 'twoSellers' };
+            }
+        } else if (mode === 'threeSellers') {
+            if (role === 'seller1') {
+                document.getElementById('newonInventThreeSellers_Seller1').style.display = 'block';
+                currentSalesMode = 'threeSellers';
+                currentRole = { role: 'seller1', mode: 'threeSellers' };
+            } else if (role === 'seller2') {
+                document.getElementById('newonInventThreeSellers_Seller2').style.display = 'block';
+                currentSalesMode = 'threeSellers';
+                currentRole = { role: 'seller2', mode: 'threeSellers' };
+            } else if (role === 'seller3') {
+                document.getElementById('newonInventThreeSellers_Seller3').style.display = 'block';
+                currentSalesMode = 'threeSellers';
+                currentRole = { role: 'seller3', mode: 'threeSellers' };
+            }
+        }
+    }
+    
+    // Mettre à jour l'information sur le rôle
+    function updateRoleInfo(roleName, icon, badgeClass) {
+        const roleInfoElement = document.getElementById('PovConfigAdmin_roleInfo');
+        if (roleInfoElement) {
+            roleInfoElement.innerHTML = `
+                <span class="PovConfigAdmin_roleBadge ${badgeClass}">
+                    <i class="fas fa-${icon} me-1"></i> ${roleName}
+                </span>
+                <span class="PovConfigAdmin_roleDesc">
+                    Vous êtes connecté en tant que ${roleName}
+                </span>
+            `;
+        }
+    }
+    
+    // Afficher un message de configuration
+    function showPovConfigMessage(type) {
+        resetAllInterfaces();
+        
+        if (type === 'config') {
+            document.getElementById('PovConfigAdmin_configMessage').style.display = 'flex';
+            document.getElementById('PovConfigAdmin_accessDenied').style.display = 'none';
+        } else if (type === 'access') {
+            document.getElementById('PovConfigAdmin_accessDenied').style.display = 'flex';
+            document.getElementById('PovConfigAdmin_configMessage').style.display = 'none';
+        }
+    }
 
     // Chargement des données d'inventaire (pour simuler votre inventaire existant)
     function loadInventoryData() {
@@ -8219,16 +8388,6 @@ function addProductToCartManual(product, interfaceIndex) {
     
 // Initialise les écouteurs d'événements pour le point de vente
 function initSalesEventListeners() {
-    // Bouton de changement de rôle
-    const roleToggleBtn = document.getElementById('newonInventRoleToggle');
-    if (roleToggleBtn) {
-        roleToggleBtn.addEventListener('click', function() {
-            if (currentSalesMode) {
-                openRoleSelectionModal(currentSalesMode);
-            }
-        });
-    }
-    
     // Bouton de réinitialisation du panier
     const resetButtons = [
         document.getElementById('newonInventResetCart'),
@@ -8244,89 +8403,88 @@ function initSalesEventListeners() {
         }
     });
     
-// Boutons de paiement
-const paymentButtons = [
-    document.getElementById('newonInventCashPayment'),
-    document.getElementById('newonInventOtherPayment'),
-    document.getElementById('newonInventProcessCash'),
-    document.getElementById('newonInventProcessOther'),
-    document.getElementById('newonInventProcessCash3'),
-    document.getElementById('newonInventProcessOther3')
-];
+    // Boutons de paiement
+    const paymentButtons = [
+        document.getElementById('newonInventCashPayment'),
+        document.getElementById('newonInventOtherPayment'),
+        document.getElementById('newonInventProcessCash'),
+        document.getElementById('newonInventProcessOther'),
+        document.getElementById('newonInventProcessCash3'),
+        document.getElementById('newonInventProcessOther3')
+    ];
 
-paymentButtons.forEach(button => {
-    if (button) {
-        button.addEventListener('click', function() {
-            // Détermine le groupe de boutons parent
-            const parentGroup = this.closest('.newonInventPaymentGrid') || this.closest('.newonInventPaymentOptions');
-            
-            // Retire la classe active de tous les boutons du même groupe
-            if (parentGroup) {
-                parentGroup.querySelectorAll('.newonInventPayBtn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-            }
-            
-            // Ajoute la classe active au bouton cliqué
-            this.classList.add('active');
-            
-            // Active le bouton de validation approprié
-            if (this.id === 'newonInventCashPayment' || this.id === 'newonInventOtherPayment') {
-                document.getElementById('newonInventCompleteSale').disabled = false;
-            } else if (this.id === 'newonInventProcessCash' || this.id === 'newonInventProcessOther') {
-                document.getElementById('newonInventConfirmPayment').disabled = false;
-            } else if (this.id === 'newonInventProcessCash3' || this.id === 'newonInventProcessOther3') {
-                document.getElementById('newonInventConfirmPayment3').disabled = false;
-            }
-            
-            // Si c'est un paiement en espèces, ouvre la modale
-            if (this.id.includes('Cash')) {
-                openPaymentModal();
-            }
-        });
-    }
-});
-
-// Écouteurs pour les boutons de confirmation de paiement
-const confirmPaymentButtons = [
-    document.getElementById('newonInventConfirmPayment'),
-    document.getElementById('newonInventConfirmPayment3')
-];
-
-confirmPaymentButtons.forEach(button => {
-    if (button) {
-        button.addEventListener('click', function() {
-            // Vérifie si un mode de paiement est sélectionné
-            const cashBtn = button.id === 'newonInventConfirmPayment' 
-                ? document.getElementById('newonInventProcessCash')
-                : document.getElementById('newonInventProcessCash3');
+    paymentButtons.forEach(button => {
+        if (button) {
+            button.addEventListener('click', function() {
+                // Détermine le groupe de boutons parent
+                const parentGroup = this.closest('.newonInventPaymentGrid') || this.closest('.newonInventPaymentOptions');
                 
-            const otherBtn = button.id === 'newonInventConfirmPayment' 
-                ? document.getElementById('newonInventProcessOther')
-                : document.getElementById('newonInventProcessOther3');
-            
-            if ((cashBtn && cashBtn.classList.contains('active')) || 
-                (otherBtn && otherBtn.classList.contains('active'))) {
-                
-                // Si paiement en espèces, ouvre la modale de paiement
-                if (cashBtn && cashBtn.classList.contains('active')) {
-                    openPaymentModal();
-                } else {
-                    // Pour les autres méthodes, confirme directement le paiement
-                    confirmPayment({
-                        amount: 0,
-                        change: 0,
-                        currency: 'usd',
-                        method: 'other'
+                // Retire la classe active de tous les boutons du même groupe
+                if (parentGroup) {
+                    parentGroup.querySelectorAll('.newonInventPayBtn').forEach(btn => {
+                        btn.classList.remove('active');
                     });
                 }
-            } else {
-                alert("Veuillez sélectionner un mode de paiement.");
-            }
-        });
-    }
-});
+                
+                // Ajoute la classe active au bouton cliqué
+                this.classList.add('active');
+                
+                // Active le bouton de validation approprié
+                if (this.id === 'newonInventCashPayment' || this.id === 'newonInventOtherPayment') {
+                    document.getElementById('newonInventCompleteSale').disabled = false;
+                } else if (this.id === 'newonInventProcessCash' || this.id === 'newonInventProcessOther') {
+                    document.getElementById('newonInventConfirmPayment').disabled = false;
+                } else if (this.id === 'newonInventProcessCash3' || this.id === 'newonInventProcessOther3') {
+                    document.getElementById('newonInventConfirmPayment3').disabled = false;
+                }
+                
+                // Si c'est un paiement en espèces, ouvre la modale
+                if (this.id.includes('Cash')) {
+                    openPaymentModal();
+                }
+            });
+        }
+    });
 
+    // Écouteurs pour les boutons de confirmation de paiement
+    const confirmPaymentButtons = [
+        document.getElementById('newonInventConfirmPayment'),
+        document.getElementById('newonInventConfirmPayment3')
+    ];
+
+    confirmPaymentButtons.forEach(button => {
+        if (button) {
+            button.addEventListener('click', function() {
+                // Vérifie si un mode de paiement est sélectionné
+                const cashBtn = button.id === 'newonInventConfirmPayment' 
+                    ? document.getElementById('newonInventProcessCash')
+                    : document.getElementById('newonInventProcessCash3');
+                    
+                const otherBtn = button.id === 'newonInventConfirmPayment' 
+                    ? document.getElementById('newonInventProcessOther')
+                    : document.getElementById('newonInventProcessOther3');
+                
+                if ((cashBtn && cashBtn.classList.contains('active')) || 
+                    (otherBtn && otherBtn.classList.contains('active'))) {
+                    
+                    // Si paiement en espèces, ouvre la modale de paiement
+                    if (cashBtn && cashBtn.classList.contains('active')) {
+                        openPaymentModal();
+                    } else {
+                        // Pour les autres méthodes, confirme directement le paiement
+                        confirmPayment({
+                            amount: 0,
+                            change: 0,
+                            currency: 'usd',
+                            method: 'other'
+                        });
+                    }
+                } else {
+                    alert("Veuillez sélectionner un mode de paiement.");
+                }
+            });
+        }
+    });
     
     // Bouton de finalisation de la vente (mode vendeur unique)
     const completeSaleBtn = document.getElementById('newonInventCompleteSale');
@@ -8374,6 +8532,7 @@ confirmPaymentButtons.forEach(button => {
     // Initialisation de la sélection des livreurs
     initDeliverySelection();
 }
+
 
     
     // Initialise la sélection des caissiers
@@ -9452,7 +9611,7 @@ function ManualModeSaisie_updateRecentProducts(product) {
 
     
 // Initialise le module de point de vente
-function initSalesPoint() {
+async function initSalesPoint() {
     // Initialisation des services audio
     ScannerFeedback.initAudio();
     ManualEntryFeedback.initAudio();
@@ -9461,8 +9620,13 @@ function initSalesPoint() {
     // Charge les données d'inventaire
     loadInventoryData();
     
-    // Initialise le sélecteur de mode
-    initModeSelectorCard();
+    // Vérifier les rôles de l'administrateur
+    const hasRole = await PovConfigAdmin_checkAdminRoles();
+    
+    if (!hasRole) {
+        // Si l'administrateur n'a pas de rôle, nous avons déjà affiché le message approprié
+        return;
+    }
     
     // Initialise les scanners
     initScanners();
@@ -9475,26 +9639,32 @@ function initSalesPoint() {
 }
 
 
+
     
-    // Initialise le module quand on clique sur le lien dans la barre latérale
-    document.querySelector('[data-section="newonInventSalesPoint"]').addEventListener('click', function() {
-        // Réinitialise les interfaces
-        resetAllInterfaces();
-        
-        // Affiche le sélecteur de mode
-        document.getElementById('newonInventSelectMode').style.display = 'block';
-        
-        // Initialise le point de vente si ce n'est pas déjà fait
-        if (!window.salesPointInitialized) {
-            initSalesPoint();
-            window.salesPointInitialized = true;
-        }
-    });
+// Initialise le module quand on clique sur le lien dans la barre latérale
+document.querySelector('[data-section="newonInventSalesPoint"]').addEventListener('click', async function() {
+    // Réinitialise les interfaces
+    resetAllInterfaces();
     
-    // Initialise le point de vente quand on navigue directement vers cette section
-    if (window.location.hash === '#newonInventSalesPoint') {
-        document.querySelector('[data-section="newonInventSalesPoint"]').click();
+    // Masquer les messages de configuration
+    document.getElementById('PovConfigAdmin_configMessage').style.display = 'none';
+    document.getElementById('PovConfigAdmin_accessDenied').style.display = 'none';
+    
+    // Initialise le point de vente si ce n'est pas déjà fait
+    if (!window.salesPointInitialized) {
+        await initSalesPoint();
+        window.salesPointInitialized = true;
+    } else {
+        // Si déjà initialisé, vérifier à nouveau les rôles
+        await PovConfigAdmin_checkAdminRoles();
     }
+});
+
+// Initialise le point de vente quand on navigue directement vers cette section
+if (window.location.hash === '#newonInventSalesPoint') {
+    document.querySelector('[data-section="newonInventSalesPoint"]').click();
+}
+
 });
 
 
@@ -9507,7 +9677,7 @@ function initSalesPoint() {
   🔴 JS PARTIE 9
   ═════════════════════════════╝*/
 
-  // Gestion des rôles d'administrateurs pour le point de vente
+// Gestion des rôles d'administrateurs pour le point de vente
 document.addEventListener('DOMContentLoaded', function() {
     // Configuration initiale
     const GestVenteAdmin_config = {
@@ -9515,71 +9685,64 @@ document.addEventListener('DOMContentLoaded', function() {
         assignments: {} // Assignations des administrateurs aux rôles
     };
     
-    // Liste fictive d'administrateurs (normalement chargée depuis la base de données)
-    const GestVenteAdmin_adminsList = [
-        { id: 'admin1', name: 'Admin Principal', badge: 'primary', role: 'admin', online: true, lastLogin: new Date(), createdAt: new Date('2025-04-25') },
-        { id: 'admin2', name: 'Jean Dupont', badge: 'standard', role: 'standard', online: false, lastLogin: new Date('2025-04-24 15:40'), createdAt: new Date('2025-04-23') },
-        { id: 'admin3', name: 'Likula Jean-Louis', badge: 'standard', role: 'standard', online: true, lastLogin: new Date('2025-04-25 09:15'), createdAt: new Date('2025-04-20') },
-        { id: 'admin4', name: 'Marie Laurent', badge: 'standard', role: 'standard', online: false, lastLogin: new Date('2025-04-23 11:30'), createdAt: new Date('2025-04-18') }
-    ];
-    
-    // Définition des rôles et leur description selon la configuration
-    const GestVenteAdmin_roleDefinitions = {
-        solo: {
-            type: 'Boutique individuelle',
-            roles: {
-                gestionnaire: {
-                    name: 'Gestionnaire',
-                    icon: 'user-tie',
-                    badge: 'solo',
-                    description: 'Gère toutes les étapes de la vente: accueil client, scan des produits, encaissement et livraison.'
-                }
-            },
-            explanation: 'Dans cette configuration, chaque gestionnaire peut traiter une vente complète, de l\'accueil du client jusqu\'à la livraison des produits.'
+// Définition des rôles et leur description selon la configuration
+const GestVenteAdmin_roleDefinitions = {
+    solo: {
+        type: 'Boutique individuelle',
+        roles: {
+            gestionnaire: {
+                name: 'Gestionnaire',
+                icon: 'user-tie',
+                badge: 'solo',
+                description: 'Gère toutes les étapes de la vente: accueil client, scan des produits, encaissement et livraison.'
+            }
         },
-        medium: {
-            type: 'Boutique moyenne',
-            roles: {
-                recepteur: {
-                    name: 'Récepteur de commandes',
-                    icon: 'clipboard-list',
-                    badge: 'recepteur',
-                    description: 'Accueille les clients, enregistre leurs besoins et transfère les commandes au caissier.'
-                },
-                caissier: {
-                    name: 'Caissier',
-                    icon: 'cash-register',
-                    badge: 'caissier',
-                    description: 'Reçoit les paiements et coordonne la livraison des produits au client.'
-                }
+        explanation: 'Dans cette configuration, chaque gestionnaire peut traiter une vente complète, de l\'accueil du client jusqu\'à la livraison des produits.'
+    },
+    medium: {
+        type: 'Boutique moyenne',
+        roles: {
+            recepteur: {
+                name: 'Récepteur de commandes',
+                icon: 'clipboard-list',
+                badge: 'recepteur',
+                description: 'Accueille les clients, enregistre leurs besoins et transfère les commandes au caissier.'
             },
-            explanation: 'Cette configuration sépare la prise de commande et l\'encaissement. Le récepteur enregistre la commande et la transmet au caissier qui finalise la vente.'
+            caissier: {
+                name: 'Caissier',
+                icon: 'cash-register',
+                badge: 'caissier',
+                description: 'Reçoit les paiements et coordonne la livraison des produits au client.'
+            }
         },
-        large: {
-            type: 'Grand commerce',
-            roles: {
-                recepteur: {
-                    name: 'Récepteur de commandes',
-                    icon: 'clipboard-list',
-                    badge: 'recepteur',
-                    description: 'Accueille les clients, enregistre leurs besoins et transfère les commandes au caissier.'
-                },
-                caissier: {
-                    name: 'Caissier',
-                    icon: 'cash-register',
-                    badge: 'caissier',
-                    description: 'Reçoit les paiements et transmet les commandes payées au livreur.'
-                },
-                livreur: {
-                    name: 'Livreur',
-                    icon: 'box',
-                    badge: 'livreur',
-                    description: 'Prépare les produits demandés et les remet au client après paiement.'
-                }
+        explanation: 'Cette configuration sépare la prise de commande et l\'encaissement. Le récepteur enregistre la commande et la transmet au caissier qui finalise la vente.'
+    },
+    large: {
+        type: 'Grand commerce',
+        roles: {
+            recepteur: {
+                name: 'Récepteur de commandes',
+                icon: 'clipboard-list',
+                badge: 'recepteur',
+                description: 'Accueille les clients, enregistre leurs besoins et transfère les commandes au caissier.'
             },
-            explanation: 'Cette configuration convient aux grands commerces avec une séparation complète entre la prise de commande, l\'encaissement et la livraison des produits.'
-        }
-    };
+            caissier: {
+                name: 'Caissier',
+                icon: 'cash-register',
+                badge: 'caissier',
+                description: 'Reçoit les paiements et transmet les commandes payées au livreur.'
+            },
+            livreur: {
+                name: 'Livreur',
+                icon: 'box',
+                badge: 'livreur',
+                description: 'Prépare les produits demandés et les remet au client après paiement.'
+            }
+        },
+        explanation: 'Cette configuration convient aux grands commerces avec une séparation complète entre la prise de commande, l\'encaissement et la livraison des produits.'
+    }
+};
+
     
     // Références aux éléments DOM
     const GestVenteAdmin_currentType = document.getElementById('GestVenteAdmin_current-type');
@@ -9599,15 +9762,139 @@ document.addEventListener('DOMContentLoaded', function() {
     const GestVenteAdmin_assignRolesModal = new bootstrap.Modal(document.getElementById('GestVenteAdmin_assignRolesModal'));
     
     // Initialisation
-    function GestVenteAdmin_init() {
-        // Mise à jour de l'interface selon la configuration actuelle
-        GestVenteAdmin_updateConfigUI();
+    async function GestVenteAdmin_init() {
+        // Chargement de la configuration depuis Supabase
+        await GestVenteAdmin_loadSavedConfig();
         
-        // Mise à jour de la liste des rôles assignés
-        GestVenteAdmin_refreshAssignedRoles();
+        // Chargement des assignations
+        await GestVenteAdmin_loadConfig();
         
         // Gestion des événements
         GestVenteAdmin_setupEventListeners();
+    }
+    
+    // Charger la configuration globale depuis Supabase
+    async function GestVenteAdmin_loadSavedConfig() {
+        try {
+            // Récupérer la configuration actuelle
+            const { data, error } = await supabase
+                .from('sales_config')
+                .select('*')
+                .limit(1)
+                .single();
+                
+            if (error && error.code !== 'PGRST116') {
+                // PGRST116 est le code pour "aucune ligne retournée"
+                console.error('Erreur lors du chargement de la configuration globale:', error);
+                showNotification('Erreur lors du chargement de la configuration globale', 'danger');
+                return;
+            }
+            
+            // Si nous avons une configuration existante, l'utiliser
+            if (data) {
+                GestVenteAdmin_config.type = data.config_type;
+            } else {
+                // Sinon, créer une configuration par défaut
+                await GestVenteAdmin_saveConfigToSupabase();
+            }
+            
+            // Mise à jour de l'interface
+            GestVenteAdmin_updateConfigUI();
+        } catch (err) {
+            console.error('Erreur lors du chargement de la configuration globale:', err);
+            showNotification('Erreur lors du chargement de la configuration globale', 'danger');
+        }
+    }
+    
+    // Sauvegarder la configuration globale dans Supabase
+    async function GestVenteAdmin_saveConfigToSupabase() {
+        try {
+            // Vérifier si une configuration existe déjà
+            const { data, error: checkError } = await supabase
+                .from('sales_config')
+                .select('id')
+                .limit(1)
+                .single();
+                
+            if (checkError && checkError.code !== 'PGRST116') {
+                console.error('Erreur lors de la vérification de la configuration:', checkError);
+                return;
+            }
+            
+            if (data) {
+                // Mise à jour de la configuration existante
+                const { error: updateError } = await supabase
+                    .from('sales_config')
+                    .update({
+                        config_type: GestVenteAdmin_config.type,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', data.id);
+                    
+                if (updateError) {
+                    console.error('Erreur lors de la mise à jour de la configuration:', updateError);
+                    showNotification('Erreur lors de la sauvegarde de la configuration', 'danger');
+                }
+            } else {
+                // Création d'une nouvelle configuration
+                const { error: insertError } = await supabase
+                    .from('sales_config')
+                    .insert([
+                        { config_type: GestVenteAdmin_config.type }
+                    ]);
+                    
+                if (insertError) {
+                    console.error('Erreur lors de la création de la configuration:', insertError);
+                    showNotification('Erreur lors de la sauvegarde de la configuration', 'danger');
+                }
+            }
+        } catch (err) {
+            console.error('Erreur lors de la sauvegarde de la configuration:', err);
+            showNotification('Erreur lors de la sauvegarde de la configuration', 'danger');
+        }
+    }
+
+    // Charger la configuration et les assignations depuis Supabase
+    async function GestVenteAdmin_loadConfig() {
+        try {
+            // Chargement des assignations existantes
+            const { data: assignments, error } = await supabase
+                .from('sales_role_assignments')
+                .select('*');
+                
+            if (error) {
+                console.error('Erreur lors du chargement des assignations de rôles:', error);
+                showNotification('Erreur lors du chargement des assignations de rôles', 'danger');
+                return;
+            }
+            
+            // Regrouper les assignations par type de configuration et rôle
+            GestVenteAdmin_config.assignments = {};
+            
+            assignments.forEach(assignment => {
+                if (!GestVenteAdmin_config.assignments[assignment.config_type]) {
+                    GestVenteAdmin_config.assignments[assignment.config_type] = {};
+                }
+                
+                if (!GestVenteAdmin_config.assignments[assignment.config_type][assignment.role_key]) {
+                    GestVenteAdmin_config.assignments[assignment.config_type][assignment.role_key] = [];
+                }
+                
+                GestVenteAdmin_config.assignments[assignment.config_type][assignment.role_key].push(assignment.admin_id);
+            });
+            
+            // Si aucune assignation n'existe pour le type de configuration actuel, initialiser un objet vide
+            if (!GestVenteAdmin_config.assignments[GestVenteAdmin_config.type]) {
+                GestVenteAdmin_config.assignments[GestVenteAdmin_config.type] = {};
+            }
+            
+            // Mise à jour de l'interface
+            GestVenteAdmin_updateConfigUI();
+            GestVenteAdmin_refreshAssignedRoles();
+        } catch (err) {
+            console.error('Erreur lors du chargement de la configuration:', err);
+            showNotification('Erreur lors du chargement de la configuration', 'danger');
+        }
     }
     
     // Mise à jour de l'interface selon la configuration
@@ -9624,138 +9911,193 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Raffraîchir la liste des administrateurs assignés à des rôles
-    function GestVenteAdmin_refreshAssignedRoles() {
-        // Vider le conteneur
-        GestVenteAdmin_assignedRoles.innerHTML = '';
-        
-        const roleConfig = GestVenteAdmin_roleDefinitions[GestVenteAdmin_config.type];
-        const assignments = GestVenteAdmin_config.assignments[GestVenteAdmin_config.type] || {};
-        
-        // Vérifier s'il y a des assignations
-        let hasAssignments = false;
-        
-        // Parcourir les rôles pour cette configuration
-        for (const roleKey in roleConfig.roles) {
-            const role = roleConfig.roles[roleKey];
-            const assignedAdmins = assignments[roleKey] || [];
+    async function GestVenteAdmin_refreshAssignedRoles() {
+        try {
+            // Vider le conteneur
+            GestVenteAdmin_assignedRoles.innerHTML = '';
             
-            // Ajouter les administrateurs assignés à ce rôle
-            assignedAdmins.forEach(adminId => {
-                hasAssignments = true;
-                const admin = GestVenteAdmin_adminsList.find(a => a.id === adminId);
-                if (admin) {
-                    const roleItem = document.createElement('div');
-                    roleItem.className = 'GestVenteAdmin_role-item';
-                    roleItem.dataset.adminId = admin.id;
-                    roleItem.dataset.roleKey = roleKey;
-                    
-                    roleItem.innerHTML = `
-                        <div class="GestVenteAdmin_role-header">
-                            <span class="GestVenteAdmin_role-badge ${role.badge}">
-                                <i class="fas fa-${role.icon}"></i> ${role.name}
-                            </span>
-                        </div>
-                        <span class="GestVenteAdmin_admin-name">${admin.name}</span>
-                        <span class="GestVenteAdmin_admin-joined">
-                            <i class="fas fa-calendar-alt"></i> Depuis le ${admin.createdAt.toLocaleDateString('fr-FR')}
-                        </span>
-                        <div class="GestVenteAdmin_role-actions">
-                            <div class="GestVenteAdmin_role-action" title="Retirer du rôle" onclick="GestVenteAdmin_removeAssignment('${admin.id}', '${roleKey}')">
-                                <i class="fas fa-times"></i>
+            const roleConfig = GestVenteAdmin_roleDefinitions[GestVenteAdmin_config.type];
+            const assignments = GestVenteAdmin_config.assignments[GestVenteAdmin_config.type] || {};
+            
+            // Vérifier s'il y a des assignations
+            let hasAssignments = false;
+            
+            // Obtenir tous les administrateurs depuis Supabase
+            const { data: admins, error } = await supabase
+                .from('administrators')
+                .select('*');
+                
+            if (error) {
+                console.error('Erreur lors du chargement des administrateurs:', error);
+                showNotification('Erreur lors du chargement des administrateurs', 'danger');
+                return;
+            }
+            
+            // Parcourir les rôles pour cette configuration
+            for (const roleKey in roleConfig.roles) {
+                const role = roleConfig.roles[roleKey];
+                const assignedAdmins = assignments[roleKey] || [];
+                
+                // Ajouter les administrateurs assignés à ce rôle
+                assignedAdmins.forEach(adminId => {
+                    const admin = admins.find(a => a.id === adminId);
+                    if (admin) {
+                        hasAssignments = true;
+                        const roleItem = document.createElement('div');
+                        roleItem.className = 'GestVenteAdmin_role-item';
+                        roleItem.dataset.adminId = admin.id;
+                        roleItem.dataset.roleKey = roleKey;
+                        
+                        roleItem.innerHTML = `
+                            <div class="GestVenteAdmin_role-header">
+                                <span class="GestVenteAdmin_role-badge ${role.badge}">
+                                    <i class="fas fa-${role.icon}"></i> ${role.name}
+                                </span>
                             </div>
-                        </div>
-                    `;
-                    
-                    GestVenteAdmin_assignedRoles.appendChild(roleItem);
-                }
-            });
-        }
-        
-        // Afficher un message si aucun administrateur n'est assigné
-        if (!hasAssignments) {
-            const emptyMessage = document.createElement('div');
-            emptyMessage.className = 'text-center py-4 text-muted';
-            emptyMessage.innerHTML = `
-                <i class="fas fa-user-tag fa-3x mb-3"></i>
-                <p>Aucun administrateur assigné aux rôles de vente</p>
-                <button class="btn btn-sm btn-outline-primary mt-2" onclick="document.getElementById('GestVenteAdmin_assign-roles').click()">
-                    <i class="fas fa-user-plus"></i> Assigner des administrateurs
-                </button>
-            `;
-            GestVenteAdmin_assignedRoles.appendChild(emptyMessage);
+                            <span class="GestVenteAdmin_admin-name">${admin.username}</span>
+                            <span class="GestVenteAdmin_admin-joined">
+                                <i class="fas fa-calendar-alt"></i> Depuis le ${new Date(admin.created_at).toLocaleDateString('fr-FR')}
+                            </span>
+                            <div class="GestVenteAdmin_role-actions">
+                                <div class="GestVenteAdmin_role-action" title="Retirer du rôle" onclick="GestVenteAdmin_removeAssignment('${admin.id}', '${roleKey}')">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                            </div>
+                        `;
+                        
+                        GestVenteAdmin_assignedRoles.appendChild(roleItem);
+                    }
+                });
+            }
+            
+            // Afficher un message si aucun administrateur n'est assigné
+            if (!hasAssignments) {
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = 'text-center py-4 text-muted';
+                emptyMessage.innerHTML = `
+                    <i class="fas fa-user-tag fa-3x mb-3"></i>
+                    <p>Aucun administrateur assigné aux rôles de vente</p>
+                    <button class="btn btn-sm btn-outline-primary mt-2" onclick="document.getElementById('GestVenteAdmin_assign-roles').click()">
+                        <i class="fas fa-user-plus"></i> Assigner des administrateurs
+                    </button>
+                `;
+                GestVenteAdmin_assignedRoles.appendChild(emptyMessage);
+            }
+        } catch (err) {
+            console.error('Erreur lors du rafraîchissement des rôles assignés:', err);
+            showNotification('Erreur lors du rafraîchissement des rôles assignés', 'danger');
         }
     }
     
     // Générer le contenu de la modale d'assignation des rôles
-    function GestVenteAdmin_generateRoleAssignments() {
-        // Vider le conteneur
-        GestVenteAdmin_roleAssignments.innerHTML = '';
-        
-        const roleConfig = GestVenteAdmin_roleDefinitions[GestVenteAdmin_config.type];
-        const assignments = GestVenteAdmin_config.assignments[GestVenteAdmin_config.type] || {};
-        
-        // Parcourir les rôles pour cette configuration
-        for (const roleKey in roleConfig.roles) {
-            const role = roleConfig.roles[roleKey];
-            const assignedAdmins = assignments[roleKey] || [];
+    async function GestVenteAdmin_generateRoleAssignments() {
+        try {
+            // Vider le conteneur
+            GestVenteAdmin_roleAssignments.innerHTML = '';
             
-            // Créer le groupe de rôles
-            const roleGroup = document.createElement('div');
-            roleGroup.className = 'GestVenteAdmin_role-group';
-            roleGroup.dataset.roleKey = roleKey;
+            const roleConfig = GestVenteAdmin_roleDefinitions[GestVenteAdmin_config.type];
+            const assignments = GestVenteAdmin_config.assignments[GestVenteAdmin_config.type] || {};
             
-            // En-tête du groupe
-            roleGroup.innerHTML = `
-                <div class="GestVenteAdmin_role-group-header">
-                    <div class="GestVenteAdmin_role-group-icon ${role.badge}">
-                        <i class="fas fa-${role.icon}"></i>
-                    </div>
-                    <div>
-                        <h6 class="GestVenteAdmin_role-group-title">${role.name}</h6>
-                        <p class="GestVenteAdmin_role-group-description">${role.description}</p>
-                    </div>
-                </div>
-                <div class="GestVenteAdmin_role-selectors" data-role-key="${roleKey}">
-                    <!-- Les sélecteurs d'admins seront ajoutés ici -->
-                </div>
-            `;
-            
-            GestVenteAdmin_roleAssignments.appendChild(roleGroup);
-            
-            // Récupérer le conteneur des sélecteurs
-            const selectors = roleGroup.querySelector('.GestVenteAdmin_role-selectors');
-            
-            // Ajouter les sélecteurs pour chaque admin
-            GestVenteAdmin_adminsList.forEach(admin => {
-                const isAssigned = assignedAdmins.includes(admin.id);
-                const adminSelector = document.createElement('div');
-                adminSelector.className = `GestVenteAdmin_admin-selector ${isAssigned ? 'selected' : ''}`;
-                adminSelector.dataset.adminId = admin.id;
+            // Obtenir tous les administrateurs depuis Supabase
+            const { data: admins, error } = await supabase
+                .from('administrators')
+                .select('*');
                 
-                adminSelector.innerHTML = `
-                    <div class="GestVenteAdmin_admin-selector-check"></div>
-                    <span class="GestVenteAdmin_admin-selector-name">${admin.name}</span>
+            if (error) {
+                console.error('Erreur lors du chargement des administrateurs:', error);
+                showNotification('Erreur lors du chargement des administrateurs', 'danger');
+                return;
+            }
+            
+            // Créer un ensemble d'administrateurs déjà assignés
+            const assignedAdminIds = new Set();
+            Object.values(assignments).forEach(adminIds => {
+                adminIds.forEach(id => assignedAdminIds.add(id));
+            });
+            
+            // Parcourir les rôles pour cette configuration
+            for (const roleKey in roleConfig.roles) {
+                const role = roleConfig.roles[roleKey];
+                const assignedAdmins = assignments[roleKey] || [];
+                
+                // Créer le groupe de rôles
+                const roleGroup = document.createElement('div');
+                roleGroup.className = 'GestVenteAdmin_role-group';
+                roleGroup.dataset.roleKey = roleKey;
+                
+                // En-tête du groupe
+                roleGroup.innerHTML = `
+                    <div class="GestVenteAdmin_role-group-header">
+                        <div class="GestVenteAdmin_role-group-icon ${role.badge}">
+                            <i class="fas fa-${role.icon}"></i>
+                        </div>
+                        <div>
+                            <h6 class="GestVenteAdmin_role-group-title">${role.name}</h6>
+                            <p class="GestVenteAdmin_role-group-description">${role.description}</p>
+                        </div>
+                    </div>
+                    <div class="GestVenteAdmin_role-selectors" data-role-key="${roleKey}">
+                        <!-- Les sélecteurs d'admins seront ajoutés ici -->
+                    </div>
                 `;
                 
-                adminSelector.addEventListener('click', function() {
-                    this.classList.toggle('selected');
-                });
+                GestVenteAdmin_roleAssignments.appendChild(roleGroup);
                 
-                selectors.appendChild(adminSelector);
-            });
-            
-            // Ajouter le bouton pour ajouter un admin
-            const addAdminBtn = document.createElement('div');
-            addAdminBtn.className = 'GestVenteAdmin_add-admin-btn';
-            addAdminBtn.innerHTML = `
-                <i class="fas fa-plus"></i> Ajouter un administrateur
-            `;
-            addAdminBtn.addEventListener('click', function() {
-                // Cette fonctionnalité ouvrirait normalement une modale pour créer un nouvel admin
-                showNotification('Cette fonctionnalité permettrait de créer un nouvel administrateur.', 'info');
-            });
-            
-            selectors.appendChild(addAdminBtn);
+                // Récupérer le conteneur des sélecteurs
+                const selectors = roleGroup.querySelector('.GestVenteAdmin_role-selectors');
+                
+                // Ajouter les sélecteurs pour chaque admin
+                admins.forEach(admin => {
+                    // Vérifier si l'admin est déjà assigné à ce rôle
+                    const isAssigned = assignedAdmins.includes(admin.id);
+                    
+                    // Vérifier si l'admin est déjà assigné à un autre rôle
+                    const isAssignedElsewhere = !isAssigned && assignedAdminIds.has(admin.id);
+                    
+                    // Si l'admin est déjà assigné ailleurs, ne pas l'afficher dans ce groupe
+                    if (isAssignedElsewhere && !isAssigned) {
+                        return;
+                    }
+                    
+                    const adminSelector = document.createElement('div');
+                    adminSelector.className = `GestVenteAdmin_admin-selector ${isAssigned ? 'selected' : ''}`;
+                    adminSelector.dataset.adminId = admin.id;
+                    
+                    adminSelector.innerHTML = `
+                        <div class="GestVenteAdmin_admin-selector-check"></div>
+                        <span class="GestVenteAdmin_admin-selector-name">${admin.username}</span>
+                        <span class="GestVenteAdmin_admin-selector-badge ${admin.role === 'primary' ? 'primary' : 'standard'}">
+                            <i class="fas fa-${admin.role === 'primary' ? 'crown' : 'user-shield'}"></i>
+                        </span>
+                        ${admin.online ? '<span class="GestVenteAdmin_admin-selector-status online" title="En ligne"></span>' : ''}
+                    `;
+                    
+                    adminSelector.addEventListener('click', function() {
+                        const wasSelected = this.classList.contains('selected');
+                        
+                        // Si on désélectionne, simplement retirer la classe
+                        if (wasSelected) {
+                            this.classList.remove('selected');
+                            return;
+                        }
+                        
+                        // Si on sélectionne, s'assurer que l'admin n'est pas sélectionné ailleurs
+                        const adminId = this.dataset.adminId;
+                        document.querySelectorAll(`.GestVenteAdmin_admin-selector[data-admin-id="${adminId}"]`).forEach(selector => {
+                            if (selector !== this) {
+                                selector.classList.remove('selected');
+                            }
+                        });
+                        
+                        this.classList.add('selected');
+                    });
+                    
+                    selectors.appendChild(adminSelector);
+                });
+            }
+        } catch (err) {
+            console.error('Erreur lors de la génération des assignations de rôles:', err);
+            showNotification('Erreur lors de la génération des assignations de rôles', 'danger');
         }
     }
     
@@ -9800,7 +10142,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Sauvegarde de la configuration
-        GestVenteAdmin_saveConfigBtn.addEventListener('click', function() {
+        GestVenteAdmin_saveConfigBtn.addEventListener('click', async function() {
             const selectedOption = document.querySelector('.GestVenteAdmin_config-option.selected');
             if (selectedOption) {
                 const newConfigType = selectedOption.dataset.configType;
@@ -9815,6 +10157,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         GestVenteAdmin_config.assignments[newConfigType] = {};
                     }
                     
+                    // Sauvegarder la configuration dans Supabase
+                    await GestVenteAdmin_saveConfigToSupabase();
+                    
                     // Mettre à jour l'interface
                     GestVenteAdmin_updateConfigUI();
                     GestVenteAdmin_refreshAssignedRoles();
@@ -9827,52 +10172,126 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Sauvegarde des assignations
-        GestVenteAdmin_saveAssignmentsBtn.addEventListener('click', function() {
-            // Réinitialiser les assignations pour la configuration actuelle
-            GestVenteAdmin_config.assignments[GestVenteAdmin_config.type] = {};
-            
-            // Parcourir les groupes de rôles
-            document.querySelectorAll('.GestVenteAdmin_role-group').forEach(group => {
-                const roleKey = group.dataset.roleKey;
+        GestVenteAdmin_saveAssignmentsBtn.addEventListener('click', async function() {
+            try {
+                // Récupérer les anciennes assignations pour pouvoir les supprimer
+                const { data: oldAssignments, error: fetchError } = await supabase
+                    .from('sales_role_assignments')
+                    .select('*')
+                    .eq('config_type', GestVenteAdmin_config.type);
+                    
+                if (fetchError) {
+                    console.error('Erreur lors de la récupération des anciennes assignations:', fetchError);
+                    showNotification('Erreur lors de la mise à jour des assignations', 'danger');
+                    return;
+                }
                 
-                // Initialiser le tableau d'assignations pour ce rôle
-                GestVenteAdmin_config.assignments[GestVenteAdmin_config.type][roleKey] = [];
+                // Supprimer les anciennes assignations pour cette configuration
+                if (oldAssignments.length > 0) {
+                    const { error: deleteError } = await supabase
+                        .from('sales_role_assignments')
+                        .delete()
+                        .eq('config_type', GestVenteAdmin_config.type);
+                        
+                    if (deleteError) {
+                        console.error('Erreur lors de la suppression des anciennes assignations:', deleteError);
+                        showNotification('Erreur lors de la mise à jour des assignations', 'danger');
+                        return;
+                    }
+                }
                 
-                // Ajouter les administrateurs sélectionnés
-                group.querySelectorAll('.GestVenteAdmin_admin-selector.selected').forEach(selector => {
-                    const adminId = selector.dataset.adminId;
-                    GestVenteAdmin_config.assignments[GestVenteAdmin_config.type][roleKey].push(adminId);
+                // Réinitialiser les assignations en mémoire pour la configuration actuelle
+                GestVenteAdmin_config.assignments[GestVenteAdmin_config.type] = {};
+                
+                // Récupérer les nouvelles assignations
+                const newAssignments = [];
+                
+                // Parcourir les groupes de rôles
+                document.querySelectorAll('.GestVenteAdmin_role-group').forEach(group => {
+                    const roleKey = group.dataset.roleKey;
+                    
+                    // Initialiser le tableau d'assignations pour ce rôle
+                    GestVenteAdmin_config.assignments[GestVenteAdmin_config.type][roleKey] = [];
+                    
+                    // Ajouter les administrateurs sélectionnés
+                    group.querySelectorAll('.GestVenteAdmin_admin-selector.selected').forEach(selector => {
+                        const adminId = selector.dataset.adminId;
+                        GestVenteAdmin_config.assignments[GestVenteAdmin_config.type][roleKey].push(adminId);
+                        
+                        // Ajouter à la liste des nouvelles assignations à insérer dans Supabase
+                        newAssignments.push({
+                            admin_id: adminId,
+                            config_type: GestVenteAdmin_config.type,
+                            role_key: roleKey
+                        });
+                    });
                 });
-            });
-            
-            // Mettre à jour l'interface
-            GestVenteAdmin_refreshAssignedRoles();
-            
-            GestVenteAdmin_assignRolesModal.hide();
-            showNotification('Rôles assignés avec succès.', 'success');
+                
+                // Insérer les nouvelles assignations dans Supabase
+                if (newAssignments.length > 0) {
+                    const { error: insertError } = await supabase
+                        .from('sales_role_assignments')
+                        .insert(newAssignments);
+                        
+                    if (insertError) {
+                        console.error('Erreur lors de l\'insertion des nouvelles assignations:', insertError);
+                        showNotification('Erreur lors de la mise à jour des assignations', 'danger');
+                        return;
+                    }
+                }
+                
+                // Mettre à jour l'interface
+                GestVenteAdmin_refreshAssignedRoles();
+                
+                GestVenteAdmin_assignRolesModal.hide();
+                showNotification('Rôles assignés avec succès.', 'success');
+            } catch (err) {
+                console.error('Erreur lors de la sauvegarde des assignations:', err);
+                showNotification('Erreur lors de la sauvegarde des assignations', 'danger');
+            }
         });
     }
     
     // Fonction pour retirer un administrateur d'un rôle (appelée depuis le HTML)
-    window.GestVenteAdmin_removeAssignment = function(adminId, roleKey) {
-        // Vérifier si des assignations existent pour cette configuration
-        if (GestVenteAdmin_config.assignments[GestVenteAdmin_config.type] &&
-            GestVenteAdmin_config.assignments[GestVenteAdmin_config.type][roleKey]) {
+    window.GestVenteAdmin_removeAssignment = async function(adminId, roleKey) {
+        try {
+            // Supprimer l'assignation de Supabase
+            const { error } = await supabase
+                .from('sales_role_assignments')
+                .delete()
+                .eq('admin_id', adminId)
+                .eq('config_type', GestVenteAdmin_config.type)
+                .eq('role_key', roleKey);
+                
+            if (error) {
+                console.error('Erreur lors de la suppression de l\'assignation:', error);
+                showNotification('Erreur lors de la suppression de l\'assignation', 'danger');
+                return;
+            }
             
-            // Filtrer l'administrateur du tableau d'assignations
-            GestVenteAdmin_config.assignments[GestVenteAdmin_config.type][roleKey] = 
-                GestVenteAdmin_config.assignments[GestVenteAdmin_config.type][roleKey].filter(id => id !== adminId);
-            
-            // Mettre à jour l'interface
-            GestVenteAdmin_refreshAssignedRoles();
-            
-            showNotification('Administrateur retiré du rôle avec succès.', 'success');
+            // Mettre à jour les assignations en mémoire
+            if (GestVenteAdmin_config.assignments[GestVenteAdmin_config.type] &&
+                GestVenteAdmin_config.assignments[GestVenteAdmin_config.type][roleKey]) {
+                
+                // Filtrer l'administrateur du tableau d'assignations
+                GestVenteAdmin_config.assignments[GestVenteAdmin_config.type][roleKey] = 
+                    GestVenteAdmin_config.assignments[GestVenteAdmin_config.type][roleKey].filter(id => id !== adminId);
+                
+                // Mettre à jour l'interface
+                GestVenteAdmin_refreshAssignedRoles();
+                
+                showNotification('Administrateur retiré du rôle avec succès.', 'success');
+            }
+        } catch (err) {
+            console.error('Erreur lors de la suppression de l\'assignation:', err);
+            showNotification('Erreur lors de la suppression de l\'assignation', 'danger');
         }
     };
     
     // Initialiser la gestion des rôles
     GestVenteAdmin_init();
 });
+
 
 
 

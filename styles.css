@@ -5925,6 +5925,83 @@
 /*═══════════════════════════*\
   🔵 PARTIE 14  
 \*═══════════════════════════*/
+/* Styles pour le point de vente lié aux rôles admin */
+.PovConfigAdmin_roleInfo {
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    background-color: rgba(0, 51, 102, 0.1);
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
+.PovConfigAdmin_roleBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-right: 10px;
+    font-weight: 600;
+    color: white;
+}
+
+.PovConfigAdmin_roleBadge.solo {
+    background-color: #8e44ad;
+}
+
+.PovConfigAdmin_roleBadge.recepteur {
+    background-color: #2980b9;
+}
+
+.PovConfigAdmin_roleBadge.caissier {
+    background-color: #27ae60;
+}
+
+.PovConfigAdmin_roleBadge.livreur {
+    background-color: #d35400;
+}
+
+.PovConfigAdmin_configMessage,
+.PovConfigAdmin_accessDenied {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.PovConfigAdmin_configMessageContent,
+.PovConfigAdmin_accessDeniedContent {
+    max-width: 500px;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.PovConfigAdmin_configMessageContent i,
+.PovConfigAdmin_accessDeniedContent i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: var(--primary);
+}
+
+.PovConfigAdmin_accessDeniedContent i {
+    color: var(--danger);
+}
+
+.PovConfigAdmin_configMessageContent h5,
+.PovConfigAdmin_accessDeniedContent h5 {
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.PovConfigAdmin_configMessageContent p,
+.PovConfigAdmin_accessDeniedContent p {
+    margin-bottom: 20px;
+    color: var(--gray);
+}
 
 
 /*═══════════════════════════*\

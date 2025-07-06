@@ -2419,40 +2419,29 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span>Gestion des ventes</span>
-            <div class="d-flex">
-                <div class="role-selector me-2">
-                    <button class="btn btn-outline-primary" id="newonInventRoleToggle">
-                        <i class="fas fa-exchange-alt me-1"></i> Changer de rôle
-                    </button>
-                </div>
+            <div id="PovConfigAdmin_roleInfo" class="PovConfigAdmin_roleInfo">
+                <!-- Information sur le rôle sera affichée ici -->
             </div>
         </div>
         <div class="card-body">
-            <!-- Sélection du mode de vente -->
-            <div id="newonInventSelectMode" class="mb-4">
-                <h5 class="mb-3">Sélectionnez votre mode de vente:</h5>
-                <div class="newonInventModeContainer">
-                    <div class="newonInventModeCard" data-mode="oneSeller">
-                        <div class="newonInventModeIcon">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <h5>Un seul vendeur</h5>
-                        <p>Un vendeur gère tout le processus de vente</p>
-                    </div>
-                    <div class="newonInventModeCard" data-mode="twoSellers">
-                        <div class="newonInventModeIcon">
-                            <i class="fas fa-user-friends"></i>
-                        </div>
-                        <h5>Deux vendeurs</h5>
-                        <p>Réception client + Caisse</p>
-                    </div>
-                    <div class="newonInventModeCard" data-mode="threeSellers">
-                        <div class="newonInventModeIcon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <h5>Trois vendeurs</h5>
-                        <p>Réception + Caisse + Livraison</p>
-                    </div>
+            <!-- Message de configuration -->
+            <div id="PovConfigAdmin_configMessage" class="PovConfigAdmin_configMessage" style="display: none;">
+                <div class="PovConfigAdmin_configMessageContent">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <h5>Configuration requise</h5>
+                    <p>Veuillez configurer l'organisation de vente et attribuer des rôles aux administrateurs avant d'utiliser le point de vente.</p>
+                    <a href="#" class="btn btn-primary" onclick="window.showSection('admin-management'); return false;">
+                        <i class="fas fa-cog me-2"></i>Configurer maintenant
+                    </a>
+                </div>
+            </div>
+
+            <!-- Message d'accès non autorisé -->
+            <div id="PovConfigAdmin_accessDenied" class="PovConfigAdmin_accessDenied" style="display: none;">
+                <div class="PovConfigAdmin_accessDeniedContent">
+                    <i class="fas fa-lock"></i>
+                    <h5>Accès non autorisé</h5>
+                    <p>Vous n'avez pas été assigné à un rôle de vente. Veuillez contacter un administrateur principal pour obtenir l'accès.</p>
                 </div>
             </div>
 
