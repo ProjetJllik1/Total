@@ -614,6 +614,7 @@
                             <table class="table table-hover" id="inventory-table">
 <thead>
     <tr>
+        <th>Image</th>
         <th>Code Produit</th>
         <th>Nom</th>
         <th>Prix</th>
@@ -624,6 +625,7 @@
         <th>Actions</th>
     </tr>
 </thead>
+
 
                                 <tbody>
                                     <tr>
@@ -735,20 +737,29 @@
     </div>
     
     <!-- Boutons d'action scanner -->
-    <div class="NouvScanModernControls">
-        <button class="NouvScanModernBtn NouvScanModernModeBtn" id="NouvScanModernToggleMode">
-            <i class="fas fa-sync-alt"></i>
-            <span>Changer de mode</span>
-        </button>
-        <button class="NouvScanModernBtn NouvScanModernLightBtn" id="NouvScanModernToggleLight">
-            <i class="fas fa-lightbulb"></i>
-            <span>Flash</span>
-        </button>
-        <button class="NouvScanModernBtn NouvScanModernCancelBtn" id="NouvScanModernCancelScan">
-            <i class="fas fa-times"></i>
-            <span>Annuler</span>
-        </button>
-    </div>
+<div class="NouvScanModernControls">
+    <button class="NouvScanModernBtn NouvScanModernModeBtn" id="NouvScanModernToggleMode">
+        <i class="fas fa-sync-alt"></i>
+        <span>Changer de mode</span>
+    </button>
+    <button class="NouvScanModernBtn NouvScanModernCameraBtn" id="NouvScanModernToggleCamera">
+        <i class="fas fa-camera-rotate"></i>
+        <span>Changer caméra</span>
+    </button>
+    <button class="NouvScanModernBtn NouvScanModernLightBtn" id="NouvScanModernToggleLight">
+        <i class="fas fa-lightbulb"></i>
+        <span>Flash arrière</span>
+    </button>
+    <button class="NouvScanModernBtn NouvScanModernFrontLightBtn" id="NouvScanModernToggleFrontLight" style="display: none;">
+        <i class="fas fa-lightbulb"></i>
+        <span>Flash avant</span>
+    </button>
+    <button class="NouvScanModernBtn NouvScanModernCancelBtn" id="NouvScanModernCancelScan">
+        <i class="fas fa-times"></i>
+        <span>Annuler</span>
+    </button>
+</div>
+
 </div>
 
                                 </div>
@@ -903,6 +914,64 @@
                                 </div>
                             </div>
                             
+                            <div class="row mb-4">
+    <div class="col-md-12">
+        <label class="form-label">Images du produit</label>
+        <div class="product-image-upload">
+            <div class="image-upload-container">
+                <div class="main-upload-box">
+                    <input type="file" id="product-images" accept="image/*" multiple class="d-none">
+                    <div class="upload-placeholder" id="upload-placeholder">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <div class="upload-text">
+                            <span class="primary-text">Glissez ou cliquez pour ajouter des photos</span>
+                            <span class="secondary-text">Pour une identification rapide du produit</span>
+                        </div>
+                    </div>
+<div class="image-select-options">
+    <button type="button" class="btn btn-sm btn-light" id="single-image-btn">
+        <i class="fas fa-image"></i> Une seule photo
+    </button>
+    <button type="button" class="btn btn-sm btn-light" id="multiple-images-btn">
+        <i class="fas fa-images"></i> Plusieurs photos (3-6)
+    </button>
+    <button type="button" class="btn btn-sm btn-light" id="capture-photo-btn">
+        <i class="fas fa-camera"></i> Prendre une photo
+    </button>
+</div>
+
+                </div>
+            </div>
+            <div class="image-preview-container" id="image-preview-container">
+                <div class="image-preview-wrapper" id="image-preview-wrapper"></div>
+                <div class="image-preview-controls d-none" id="image-preview-controls">
+                    <button type="button" class="btn btn-sm btn-primary" id="add-more-images">
+                        <i class="fas fa-plus"></i> Ajouter plus
+                    </button>
+                    <button type="button" class="btn btn-sm btn-danger" id="clear-images">
+                        <i class="fas fa-trash"></i> Effacer tout
+                    </button>
+                </div>
+            </div>
+            <div class="camera-capture-container d-none" id="camera-capture-container">
+    <div class="camera-wrapper">
+        <video id="camera-preview" autoplay playsinline></video>
+        <canvas id="camera-canvas" class="d-none"></canvas>
+    </div>
+    <div class="camera-controls">
+        <button type="button" class="btn btn-sm btn-primary" id="take-photo-btn">
+            <i class="fas fa-camera"></i> Capturer
+        </button>
+        <button type="button" class="btn btn-sm btn-danger" id="cancel-camera-btn">
+            <i class="fas fa-times"></i> Annuler
+        </button>
+    </div>
+</div>
+
+        </div>
+    </div>
+</div>
+                            
                             <div class="row mb-3">
                                 <div class="col-md-12">
                                     <label for="product-description" class="form-label">Description</label>
@@ -1045,20 +1114,29 @@
                 </div>
                 
                 <!-- Boutons d'action scanner -->
-                <div class="NouvScanModern2Controls mt-3">
-                    <button class="NouvScanModern2Btn NouvScanModern2ModeBtn" id="NouvScanModern2ToggleMode">
-                        <i class="fas fa-sync-alt"></i>
-                        <span>Changer de mode</span>
-                    </button>
-                    <button class="NouvScanModern2Btn NouvScanModern2LightBtn" id="NouvScanModern2ToggleLight">
-                        <i class="fas fa-lightbulb"></i>
-                        <span>Flash</span>
-                    </button>
-                    <button class="NouvScanModern2Btn NouvScanModern2CancelBtn" id="NouvScanModern2CancelScan">
-                        <i class="fas fa-times"></i>
-                        <span>Annuler</span>
-                    </button>
-                </div>
+<div class="NouvScanModern2Controls mt-3">
+    <button class="NouvScanModern2Btn NouvScanModern2ModeBtn" id="NouvScanModern2ToggleMode">
+        <i class="fas fa-sync-alt"></i>
+        <span>Changer de mode</span>
+    </button>
+    <button class="NouvScanModern2Btn NouvScanModern2CameraBtn" id="NouvScanModern2ToggleCamera">
+        <i class="fas fa-camera-rotate"></i>
+        <span>Changer caméra</span>
+    </button>
+    <button class="NouvScanModern2Btn NouvScanModern2LightBtn" id="NouvScanModern2ToggleLight">
+        <i class="fas fa-lightbulb"></i>
+        <span>Flash arrière</span>
+    </button>
+    <button class="NouvScanModern2Btn NouvScanModern2FrontLightBtn" id="NouvScanModern2ToggleFrontLight" style="display: none;">
+        <i class="fas fa-lightbulb"></i>
+        <span>Flash avant</span>
+    </button>
+    <button class="NouvScanModern2Btn NouvScanModern2CancelBtn" id="NouvScanModern2CancelScan">
+        <i class="fas fa-times"></i>
+        <span>Annuler</span>
+    </button>
+</div>
+
             </div>
         </div>
     </div>
@@ -3645,6 +3723,21 @@
                             </form>
                         </div>
                         <div class="col-md-6">
+                          <div class="mb-4">
+    <h5>Images du produit</h5>
+    <div class="product-images-gallery" id="product-images-gallery">
+        <div class="product-no-images" id="product-no-images">
+            <i class="fas fa-image"></i>
+            <p>Aucune image</p>
+        </div>
+    </div>
+    <div class="product-images-controls mt-2 d-none" id="product-images-controls">
+        <button type="button" class="btn btn-sm btn-outline-primary" id="edit-product-images">
+            <i class="fas fa-pencil-alt"></i> Modifier les images
+        </button>
+    </div>
+</div>
+
                             <div class="mb-4">
                                 <h5>Codes produit</h5>
                                 <div class="code-preview mb-3">

@@ -13,6 +13,17 @@
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
+
+// État global des scanners
+window.scannerState = {
+    frontCamera: false,  // Par défaut, utiliser la caméra arrière
+    backFlashOn: false,  // État du flash arrière
+    frontFlashOn: false, // État du flash avant
+    currentStream: null, // Stream actuel
+    backVideoTrack: null, // Track vidéo de la caméra arrière
+    frontVideoTrack: null // Track vidéo de la caméra frontale
+};
+
         // Modals
         const productModal = new bootstrap.Modal(document.getElementById('productModal'));
         const sellModal = new bootstrap.Modal(document.getElementById('sellModal'));
@@ -479,8 +490,12 @@ document.getElementById('print-generated').addEventListener('click', function() 
     // Initialiser les dropdowns personnalisés
     initCustomDropdowns();
     initInfoUnitMesureTooltips();
+    
     // Charger les unités personnalisées
     loadCustomUnits();
+    
+    // Initialiser la gestion des images
+    initImageUpload();
     
     // Si c'est la première exécution, ajouter des produits d'exemple
     if (products.length === 0) {
@@ -492,6 +507,9 @@ document.getElementById('print-generated').addEventListener('click', function() 
 }
 
         function addSampleProducts() {
+    // Image par défaut pour les exemples (data URI d'une image très légère)
+    const defaultImageData = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNmMWYxZjEiLz48dGV4dCB4PSI1MCIgeT0iNTAiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGFsaWdubWVudC1iYXNlbGluZT0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZmlsbD0iIzk5OSI+SW1hZ2U8L3RleHQ+PC9zdmc+';
+    
     const sampleProducts = [
         {
             id: generateProductCode(),
@@ -500,12 +518,15 @@ document.getElementById('print-generated').addEventListener('click', function() 
             category: "antennes",
             price: 49.99,
             quantity: 15,
-            unit: "piece", // Ajout de l'unité de mesure
+            unit: "piece",
             location: "Rayon 1, Étagère A",
             description: "Antenne TV puissante pour réception TNT HD",
             minStock: 5,
             supplier: "AntennaPro",
             dateAdded: new Date().toISOString(),
+            images: [
+                { dataUrl: defaultImageData, isMain: true }
+            ],
             movements: [
                 {
                     type: "add",
@@ -522,12 +543,15 @@ document.getElementById('print-generated').addEventListener('click', function() 
             category: "panneaux-solaires",
             price: 129.99,
             quantity: 8,
-            unit: "piece", // Ajout de l'unité de mesure
+            unit: "piece",
             location: "Rayon 2, Étagère C",
             description: "Panneau solaire monocristallin 100W",
             minStock: 3,
             supplier: "SolarTech",
             dateAdded: new Date().toISOString(),
+            images: [
+                { dataUrl: defaultImageData, isMain: true }
+            ],
             movements: [
                 {
                     type: "add",
@@ -544,12 +568,15 @@ document.getElementById('print-generated').addEventListener('click', function() 
             category: "outillage",
             price: 89.90,
             quantity: 12,
-            unit: "kit", // Ajout de l'unité de mesure
+            unit: "kit",
             location: "Rayon 3, Étagère B",
             description: "Perceuse-visseuse sans fil avec 2 batteries",
             minStock: 4,
             supplier: "OutilPro",
             dateAdded: new Date().toISOString(),
+            images: [
+                { dataUrl: defaultImageData, isMain: true }
+            ],
             movements: [
                 {
                     type: "add",
@@ -566,12 +593,15 @@ document.getElementById('print-generated').addEventListener('click', function() 
             category: "motos",
             price: 12.50,
             quantity: 25,
-            unit: "piece", // Ajout de l'unité de mesure
+            unit: "piece",
             location: "Rayon 4, Étagère D",
             description: "Filtre à huile compatible plusieurs modèles",
             minStock: 10,
             supplier: "MotoTech",
             dateAdded: new Date().toISOString(),
+            images: [
+                { dataUrl: defaultImageData, isMain: true }
+            ],
             movements: [
                 {
                     type: "add",
@@ -588,12 +618,15 @@ document.getElementById('print-generated').addEventListener('click', function() 
             category: "electronique",
             price: 34.99,
             quantity: 7,
-            unit: "piece", // Ajout de l'unité de mesure
+            unit: "piece",
             location: "Rayon 5, Étagère A",
             description: "Multimètre numérique professionnel",
             minStock: 3,
             supplier: "ElectroPro",
             dateAdded: new Date().toISOString(),
+            images: [
+                { dataUrl: defaultImageData, isMain: true }
+            ],
             movements: [
                 {
                     type: "add",
@@ -754,7 +787,7 @@ function loadInventoryTable() {
     inventoryTable.innerHTML = '';
     
     if (products.length === 0) {
-        inventoryTable.innerHTML = '<tr><td colspan="8" class="text-center">Aucun produit trouvé</td></tr>';
+        inventoryTable.innerHTML = '<tr><td colspan="9" class="text-center">Aucun produit trouvé</td></tr>';
         return;
     }
     
@@ -768,7 +801,19 @@ function loadInventoryTable() {
         const unitInfo = getUnitInfo(product.unit || 'piece');
         const unitBadge = `<span class="unit-badge"><i class="${unitInfo.icon}"></i>${unitInfo.name}</span>`;
         
+        // Préparer la cellule d'image
+        let imageTd;
+        if (product.images && product.images.length > 0) {
+            // Trouver l'image principale
+            const mainImage = product.images.find(img => img.isMain) || product.images[0];
+            imageTd = `<img src="${mainImage.dataUrl}" alt="${product.name}" class="product-table-thumbnail">`;
+        } else {
+            // Image par défaut
+            imageTd = `<div class="product-image-placeholder"><i class="fas fa-image"></i></div>`;
+        }
+        
         row.innerHTML = `
+            <td>${imageTd}</td>
             <td>${product.code}</td>
             <td>${product.name}</td>
             <td>${formattedPrice}</td>
@@ -1025,36 +1070,105 @@ function initBarcodeScanner(videoElementId) {
         scannerNumber = 2;
     }
     
+    // Variables pour suivre l'état des caméras et des flashs
+    if (!window.scannerState) {
+        window.scannerState = {
+            frontCamera: false,  // Par défaut, utiliser la caméra arrière
+            backFlashOn: false,  // État du flash arrière
+            frontFlashOn: false, // État du flash avant
+            currentStream: null, // Stream actuel
+            backVideoTrack: null, // Track vidéo de la caméra arrière
+            frontVideoTrack: null // Track vidéo de la caméra frontale
+        };
+    }
+    
     // Afficher un message dans l'interface moderne
     updateScannerMessage(scannerNumber, 'Initialisation...');
     
+    // Arrêter les scanners et streams existants
     if (scannerInitialized) {
         Quagga.stop();
-        if (qrScannerInterval) {
-            clearInterval(qrScannerInterval);
-            qrScannerInterval = null;
-        }
+        scannerInitialized = false;
     }
     
+    if (qrScannerInterval) {
+        clearInterval(qrScannerInterval);
+        qrScannerInterval = null;
+    }
+    
+    // Arrêter les flux vidéo existants
+    if (window.scannerState.currentStream) {
+        window.scannerState.currentStream.getTracks().forEach(track => track.stop());
+        window.scannerState.currentStream = null;
+    }
+    
+    // Configurer les contraintes vidéo en fonction de la caméra sélectionnée
+    const videoConstraints = {
+        video: {
+            facingMode: window.scannerState.frontCamera ? "user" : "environment",
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+        }
+    };
+    
     // Demander l'accès à la caméra
-    navigator.mediaDevices.getUserMedia({ 
-        video: { 
-            facingMode: "environment",
-            advanced: [{ torch: false }] // La lampe est éteinte par défaut
-        } 
-    })
+    navigator.mediaDevices.getUserMedia(videoConstraints)
     .then(function(stream) {
+        // Stocker le stream actuel
+        window.scannerState.currentStream = stream;
+        
+        // Connecter le stream à l'élément vidéo
         videoElement.srcObject = stream;
         videoElement.play();
         
-        // Mise à jour du message
-        updateScannerMessage(scannerNumber, 'Caméra activée...');
-        
-        // Stocke le track vidéo pour le flash
+        // Obtenir la piste vidéo
         const videoTrack = stream.getVideoTracks()[0];
         
-        // Configure le flash si disponible
-        setupFlashButton(scannerNumber, videoTrack);
+        // Stocker la piste vidéo selon le type de caméra
+        if (window.scannerState.frontCamera) {
+            window.scannerState.frontVideoTrack = videoTrack;
+            
+            // Appliquer l'état du flash frontal si activé
+            if (window.scannerState.frontFlashOn) {
+                setTimeout(async () => {
+                    try {
+                        await videoTrack.applyConstraints({
+                            advanced: [
+                                { torch: true },
+                                { fillLightMode: "flash" }
+                            ]
+                        });
+                    } catch (e) {
+                        console.log("Flash frontal non disponible sur cet appareil");
+                    }
+                }, 500);
+            }
+        } else {
+            window.scannerState.backVideoTrack = videoTrack;
+            
+            // Appliquer l'état du flash arrière si activé
+            if (window.scannerState.backFlashOn) {
+                setTimeout(async () => {
+                    try {
+                        const capabilities = videoTrack.getCapabilities();
+                        if (capabilities && 'torch' in capabilities) {
+                            await videoTrack.applyConstraints({
+                                advanced: [{ torch: true }]
+                            });
+                        }
+                    } catch (e) {
+                        console.log("Flash arrière non disponible sur cet appareil");
+                    }
+                }, 500);
+            }
+        }
+        
+        // Mise à jour du message
+        updateScannerMessage(scannerNumber, window.scannerState.frontCamera ? 
+            'Caméra frontale activée...' : 'Caméra arrière activée...');
+        
+        // Configurer les boutons pour le flash approprié
+        setupFlashButtons(scannerNumber);
         
         // Initialiser Quagga pour la détection de code-barres
         Quagga.init({
@@ -1078,7 +1192,7 @@ function initBarcodeScanner(videoElementId) {
             }
         }, function(err) {
             if (err) {
-                console.error(err);
+                console.error("Erreur d'initialisation Quagga:", err);
                 updateScannerMessage(scannerNumber, 'Erreur d\'initialisation');
                 return;
             }
@@ -1086,7 +1200,7 @@ function initBarcodeScanner(videoElementId) {
             Quagga.start();
             updateScannerMessage(scannerNumber, 'Scanner prêt');
             
-            // Après 1,5 seconde, changer le message à "Recherche de codes..."
+            // Après 1,5 seconde, changer le message
             setTimeout(() => {
                 updateScannerMessage(scannerNumber, 'Positionnez le code dans le cadre');
             }, 1500);
@@ -1101,7 +1215,10 @@ function initBarcodeScanner(videoElementId) {
             indicateDetection(scannerNumber);
             
             // Retour haptique et sonore
-            NouvScanModernFeedback.feedback();
+            if (typeof NouvScanModernFeedback !== 'undefined' && 
+                typeof NouvScanModernFeedback.feedback === 'function') {
+                NouvScanModernFeedback.feedback();
+            }
             
             processScannedCode(code);
         });
@@ -1115,35 +1232,110 @@ function initBarcodeScanner(videoElementId) {
                 canvas.height = videoElement.videoHeight;
                 canvas.width = videoElement.videoWidth;
                 context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
                 
-                const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: "dontInvert",
-                });
-                
-                if (code) {
-                    console.log("Detected QR code:", code.data);
+                try {
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
                     
-                    // Indiquer visuellement qu'un code a été détecté
-                    indicateDetection(scannerNumber);
-                    
-                    // Retour haptique et sonore
-                    NouvScanModernFeedback.feedback();
-                    
-                    processScannedCode(code.data);
+                    // Utiliser jsQR si disponible
+                    if (typeof jsQR === 'function') {
+                        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                            inversionAttempts: "dontInvert",
+                        });
+                        
+                        if (code) {
+                            console.log("Detected QR code:", code.data);
+                            
+                            // Indiquer visuellement qu'un code a été détecté
+                            indicateDetection(scannerNumber);
+                            
+                            // Retour haptique et sonore
+                            if (typeof NouvScanModernFeedback !== 'undefined' && 
+                                typeof NouvScanModernFeedback.feedback === 'function') {
+                                NouvScanModernFeedback.feedback();
+                            }
+                            
+                            processScannedCode(code.data);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Erreur lors de l'analyse QR:", error);
                 }
             }
         }, 500);
     })
     .catch(function(err) {
         console.error("Error accessing camera:", err);
-        showNotification("Erreur", "Impossible d'accéder à la caméra.", "error");
+        showNotification("Erreur", "Impossible d'accéder à la caméra: " + err.message, "error");
         updateScannerMessage(scannerNumber, 'Erreur caméra');
     });
     
-    // Configurer les boutons de mode
+    // Configurer les boutons de mode et de caméra
     setupModeButtons(scannerNumber);
+    setupCameraToggle(scannerNumber, videoElement);
 }
+
+
+
+function setupCameraToggle(scannerNumber, videoElement) {
+    let toggleCameraBtn, prefix;
+    
+    if (scannerNumber === 1) {
+        toggleCameraBtn = document.getElementById('NouvScanModernToggleCamera');
+        prefix = 'NouvScanModern';
+    } else if (scannerNumber === 2) {
+        toggleCameraBtn = document.getElementById('NouvScanModern2ToggleCamera');
+        prefix = 'NouvScanModern2';
+    }
+    
+    if (toggleCameraBtn) {
+        // Supprimer les écouteurs d'événements existants pour éviter les doublons
+        const newToggleBtn = toggleCameraBtn.cloneNode(true);
+        toggleCameraBtn.parentNode.replaceChild(newToggleBtn, toggleCameraBtn);
+        toggleCameraBtn = newToggleBtn;
+        
+        toggleCameraBtn.addEventListener('click', function() {
+            // Inverser la sélection de caméra
+            window.scannerState.frontCamera = !window.scannerState.frontCamera;
+            
+            // Mise à jour du texte du bouton pour indiquer la caméra actuelle
+            const cameraTypeText = window.scannerState.frontCamera ? 
+                "Caméra avant" : "Caméra arrière";
+            const spanElement = toggleCameraBtn.querySelector('span');
+            if (spanElement) {
+                spanElement.textContent = cameraTypeText;
+            }
+            
+            // Arrêter le scanner actuel
+            if (scannerInitialized) {
+                Quagga.stop();
+                scannerInitialized = false;
+            }
+            
+            if (qrScannerInterval) {
+                clearInterval(qrScannerInterval);
+                qrScannerInterval = null;
+            }
+            
+            // Arrêter le stream actuel
+            if (window.scannerState.currentStream) {
+                window.scannerState.currentStream.getTracks().forEach(track => track.stop());
+                window.scannerState.currentStream = null;
+            }
+            
+            // Réinitialiser les états du flash
+            // Ne pas réinitialiser les états pour conserver les préférences de l'utilisateur
+            
+            // Mettre à jour l'affichage des boutons de flash
+            updateFlashButtonsVisibility(scannerNumber);
+            
+            // Réinitialiser le scanner avec la nouvelle caméra
+            initBarcodeScanner(videoElement.id);
+        });
+    }
+}
+
+
+
 
 // Fonction pour mettre à jour le message du scanner
 function updateScannerMessage(scannerNumber, message) {
@@ -1278,48 +1470,238 @@ function setupModeButtons(scannerNumber) {
     }
 }
 
-// Fonction pour configurer le bouton de flash
-function setupFlashButton(scannerNumber, videoTrack) {
-    let flashBtn;
+function updateFlashButtonsVisibility(scannerNumber) {
+    let backFlashBtn, frontFlashBtn;
+    
     if (scannerNumber === 1) {
-        flashBtn = document.getElementById('NouvScanModernToggleLight');
+        backFlashBtn = document.getElementById('NouvScanModernToggleLight');
+        frontFlashBtn = document.getElementById('NouvScanModernToggleFrontLight');
     } else if (scannerNumber === 2) {
-        flashBtn = document.getElementById('NouvScanModern2ToggleLight');
+        backFlashBtn = document.getElementById('NouvScanModern2ToggleLight');
+        frontFlashBtn = document.getElementById('NouvScanModern2ToggleFrontLight');
     }
     
-    if (flashBtn && videoTrack) {
-        // Vérifier si la fonction torch est disponible
-        const capabilities = videoTrack.getCapabilities();
-        const hasTorch = 'torch' in capabilities;
+    if (backFlashBtn && frontFlashBtn) {
+        if (window.scannerState.frontCamera) {
+            backFlashBtn.style.display = 'none';
+            frontFlashBtn.style.display = 'flex';
+        } else {
+            backFlashBtn.style.display = 'flex';
+            frontFlashBtn.style.display = 'none';
+        }
+    }
+}
+
+function setupFlashButtons(scannerNumber) {
+    let backFlashBtn, frontFlashBtn;
+    
+    if (scannerNumber === 1) {
+        backFlashBtn = document.getElementById('NouvScanModernToggleLight');
+        frontFlashBtn = document.getElementById('NouvScanModernToggleFrontLight');
+    } else if (scannerNumber === 2) {
+        backFlashBtn = document.getElementById('NouvScanModern2ToggleLight');
+        frontFlashBtn = document.getElementById('NouvScanModern2ToggleFrontLight');
+    }
+    
+    // Mettre à jour la visibilité des boutons
+    updateFlashButtonsVisibility(scannerNumber);
+    
+    // Supprimer les écouteurs d'événements existants pour éviter les doublons
+    if (backFlashBtn) {
+        const newBackFlashBtn = backFlashBtn.cloneNode(true);
+        backFlashBtn.parentNode.replaceChild(newBackFlashBtn, backFlashBtn);
+        backFlashBtn = newBackFlashBtn;
+    }
+    
+    if (frontFlashBtn) {
+        const newFrontFlashBtn = frontFlashBtn.cloneNode(true);
+        frontFlashBtn.parentNode.replaceChild(newFrontFlashBtn, frontFlashBtn);
+        frontFlashBtn = newFrontFlashBtn;
+    }
+    
+    // Configurer le flash arrière
+    if (backFlashBtn && window.scannerState.backVideoTrack) {
+        // Mettre à jour l'état actif du bouton
+        backFlashBtn.classList.toggle('active', window.scannerState.backFlashOn);
         
-        flashBtn.addEventListener('click', async function() {
-            flashBtn.classList.toggle('active');
-            const torchState = flashBtn.classList.contains('active');
-            
+        backFlashBtn.addEventListener('click', async function() {
             try {
+                // Inverser l'état du flash arrière
+                window.scannerState.backFlashOn = !window.scannerState.backFlashOn;
+                backFlashBtn.classList.toggle('active', window.scannerState.backFlashOn);
+                
+                // Vérifier si la fonction torch est disponible
+                const capabilities = window.scannerState.backVideoTrack.getCapabilities();
+                const hasTorch = capabilities && 'torch' in capabilities;
+                
                 if (hasTorch) {
                     // Appliquer le changement de lampe torche
-                    await videoTrack.applyConstraints({
-                        advanced: [{ torch: torchState }]
+                    await window.scannerState.backVideoTrack.applyConstraints({
+                        advanced: [{ torch: window.scannerState.backFlashOn }]
                     });
                     
                     // Message flash activé/désactivé
-                    updateScannerMessage(scannerNumber, torchState ? 'Flash activé' : 'Flash désactivé');
+                    updateScannerMessage(scannerNumber, window.scannerState.backFlashOn ? 
+                        'Flash arrière activé' : 'Flash arrière désactivé');
                     
                     setTimeout(() => {
                         updateScannerMessage(scannerNumber, 'Positionnez le code dans le cadre');
                     }, 1000);
                 } else {
-                    console.warn("La lampe torche n'est pas prise en charge sur cet appareil");
-                    updateScannerMessage(scannerNumber, "Flash non disponible sur cet appareil");
+                    console.warn("La lampe torche arrière n'est pas prise en charge sur cet appareil");
+                    updateScannerMessage(scannerNumber, "Flash arrière non disponible");
                     
                     setTimeout(() => {
                         updateScannerMessage(scannerNumber, 'Positionnez le code dans le cadre');
                     }, 1500);
                 }
             } catch (error) {
-                console.error("Erreur lors de l'activation de la lampe torche:", error);
-                updateScannerMessage(scannerNumber, "Erreur d'activation du flash");
+                console.error("Erreur lors de l'activation du flash arrière:", error);
+                updateScannerMessage(scannerNumber, "Erreur d'activation du flash arrière");
+                
+                setTimeout(() => {
+                    updateScannerMessage(scannerNumber, 'Positionnez le code dans le cadre');
+                }, 1500);
+            }
+        });
+    }
+    
+    // Configurer le flash frontal
+    if (frontFlashBtn && window.scannerState.frontVideoTrack) {
+        // Mettre à jour l'état actif du bouton
+        frontFlashBtn.classList.toggle('active', window.scannerState.frontFlashOn);
+        
+        frontFlashBtn.addEventListener('click', async function() {
+            try {
+                // Inverser l'état du flash frontal
+                window.scannerState.frontFlashOn = !window.scannerState.frontFlashOn;
+                frontFlashBtn.classList.toggle('active', window.scannerState.frontFlashOn);
+                
+                // Utiliser différentes méthodes pour le flash frontal
+                try {
+                    // Méthode 1: torch + fillLightMode
+                    await window.scannerState.frontVideoTrack.applyConstraints({
+                        advanced: [
+                            { torch: window.scannerState.frontFlashOn },
+                            { fillLightMode: window.scannerState.frontFlashOn ? "flash" : "none" }
+                        ]
+                    });
+                    
+                    updateScannerMessage(scannerNumber, window.scannerState.frontFlashOn ? 
+                        'Flash frontal activé' : 'Flash frontal désactivé');
+                } catch (methodError) {
+                    console.warn("Première méthode de flash frontal échouée, essai méthode alternative", methodError);
+                    
+                    // Méthode 2: exposureMode + fillLightMode (iOS)
+                    try {
+                        // Arrêter le stream actuel
+                        if (window.scannerState.currentStream) {
+                            window.scannerState.currentStream.getTracks().forEach(track => track.stop());
+                        }
+                        
+                        // Créer un nouveau stream avec les contraintes de flash
+                        const newConstraints = {
+                            video: {
+                                facingMode: "user",
+                                exposureMode: window.scannerState.frontFlashOn ? 'continuous' : 'auto',
+                                fillLightMode: window.scannerState.frontFlashOn ? 'flash' : 'auto'
+                            }
+                        };
+                        
+                        const newStream = await navigator.mediaDevices.getUserMedia(newConstraints);
+                        const videoElement = document.getElementById(scannerNumber === 1 ? 'scanner-video' : 'scanner');
+                        
+                        // Mettre à jour les variables globales
+                        window.scannerState.currentStream = newStream;
+                        window.scannerState.frontVideoTrack = newStream.getVideoTracks()[0];
+                        
+                        // Connecter le nouveau stream
+                        videoElement.srcObject = newStream;
+                        
+                        // Réinitialiser le scanner avec le nouveau stream
+                        if (scannerInitialized) {
+                            Quagga.stop();
+                            scannerInitialized = false;
+                        }
+                        
+                        Quagga.init({
+                            inputStream: {
+                                name: "Live",
+                                type: "LiveStream",
+                                target: videoElement
+                            },
+                            decoder: {
+                                readers: [
+                                    "code_128_reader",
+                                    "ean_reader",
+                                    "ean_8_reader",
+                                    "code_39_reader",
+                                    "code_39_vin_reader",
+                                    "codabar_reader",
+                                    "upc_reader",
+                                    "upc_e_reader",
+                                    "i2of5_reader"
+                                ]
+                            }
+                        }, function(err) {
+                            if (err) {
+                                console.error("Erreur de réinitialisation Quagga:", err);
+                                return;
+                            }
+                            scannerInitialized = true;
+                            Quagga.start();
+                        });
+                        
+                        updateScannerMessage(scannerNumber, window.scannerState.frontFlashOn ? 
+                            'Flash frontal activé (méthode alt)' : 'Flash frontal désactivé');
+                    } catch (altError) {
+                        console.error("Erreur avec la méthode alternative de flash frontal:", altError);
+                        
+                        // Méthode 3: Utiliser un élément DIV blanc comme flash
+                        // Créer un élément flash si nécessaire
+                        let flashOverlay = document.getElementById(`flash-overlay-${scannerNumber}`);
+                        if (!flashOverlay) {
+                            flashOverlay = document.createElement('div');
+                            flashOverlay.id = `flash-overlay-${scannerNumber}`;
+                            flashOverlay.style.position = 'absolute';
+                            flashOverlay.style.top = '0';
+                            flashOverlay.style.left = '0';
+                            flashOverlay.style.width = '100%';
+                            flashOverlay.style.height = '100%';
+                            flashOverlay.style.backgroundColor = 'white';
+                            flashOverlay.style.opacity = '0.9';
+                            flashOverlay.style.pointerEvents = 'none';
+                            flashOverlay.style.display = 'none';
+                            flashOverlay.style.zIndex = '1000';
+                            
+                            // Ajouter l'overlay
+                            const scannerContainer = document.getElementById(scannerNumber === 1 ? 
+                                'scanner-container' : 'scanner-area');
+                            if (scannerContainer) {
+                                scannerContainer.style.position = 'relative';
+                                scannerContainer.appendChild(flashOverlay);
+                            }
+                        }
+                        
+                        // Activer/désactiver l'overlay
+                        if (window.scannerState.frontFlashOn) {
+                            flashOverlay.style.display = 'block';
+                        } else {
+                            flashOverlay.style.display = 'none';
+                        }
+                        
+                        updateScannerMessage(scannerNumber, window.scannerState.frontFlashOn ? 
+                            'Flash logiciel activé' : 'Flash logiciel désactivé');
+                    }
+                }
+                
+                setTimeout(() => {
+                    updateScannerMessage(scannerNumber, 'Positionnez le code dans le cadre');
+                }, 1500);
+                
+            } catch (error) {
+                console.error("Erreur avec le flash frontal:", error);
+                updateScannerMessage(scannerNumber, "Erreur d'activation du flash frontal");
                 
                 setTimeout(() => {
                     updateScannerMessage(scannerNumber, 'Positionnez le code dans le cadre');
@@ -1329,25 +1711,55 @@ function setupFlashButton(scannerNumber, videoTrack) {
     }
 }
 
+// Fonction utilitaire pour nettoyer les écouteurs d'événements
+function cleanupEventListeners(element) {
+    if (!element) return;
+    
+    // Créer un clone de l'élément sans écouteurs d'événements
+    const newElement = element.cloneNode(true);
+    if (element.parentNode) {
+        element.parentNode.replaceChild(newElement, element);
+    }
+    return newElement;
+}
+
+
 
 function processScannedCode(codeData) {
     // Arrêter le scanner
-    Quagga.stop();
+    if (scannerInitialized) {
+        Quagga.stop();
+        scannerInitialized = false;
+    }
+    
     if (qrScannerInterval) {
         clearInterval(qrScannerInterval);
         qrScannerInterval = null;
     }
-    scannerInitialized = false;
     
     // Fermer les flux vidéo
-    const videos = document.querySelectorAll('video');
-    videos.forEach(video => {
-        if (video.srcObject) {
-            const tracks = video.srcObject.getTracks();
-            tracks.forEach(track => track.stop());
-            video.srcObject = null;
-        }
-    });
+    if (window.scannerState && window.scannerState.currentStream) {
+        window.scannerState.currentStream.getTracks().forEach(track => {
+            if (track.readyState === 'live') {
+                track.stop();
+            }
+        });
+        window.scannerState.currentStream = null;
+    } else {
+        // Méthode de secours pour arrêter les flux vidéo
+        const videos = document.querySelectorAll('video');
+        videos.forEach(video => {
+            if (video.srcObject) {
+                const tracks = video.srcObject.getTracks();
+                tracks.forEach(track => {
+                    if (track.readyState === 'live') {
+                        track.stop();
+                    }
+                });
+                video.srcObject = null;
+            }
+        });
+    }
     
     // Traiter le code en fonction du contexte
     if (document.getElementById('add-product').style.display !== 'none') {
@@ -1384,6 +1796,8 @@ function processScannedCode(codeData) {
         }
     }
 }
+
+
 
 
         function displayScannedProduct(product) {
@@ -1445,20 +1859,29 @@ function processScannedCode(codeData) {
     const minStock = parseInt(document.getElementById('min-stock').value) || 5;
     const supplier = document.getElementById('supplier').value;
     
+    // Préparer les images à stocker
+    const images = productImages.map((img, index) => ({
+        dataUrl: img.dataUrl,
+        isMain: index === mainImageIndex
+    }));
+    
     const product = {
         id: generateProductCode(), // ID unique pour le produit
         name: name,
         code: code,
         category: category,
         price: price,
-        priceCurrency: priceCurrency, // Stocker la devise d'origine
+        priceCurrency: priceCurrency,
         quantity: quantity,
-        unit: unit, // Nouvelle propriété: unité de mesure
+        unit: unit,
         location: location,
         description: description,
         minStock: minStock,
         supplier: supplier,
         dateAdded: new Date().toISOString(),
+        // Nouvelles propriétés pour les images
+        images: images,
+        mainImageIndex: mainImageIndex,
         movements: [
             {
                 type: "add",
@@ -1479,6 +1902,9 @@ function processScannedCode(codeData) {
     document.getElementById('code-preview-container').style.display = 'none';
     document.getElementById('code-scan-container').style.display = 'none';
     document.getElementById('code-manual-container').style.display = 'none';
+    
+    // Réinitialiser les images
+    clearImages();
     
     // Réinitialiser l'unité de mesure
     const dropdown = document.querySelector('#add-product .custom-dropdown');
@@ -1550,6 +1976,51 @@ function processScannedCode(codeData) {
     
     generateQRCode(JSON.stringify(qrData), 'edit-qrcode-preview');
     
+    // Afficher les images du produit
+    const imagesGallery = document.getElementById('product-images-gallery');
+    const noImagesEl = document.getElementById('product-no-images');
+    const imagesControls = document.getElementById('product-images-controls');
+    
+    imagesGallery.innerHTML = '';
+    
+    if (product.images && product.images.length > 0) {
+        noImagesEl.style.display = 'none';
+        imagesControls.classList.remove('d-none');
+        
+        product.images.forEach((image, index) => {
+            const galleryItem = document.createElement('div');
+            galleryItem.className = `product-gallery-item ${image.isMain ? 'main-image' : ''}`;
+            
+            const img = document.createElement('img');
+            img.src = image.dataUrl;
+            img.alt = 'Image produit';
+            
+            if (image.isMain) {
+                const mainIndicator = document.createElement('div');
+                mainIndicator.className = 'main-image-indicator';
+                mainIndicator.textContent = 'Principale';
+                galleryItem.appendChild(mainIndicator);
+            }
+            
+            galleryItem.appendChild(img);
+            
+            // Zoom au clic
+            galleryItem.addEventListener('click', () => {
+                showProductImageZoom(product.images, index);
+            });
+            
+            imagesGallery.appendChild(galleryItem);
+        });
+    } else {
+        noImagesEl.style.display = 'flex';
+        imagesControls.classList.add('d-none');
+    }
+    
+    // Événement pour modifier les images
+    document.getElementById('edit-product-images').addEventListener('click', () => {
+        openImageEditorModal(product);
+    });
+    
     // Afficher l'historique des mouvements
     const historyContainer = document.getElementById('product-history');
     historyContainer.innerHTML = '';
@@ -1610,10 +2081,12 @@ function saveEditProduct() {
     product.price = parseFloat(document.getElementById('edit-product-price').value);
     product.priceCurrency = document.getElementById('edit-product-price-currency').value;
     product.quantity = newQuantity;
-    product.unit = document.getElementById('edit-product-unit').value; // Mettre à jour l'unité de mesure
+    product.unit = document.getElementById('edit-product-unit').value;
     product.location = document.getElementById('edit-product-location').value;
     product.description = document.getElementById('edit-product-description').value;
     product.minStock = parseInt(document.getElementById('edit-min-stock').value);
+    
+    // Les images sont gérées séparément dans l'éditeur d'images
     
     // Ajouter un mouvement si la quantité a changé
     if (oldQuantity !== newQuantity) {
@@ -10298,6 +10771,975 @@ const GestVenteAdmin_roleDefinitions = {
 /*══════════════════════════════╗
   🟠 JS PARTIE 10
   ═════════════════════════════╝*/
+
+// Variables globales pour la gestion des images et de la caméra
+let productImages = [];
+let mainImageIndex = 0;
+let maxImages = 6;
+let isMultipleImagesMode = false;
+let cameraStream = null;
+
+
+// DOM Elements
+const imageInput = document.getElementById('product-images');
+const uploadPlaceholder = document.getElementById('upload-placeholder');
+const imagePreviewContainer = document.getElementById('image-preview-container');
+const imagePreviewWrapper = document.getElementById('image-preview-wrapper');
+const imagePreviewControls = document.getElementById('image-preview-controls');
+const singleImageBtn = document.getElementById('single-image-btn');
+const multipleImagesBtn = document.getElementById('multiple-images-btn');
+const addMoreImagesBtn = document.getElementById('add-more-images');
+const clearImagesBtn = document.getElementById('clear-images');
+
+// Initialisation des fonctionnalités d'image
+function initImageUpload() {
+    // DOM Elements pour la caméra
+    const capturePhotoBtn = document.getElementById('capture-photo-btn');
+    const cameraContainer = document.getElementById('camera-capture-container');
+    const cameraPreview = document.getElementById('camera-preview');
+    const cameraCanvas = document.getElementById('camera-canvas');
+    const takePhotoBtn = document.getElementById('take-photo-btn');
+    const cancelCameraBtn = document.getElementById('cancel-camera-btn');
+
+    // Event listeners pour le mode d'image
+    singleImageBtn.addEventListener('click', () => {
+        isMultipleImagesMode = false;
+        maxImages = 1;
+        imageInput.multiple = false;
+        imageInput.click();
+    });
+
+    multipleImagesBtn.addEventListener('click', () => {
+        isMultipleImagesMode = true;
+        maxImages = 6;
+        imageInput.multiple = true;
+        imageInput.click();
+    });
+
+    // Activation de la caméra
+    capturePhotoBtn.addEventListener('click', () => {
+        startCamera();
+    });
+
+    // Capture de photo
+    takePhotoBtn.addEventListener('click', () => {
+        capturePhoto();
+    });
+
+    // Annuler la caméra
+    cancelCameraBtn.addEventListener('click', () => {
+        stopCamera();
+    });
+
+    // Glisser-déposer
+    uploadPlaceholder.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadPlaceholder.classList.add('drag-over');
+    });
+
+    uploadPlaceholder.addEventListener('dragleave', () => {
+        uploadPlaceholder.classList.remove('drag-over');
+    });
+
+    uploadPlaceholder.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadPlaceholder.classList.remove('drag-over');
+        
+        isMultipleImagesMode = true;
+        maxImages = 6;
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleImageFiles(files);
+        }
+    });
+
+    uploadPlaceholder.addEventListener('click', () => {
+        // Mode par défaut: multiple
+        isMultipleImagesMode = true;
+        maxImages = 6;
+        imageInput.multiple = true;
+        imageInput.click();
+    });
+
+    // Gestion du changement d'input file
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleImageFiles(e.target.files);
+        }
+    });
+
+    // Ajouter plus d'images
+    addMoreImagesBtn.addEventListener('click', () => {
+        isMultipleImagesMode = true;
+        imageInput.multiple = true;
+        imageInput.click();
+    });
+
+    // Effacer toutes les images
+    clearImagesBtn.addEventListener('click', clearImages);
+
+    // Fonctions pour la caméra
+    function startCamera() {
+        // Cacher les conteneurs d'image
+        imagePreviewContainer.classList.add('d-none');
+        
+        // Afficher le conteneur de caméra
+        cameraContainer.classList.remove('d-none');
+        
+        // Démarrer la caméra
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                .then(function(stream) {
+                    cameraStream = stream;
+                    cameraPreview.srcObject = stream;
+                })
+                .catch(function(error) {
+                    console.error("Erreur d'accès à la caméra:", error);
+                    showNotification("Erreur", "Impossible d'accéder à la caméra. Vérifiez les permissions.", "error");
+                    stopCamera();
+                });
+        } else {
+            showNotification("Erreur", "Votre navigateur ne supporte pas l'accès à la caméra.", "error");
+            stopCamera();
+        }
+    }
+
+    function stopCamera() {
+        // Arrêter la caméra
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+        }
+        
+        // Cacher le conteneur de caméra
+        cameraContainer.classList.add('d-none');
+        
+        // Afficher les conteneurs d'image si nécessaire
+        imagePreviewContainer.classList.remove('d-none');
+    }
+
+    function capturePhoto() {
+        if (!cameraStream) return;
+        
+        // Prendre une photo à partir du flux vidéo
+        const context = cameraCanvas.getContext('2d');
+        
+        // Définir la taille du canvas à celle du flux vidéo
+        cameraCanvas.width = cameraPreview.videoWidth;
+        cameraCanvas.height = cameraPreview.videoHeight;
+        
+        // Dessiner l'image de la caméra sur le canvas
+        context.drawImage(cameraPreview, 0, 0, cameraCanvas.width, cameraCanvas.height);
+        
+        // Convertir en data URL
+        const dataUrl = cameraCanvas.toDataURL('image/jpeg', 0.8);
+        
+        // Créer un Blob à partir de la data URL
+        fetch(dataUrl)
+            .then(res => res.blob())
+            .then(blob => {
+                // Créer un File à partir du Blob
+                const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                
+                // Optimiser l'image et l'ajouter
+                optimizeImage(file, (optimizedImage) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = (e) => {
+                        productImages.push({
+                            file: optimizedImage,
+                            dataUrl: e.target.result
+                        });
+                        
+                        // Si c'est la première image, la définir comme principale
+                        if (productImages.length === 1) {
+                            mainImageIndex = 0;
+                        }
+                        
+                        // Mettre à jour l'affichage
+                        renderImagePreviews();
+                        
+                        // Arrêter la caméra après la capture
+                        stopCamera();
+                    };
+                    
+                    reader.readAsDataURL(optimizedImage);
+                });
+            });
+    }
+}
+
+
+// Traitement des fichiers image
+function handleImageFiles(files) {
+    // Vérifier si on dépasse le nombre maximum
+    if (productImages.length + files.length > maxImages) {
+        showNotification('Attention', `Vous ne pouvez pas ajouter plus de ${maxImages} images.`, 'warning');
+        
+        // Si mode image unique, remplacer l'existante
+        if (!isMultipleImagesMode && files.length === 1) {
+            productImages = [];
+            mainImageIndex = 0;
+        } else {
+            // Sinon limiter le nombre
+            files = Array.from(files).slice(0, maxImages - productImages.length);
+        }
+    }
+
+    // Traitement des fichiers
+    Array.from(files).forEach(file => {
+        // Vérifier si c'est une image
+        if (!file.type.match('image.*')) {
+            return;
+        }
+
+        // Optimiser et redimensionner l'image
+        optimizeImage(file, (optimizedImage) => {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                productImages.push({
+                    file: optimizedImage,
+                    dataUrl: e.target.result
+                });
+
+                // Si c'est la première image, la définir comme principale
+                if (productImages.length === 1) {
+                    mainImageIndex = 0;
+                }
+
+                // Mettre à jour l'affichage
+                renderImagePreviews();
+            };
+            
+            reader.readAsDataURL(optimizedImage);
+        });
+    });
+}
+
+// Optimisation d'image avec compression
+function optimizeImage(file, callback) {
+    const maxWidth = 1200;
+    const maxHeight = 1200;
+    const quality = 0.7; // Qualité de compression (0.7 = 70%)
+    
+    // Créer un objet Image pour obtenir les dimensions
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    
+    img.onload = () => {
+        // Calculer les nouvelles dimensions en gardant le ratio
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > maxWidth) {
+            height = Math.round(height * (maxWidth / width));
+            width = maxWidth;
+        }
+        
+        if (height > maxHeight) {
+            width = Math.round(width * (maxHeight / height));
+            height = maxHeight;
+        }
+        
+        // Créer un canvas pour redimensionner
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convertir en Blob avec compression
+        canvas.toBlob((blob) => {
+            callback(new File([blob], file.name, { 
+                type: 'image/jpeg',
+                lastModified: new Date().getTime()
+            }));
+        }, 'image/jpeg', quality);
+    };
+}
+
+// Affichage des images
+function renderImagePreviews() {
+    imagePreviewWrapper.innerHTML = '';
+    
+    if (productImages.length === 0) {
+        imagePreviewControls.classList.add('d-none');
+        return;
+    }
+    
+    imagePreviewControls.classList.remove('d-none');
+    
+    productImages.forEach((image, index) => {
+        const previewDiv = document.createElement('div');
+        previewDiv.className = `image-preview-item ${index === mainImageIndex ? 'is-main' : ''}`;
+        
+        // Image
+        const img = document.createElement('img');
+        img.src = image.dataUrl;
+        img.alt = 'Aperçu produit';
+        
+        // Actions
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'image-preview-actions';
+        
+        // Bouton supprimer
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+        deleteBtn.title = 'Supprimer';
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeImage(index);
+        });
+        
+        actionsDiv.appendChild(deleteBtn);
+        
+        // Badge image principale
+        if (isMultipleImagesMode && productImages.length > 1) {
+            if (index === mainImageIndex) {
+                const mainBadge = document.createElement('div');
+                mainBadge.className = 'set-main-badge';
+                mainBadge.textContent = 'Principale';
+                previewDiv.appendChild(mainBadge);
+            } else {
+                // Bouton définir comme principale
+                const setMainBtn = document.createElement('button');
+                setMainBtn.innerHTML = '<i class="fas fa-star"></i>';
+                setMainBtn.title = 'Définir comme image principale';
+                setMainBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    setMainImage(index);
+                });
+                
+                actionsDiv.appendChild(setMainBtn);
+            }
+        }
+        
+        // Ajouter les éléments
+        previewDiv.appendChild(img);
+        previewDiv.appendChild(actionsDiv);
+        
+        // Aperçu en grand au clic
+        previewDiv.addEventListener('click', () => {
+            showImageZoom(index);
+        });
+        
+        imagePreviewWrapper.appendChild(previewDiv);
+    });
+    
+    // Afficher les boutons de contrôle
+    const canAddMore = productImages.length < maxImages;
+    addMoreImagesBtn.style.display = canAddMore && isMultipleImagesMode ? 'block' : 'none';
+}
+
+// Supprimer une image
+function removeImage(index) {
+    productImages.splice(index, 1);
+    
+    // Ajuster l'index de l'image principale si nécessaire
+    if (index === mainImageIndex) {
+        mainImageIndex = productImages.length > 0 ? 0 : -1;
+    } else if (index < mainImageIndex) {
+        mainImageIndex--;
+    }
+    
+    renderImagePreviews();
+}
+
+// Définir une image comme principale
+function setMainImage(index) {
+    if (index >= 0 && index < productImages.length) {
+        mainImageIndex = index;
+        renderImagePreviews();
+    }
+}
+
+// Effacer toutes les images
+function clearImages() {
+    productImages = [];
+    mainImageIndex = -1;
+    renderImagePreviews();
+}
+
+// Aperçu en grand
+function showImageZoom(index) {
+    if (productImages.length === 0) return;
+    
+    // Créer la structure du zoom
+    const overlay = document.createElement('div');
+    overlay.className = 'image-zoom-overlay';
+    
+    const container = document.createElement('div');
+    container.className = 'image-zoom-container';
+    
+    const img = document.createElement('img');
+    img.src = productImages[index].dataUrl;
+    
+    const closeBtn = document.createElement('div');
+    closeBtn.className = 'image-zoom-close';
+    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    closeBtn.addEventListener('click', () => {
+        overlay.classList.remove('active');
+        setTimeout(() => {
+            document.body.removeChild(overlay);
+        }, 300);
+    });
+    
+    container.appendChild(img);
+    container.appendChild(closeBtn);
+    
+    // Navigation si plusieurs images
+    if (productImages.length > 1) {
+        const nav = document.createElement('div');
+        nav.className = 'image-zoom-nav';
+        
+        const prevBtn = document.createElement('button');
+        prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        prevBtn.addEventListener('click', () => {
+            const newIndex = (index - 1 + productImages.length) % productImages.length;
+            img.src = productImages[newIndex].dataUrl;
+            index = newIndex;
+            counter.textContent = `${index + 1} / ${productImages.length}`;
+        });
+        
+        const nextBtn = document.createElement('button');
+        nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        nextBtn.addEventListener('click', () => {
+            const newIndex = (index + 1) % productImages.length;
+            img.src = productImages[newIndex].dataUrl;
+            index = newIndex;
+            counter.textContent = `${index + 1} / ${productImages.length}`;
+        });
+        
+        nav.appendChild(prevBtn);
+        nav.appendChild(nextBtn);
+        container.appendChild(nav);
+        
+        // Compteur d'images
+        const counter = document.createElement('div');
+        counter.className = 'image-zoom-counter';
+        counter.textContent = `${index + 1} / ${productImages.length}`;
+        container.appendChild(counter);
+    }
+    
+    overlay.appendChild(container);
+    document.body.appendChild(overlay);
+    
+    // Animation
+    setTimeout(() => {
+        overlay.classList.add('active');
+    }, 10);
+    
+    // Fermer avec Escape
+    const handleKeyDown = (e) => {
+        if (e.key === 'Escape') {
+            overlay.classList.remove('active');
+            setTimeout(() => {
+                document.body.removeChild(overlay);
+            }, 300);
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown);
+}
+
+
+// Fonction pour afficher les images en zoom
+function showProductImageZoom(images, startIndex) {
+    if (!images || images.length === 0) return;
+    
+    // Créer la structure du zoom
+    const overlay = document.createElement('div');
+    overlay.className = 'image-zoom-overlay';
+    
+    const container = document.createElement('div');
+    container.className = 'image-zoom-container';
+    
+    const img = document.createElement('img');
+    img.src = images[startIndex].dataUrl;
+    
+    const closeBtn = document.createElement('div');
+    closeBtn.className = 'image-zoom-close';
+    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    closeBtn.addEventListener('click', () => {
+        overlay.classList.remove('active');
+        setTimeout(() => {
+            document.body.removeChild(overlay);
+        }, 300);
+    });
+    
+    container.appendChild(img);
+    container.appendChild(closeBtn);
+    
+    // Navigation si plusieurs images
+    if (images.length > 1) {
+        const nav = document.createElement('div');
+        nav.className = 'image-zoom-nav';
+        
+        const prevBtn = document.createElement('button');
+        prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        prevBtn.addEventListener('click', () => {
+            startIndex = (startIndex - 1 + images.length) % images.length;
+            img.src = images[startIndex].dataUrl;
+            counter.textContent = `${startIndex + 1} / ${images.length}`;
+        });
+        
+        const nextBtn = document.createElement('button');
+        nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        nextBtn.addEventListener('click', () => {
+            startIndex = (startIndex + 1) % images.length;
+            img.src = images[startIndex].dataUrl;
+            counter.textContent = `${startIndex + 1} / ${images.length}`;
+        });
+        
+        nav.appendChild(prevBtn);
+        nav.appendChild(nextBtn);
+        container.appendChild(nav);
+        
+        // Compteur d'images
+        const counter = document.createElement('div');
+        counter.className = 'image-zoom-counter';
+        counter.textContent = `${startIndex + 1} / ${images.length}`;
+        container.appendChild(counter);
+    }
+    
+    overlay.appendChild(container);
+    document.body.appendChild(overlay);
+    
+    // Animation
+    setTimeout(() => {
+        overlay.classList.add('active');
+    }, 10);
+    
+    // Fermer avec Escape
+    const handleKeyDown = (e) => {
+        if (e.key === 'Escape') {
+            overlay.classList.remove('active');
+            setTimeout(() => {
+                document.body.removeChild(overlay);
+            }, 300);
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown);
+}
+
+// Fonction pour ouvrir l'éditeur d'images
+function openImageEditorModal(product) {
+    // Sauvegarder les images actuelles pour les éditer
+    productImages = product.images ? [...product.images.map(img => ({ dataUrl: img.dataUrl }))] : [];
+    
+    // Trouver l'index de l'image principale
+    mainImageIndex = product.images ? product.images.findIndex(img => img.isMain) : -1;
+    if (mainImageIndex === -1 && productImages.length > 0) {
+        mainImageIndex = 0;
+    }
+    
+// Créer un modal pour éditer les images
+const modalHtml = `
+<div class="modal fade" id="imageEditorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifier les images du produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="product-image-upload">
+                    <div class="image-upload-container">
+                        <div class="main-upload-box" id="editor-upload-box">
+                            <div class="upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <div class="upload-text">
+                                    <span class="primary-text">Glissez ou cliquez pour ajouter des photos</span>
+                                    <span class="secondary-text">Maximum 6 images</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 justify-content-center mt-2">
+                            <button type="button" class="btn btn-sm btn-light" id="editor-choose-files">
+                                <i class="fas fa-folder-open"></i> Choisir des fichiers
+                            </button>
+                            <button type="button" class="btn btn-sm btn-light" id="editor-take-photo">
+                                <i class="fas fa-camera"></i> Prendre une photo
+                            </button>
+                        </div>
+                    </div>
+                    <div class="camera-capture-container d-none" id="editor-camera-container">
+                        <div class="camera-wrapper">
+                            <video id="editor-camera-preview" autoplay playsinline></video>
+                            <canvas id="editor-camera-canvas" class="d-none"></canvas>
+                        </div>
+                        <div class="camera-controls">
+                            <button type="button" class="btn btn-sm btn-primary" id="editor-take-photo-btn">
+                                <i class="fas fa-camera"></i> Capturer
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" id="editor-cancel-camera-btn">
+                                <i class="fas fa-times"></i> Annuler
+                            </button>
+                        </div>
+                    </div>
+                    <div class="image-preview-container mt-4">
+                        <h6>Images actuelles</h6>
+                        <div class="image-preview-wrapper" id="editor-preview-wrapper"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="save-images">Enregistrer les modifications</button>
+            </div>
+        </div>
+    </div>
+</div>
+`;
+
+    
+    // Insérer le modal dans le DOM
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHtml;
+    document.body.appendChild(modalContainer);
+    
+    // Créer l'input file caché
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.multiple = true;
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+    
+    // Initialiser le modal Bootstrap
+    const imageEditorModal = new bootstrap.Modal(document.getElementById('imageEditorModal'));
+    imageEditorModal.show();
+    
+    // Afficher les images actuelles
+    const renderEditorPreviews = () => {
+        const previewWrapper = document.getElementById('editor-preview-wrapper');
+        previewWrapper.innerHTML = '';
+        
+        productImages.forEach((image, index) => {
+            const previewDiv = document.createElement('div');
+            previewDiv.className = `image-preview-item ${index === mainImageIndex ? 'is-main' : ''}`;
+            
+            // Image
+            const img = document.createElement('img');
+            img.src = image.dataUrl;
+            img.alt = 'Aperçu produit';
+            
+            // Actions
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'image-preview-actions';
+            
+            // Bouton supprimer
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteBtn.title = 'Supprimer';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                productImages.splice(index, 1);
+                
+                // Ajuster l'index de l'image principale si nécessaire
+                if (index === mainImageIndex) {
+                    mainImageIndex = productImages.length > 0 ? 0 : -1;
+                } else if (index < mainImageIndex) {
+                    mainImageIndex--;
+                }
+                
+                renderEditorPreviews();
+            });
+            
+            actionsDiv.appendChild(deleteBtn);
+            
+            // Badge image principale
+            if (productImages.length > 1) {
+                if (index === mainImageIndex) {
+                    const mainBadge = document.createElement('div');
+                    mainBadge.className = 'set-main-badge';
+                    mainBadge.textContent = 'Principale';
+                    previewDiv.appendChild(mainBadge);
+                } else {
+                    // Bouton définir comme principale
+                    const setMainBtn = document.createElement('button');
+                    setMainBtn.innerHTML = '<i class="fas fa-star"></i>';
+                    setMainBtn.title = 'Définir comme image principale';
+                    setMainBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        mainImageIndex = index;
+                        renderEditorPreviews();
+                    });
+                    
+                    actionsDiv.appendChild(setMainBtn);
+                }
+            }
+            
+            // Ajouter les éléments
+            previewDiv.appendChild(img);
+            previewDiv.appendChild(actionsDiv);
+            
+            // Aperçu en grand au clic
+            previewDiv.addEventListener('click', () => {
+                showImageZoom(index);
+            });
+            
+            previewWrapper.appendChild(previewDiv);
+        });
+    };
+    
+    // Événements pour la caméra dans l'éditeur
+const editorTakePhoto = document.getElementById('editor-take-photo');
+const editorCameraContainer = document.getElementById('editor-camera-container');
+const editorCameraPreview = document.getElementById('editor-camera-preview');
+const editorCameraCanvas = document.getElementById('editor-camera-canvas');
+const editorTakePhotoBtn = document.getElementById('editor-take-photo-btn');
+const editorCancelCameraBtn = document.getElementById('editor-cancel-camera-btn');
+const editorChooseFiles = document.getElementById('editor-choose-files');
+
+let editorCameraStream = null;
+
+editorTakePhoto.addEventListener('click', () => {
+    startEditorCamera();
+});
+
+editorTakePhotoBtn.addEventListener('click', () => {
+    captureEditorPhoto();
+});
+
+editorCancelCameraBtn.addEventListener('click', () => {
+    stopEditorCamera();
+});
+
+editorChooseFiles.addEventListener('click', () => {
+    fileInput.click();
+});
+
+function startEditorCamera() {
+    // Afficher le conteneur de caméra
+    editorCameraContainer.classList.remove('d-none');
+    
+    // Démarrer la caméra
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(function(stream) {
+                editorCameraStream = stream;
+                editorCameraPreview.srcObject = stream;
+            })
+            .catch(function(error) {
+                console.error("Erreur d'accès à la caméra:", error);
+                showNotification("Erreur", "Impossible d'accéder à la caméra. Vérifiez les permissions.", "error");
+                stopEditorCamera();
+            });
+    } else {
+        showNotification("Erreur", "Votre navigateur ne supporte pas l'accès à la caméra.", "error");
+        stopEditorCamera();
+    }
+}
+
+function stopEditorCamera() {
+    // Arrêter la caméra
+    if (editorCameraStream) {
+        editorCameraStream.getTracks().forEach(track => track.stop());
+        editorCameraStream = null;
+    }
+    
+    // Cacher le conteneur de caméra
+    editorCameraContainer.classList.add('d-none');
+}
+
+function captureEditorPhoto() {
+    if (!editorCameraStream) return;
+    
+    // Prendre une photo à partir du flux vidéo
+    const context = editorCameraCanvas.getContext('2d');
+    
+    // Définir la taille du canvas à celle du flux vidéo
+    editorCameraCanvas.width = editorCameraPreview.videoWidth;
+    editorCameraCanvas.height = editorCameraPreview.videoHeight;
+    
+    // Dessiner l'image de la caméra sur le canvas
+    context.drawImage(editorCameraPreview, 0, 0, editorCameraCanvas.width, editorCameraCanvas.height);
+    
+    // Convertir en data URL
+    const dataUrl = editorCameraCanvas.toDataURL('image/jpeg', 0.8);
+    
+    // Ajouter l'image
+    productImages.push({
+        dataUrl: dataUrl
+    });
+    
+    // Si c'est la première image, la définir comme principale
+    if (productImages.length === 1) {
+        mainImageIndex = 0;
+    }
+    
+    // Mettre à jour l'affichage
+    renderEditorPreviews();
+    
+    // Arrêter la caméra après la capture
+    stopEditorCamera();
+}
+
+    
+    renderEditorPreviews();
+    
+    // Événements de glisser-déposer
+    const uploadBox = document.getElementById('editor-upload-box');
+    
+    uploadBox.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadBox.classList.add('drag-over');
+    });
+    
+    uploadBox.addEventListener('dragleave', () => {
+        uploadBox.classList.remove('drag-over');
+    });
+    
+    uploadBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadBox.classList.remove('drag-over');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleEditorFiles(files);
+        }
+    });
+    
+    uploadBox.addEventListener('click', () => {
+        fileInput.click();
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleEditorFiles(e.target.files);
+        }
+    });
+    
+    // Traitement des fichiers dans l'éditeur
+    function handleEditorFiles(files) {
+        // Vérifier si on dépasse le nombre maximum
+        if (productImages.length + files.length > 6) {
+            showNotification('Attention', 'Vous ne pouvez pas ajouter plus de 6 images.', 'warning');
+            files = Array.from(files).slice(0, 6 - productImages.length);
+        }
+        
+        // Traitement des fichiers
+        Array.from(files).forEach(file => {
+            // Vérifier si c'est une image
+            if (!file.type.match('image.*')) {
+                return;
+            }
+            
+            // Optimiser et redimensionner l'image
+            optimizeImage(file, (optimizedImage) => {
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    productImages.push({
+                        dataUrl: e.target.result
+                    });
+                    
+                    // Si c'est la première image, la définir comme principale
+                    if (productImages.length === 1) {
+                        mainImageIndex = 0;
+                    }
+                    
+                    // Mettre à jour l'affichage
+                    renderEditorPreviews();
+                };
+                
+                reader.readAsDataURL(optimizedImage);
+            });
+        });
+    }
+    
+    // Enregistrer les modifications d'image
+    document.getElementById('save-images').addEventListener('click', () => {
+        const productId = currentProductId;
+        const product = products.find(p => p.id === productId);
+        
+        if (product) {
+            // Mettre à jour les images avec les indicateurs isMain
+            product.images = productImages.map((img, index) => ({
+                dataUrl: img.dataUrl,
+                isMain: index === mainImageIndex
+            }));
+            
+            updateLocalStorage();
+            showNotification('Succès', 'Les images du produit ont été mises à jour.', 'success');
+            
+            // Mettre à jour l'affichage des images dans le modal de détails
+            const imagesGallery = document.getElementById('product-images-gallery');
+            const noImagesEl = document.getElementById('product-no-images');
+            const imagesControls = document.getElementById('product-images-controls');
+            
+            imagesGallery.innerHTML = '';
+            
+            if (product.images && product.images.length > 0) {
+                noImagesEl.style.display = 'none';
+                imagesControls.classList.remove('d-none');
+                
+                product.images.forEach((image, index) => {
+                    const galleryItem = document.createElement('div');
+                    galleryItem.className = `product-gallery-item ${image.isMain ? 'main-image' : ''}`;
+                    
+                    const img = document.createElement('img');
+                    img.src = image.dataUrl;
+                    img.alt = 'Image produit';
+                    
+                    if (image.isMain) {
+                        const mainIndicator = document.createElement('div');
+                        mainIndicator.className = 'main-image-indicator';
+                        mainIndicator.textContent = 'Principale';
+                        galleryItem.appendChild(mainIndicator);
+                    }
+                    
+                    galleryItem.appendChild(img);
+                    
+                    // Zoom au clic
+                    galleryItem.addEventListener('click', () => {
+                        showProductImageZoom(product.images, index);
+                    });
+                    
+                    imagesGallery.appendChild(galleryItem);
+                });
+            } else {
+                noImagesEl.style.display = 'flex';
+                imagesControls.classList.add('d-none');
+            }
+            
+            // Mettre à jour la table d'inventaire pour afficher les nouvelles images
+            loadInventoryTable();
+        }
+        
+        // Fermer le modal
+        imageEditorModal.hide();
+        
+        // Nettoyer le DOM
+        setTimeout(() => {
+            document.body.removeChild(modalContainer);
+            document.body.removeChild(fileInput);
+        }, 300);
+    });
+    
+    // Nettoyer au moment de fermer le modal
+    document.getElementById('imageEditorModal').addEventListener('hidden.bs.modal', function () {
+    // Arrêter la caméra si active
+    if (editorCameraStream) {
+        editorCameraStream.getTracks().forEach(track => track.stop());
+        editorCameraStream = null;
+    }
+    
+    document.body.removeChild(modalContainer);
+    document.body.removeChild(fileInput);
+});
+
+}
+
+ 
+
 
 /*══════════════════════════════╗
   🟡 JS PARTIE 11

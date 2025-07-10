@@ -5350,6 +5350,22 @@
         font-size: 11px;
     }
 }
+/* Bouton de changement de caméra */
+.NouvScanModernCameraBtn i,
+.NouvScanModern2CameraBtn i {
+    color: #4361ee;
+}
+
+.NouvScanModernFrontLightBtn i,
+.NouvScanModern2FrontLightBtn i {
+    color: #ff9e00;
+}
+
+.NouvScanModernFrontLightBtn.active i,
+.NouvScanModern2FrontLightBtn.active i {
+    color: #ffdd00;
+    text-shadow: 0 0 10px #ffdd00;
+}
 
 /*═══════════════════════════*\
   🟡 PARTIE 12  
@@ -6007,6 +6023,335 @@
 /*═══════════════════════════*\
   🟣 PARTIE 15  
 \*═══════════════════════════*/
+
+  /* Styles pour la gestion des images */
+.product-image-upload {
+    margin-bottom: 15px;
+}
+
+.image-upload-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.main-upload-box {
+    border: 2px dashed #ddd;
+    border-radius: 10px;
+    padding: 25px;
+    text-align: center;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.main-upload-box:hover {
+    border-color: var(--primary);
+    background-color: #fff;
+}
+
+.upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.upload-placeholder i {
+    font-size: 3rem;
+    color: #aaa;
+}
+
+.upload-text {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.upload-text .primary-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #555;
+}
+
+.upload-text .secondary-text {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.image-select-options {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.image-preview-container {
+    margin-top: 20px;
+}
+
+.image-preview-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.image-preview-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    aspect-ratio: 1;
+}
+
+.image-preview-item.is-main {
+    border: 3px solid var(--primary);
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-preview-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.image-preview-actions {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: flex;
+    gap: 5px;
+}
+
+.image-preview-actions button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255,255,255,0.8);
+    border: none;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.set-main-badge {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    background-color: var(--primary);
+    color: white;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+}
+
+/* Styles pour la galerie d'images dans le modal */
+.product-images-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.product-no-images {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 30px;
+    grid-column: 1 / -1;
+}
+
+.product-no-images i {
+    font-size: 2.5rem;
+    color: #ccc;
+    margin-bottom: 10px;
+}
+
+.product-no-images p {
+    color: #999;
+    margin: 0;
+}
+
+.product-gallery-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.product-gallery-item.main-image {
+    border: 2px solid var(--primary);
+}
+
+.product-gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.main-image-indicator {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    background-color: var(--primary);
+    color: white;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+/* Image dans la table d'inventaire */
+.product-table-thumbnail {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+
+.product-image-placeholder {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+    font-size: 1.5rem;
+}
+
+/* Écran de zoom image */
+.image-zoom-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+}
+
+.image-zoom-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.image-zoom-container {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.image-zoom-container img {
+    max-width: 100%;
+    max-height: 90vh;
+    box-shadow: 0 0 30px rgba(0,0,0,0.3);
+}
+
+.image-zoom-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.image-zoom-nav {
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+}
+
+.image-zoom-nav button {
+    background-color: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.image-zoom-nav button:hover {
+    background-color: rgba(255,255,255,0.4);
+}
+
+.image-zoom-counter {
+    color: white;
+    position: absolute;
+    bottom: -40px;
+    right: 0;
+    font-size: 0.9rem;
+}
+
+
+
+/* Styles pour la capture de caméra */
+.camera-capture-container {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    background-color: #f9f9f9;
+}
+
+.camera-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.camera-wrapper video {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    background-color: #000;
+}
+
+.camera-wrapper canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.camera-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
 
 /*═══════════════════════════*\
   🟤 PARTIE 16  
