@@ -8,6 +8,9 @@
         let currentProductId = null;
         let scannerInitialized = false;
         let qrScannerInterval = null;
+// Variables pour gérer l'historique de navigation
+let sectionHistory = [];
+let currentHistoryIndex = -1;
 
         // Initialisation Bootstrap
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
@@ -272,206 +275,268 @@ function generateQRCode(data, elementId) {
 
         // Event Listeners
         document.addEventListener('DOMContentLoaded', function() {
-            initApp();
-                // Initialiser les tooltips
+    initApp();
+    
+    // Initialiser le titre de la page dès le démarrage
+    const initialSection = sessionStorage.getItem('sectionHistory') 
+        ? JSON.parse(sessionStorage.getItem('sectionHistory'))[parseInt(sessionStorage.getItem('currentHistoryIndex') || 0) || 0] 
+        : 'dashboard';
+    updateSectionTitle(initialSection);
+    
+    // Initialiser les tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.forEach(function(tooltipTriggerEl) {
         new bootstrap.Tooltip(tooltipTriggerEl);
     });
-            // Charger les paramètres de devise
-loadCurrencySettings();
-initCurrencyEvents();
+    
+    // Charger les paramètres de devise
+    loadCurrencySettings();
+    initCurrencyEvents();
 
-// Essayer de récupérer le taux de change en ligne au démarrage
-// uniquement si aucun taux personnalisé n'est défini
-if (!currencySettings.customRate) {
-    fetchExchangeRate();
-}
+    // Essayer de récupérer le taux de change en ligne au démarrage
+    // uniquement si aucun taux personnalisé n'est défini
+    if (!currencySettings.customRate) {
+        fetchExchangeRate();
+    }
 
-            updateDashboardStats();
-            loadRecentProducts();
-            loadInventoryTable();
-            updateAlertsBadge();
-            checkStockAlerts();
-            
-            // Navigation
-            document.querySelectorAll('#sidebar .nav-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    const section = this.getAttribute('data-section');
-                    showSection(section);
-                    
-                    // Si on est sur un écran mobile, fermer le menu
-                    if (window.innerWidth < 992) {
-                        document.getElementById('sidebar').classList.remove('active');
-                    }
-                });
-            });
-            
-            // Bouton de toggle mobile
-            document.getElementById('mobile-toggle-btn').addEventListener('click', function() {
-                document.getElementById('sidebar').classList.toggle('active');
-            });
-            
-            // Voir tous les produits
-            document.getElementById('view-all-products').addEventListener('click', function() {
-                showSection('inventory');
-            });
-            
-            // Bouton Ajouter dans l'inventaire
-            document.getElementById('add-product-btn').addEventListener('click', function() {
-                showSection('add-product');
-            });
-            
-            // Formulaire d'ajout de produit
-            document.getElementById('product-code-type').addEventListener('change', function() {
-                const value = this.value;
-                
-                document.getElementById('code-scan-container').style.display = value === 'scan' ? 'block' : 'none';
-                document.getElementById('code-manual-container').style.display = value === 'manual' ? 'block' : 'none';
-            });
-            
-            // Prévisualisation des codes
-            document.getElementById('product-name').addEventListener('input', updateCodePreview);
-            document.getElementById('product-price').addEventListener('input', updateCodePreview);
-            document.getElementById('product-code-manual').addEventListener('input', updateCodePreview);
-            
-            // Activation de la caméra pour le scan
-            document.getElementById('start-scan').addEventListener('click', function() {
-                const scannerContainer = document.getElementById('scanner-container');
-                scannerContainer.classList.remove('d-none');
-                initBarcodeScanner('scanner-video');
-            });
-            
-            // Activation scanner dans la section scan
-            document.getElementById('activate-scanner').addEventListener('click', function() {
-                document.getElementById('scanner-area').style.display = 'block';
-                document.getElementById('scan-result').style.display = 'none';
-                initBarcodeScanner('scanner');
-            });
-            
-            // Scanner un autre code
-            document.getElementById('scan-another').addEventListener('click', function() {
-                document.getElementById('scanner-area').style.display = 'block';
-                document.getElementById('scan-result').style.display = 'none';
-                initBarcodeScanner('scanner');
-            });
-            
-            // Soumission du formulaire d'ajout
-            document.getElementById('add-product-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                addNewProduct();
-            });
-            
-            // Réinitialisation du formulaire
-            document.getElementById('reset-form').addEventListener('click', function() {
-                document.getElementById('add-product-form').reset();
-                document.getElementById('code-preview-container').style.display = 'none';
-            });
-            
-            // Recherche dans l'inventaire
-            document.getElementById('search-inventory').addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                filterInventoryTable(searchTerm);
-            });
-            
-            // Recherche pour impression
-            document.getElementById('search-print').addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                filterPrintTable(searchTerm);
-            });
-            
-            // Sélectionner tous pour impression
-            document.getElementById('select-all-print').addEventListener('change', function() {
-                const isChecked = this.checked;
-                document.querySelectorAll('#print-products-table tbody input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.checked = isChecked;
-                });
-            });
-            
-            // Générer aperçu impression
-            document.getElementById('generate-print').addEventListener('click', generatePrintPreview);
-            
-// Imprimer
-document.getElementById('print-generated').addEventListener('click', function() {
-    // Créer un conteneur temporaire pour l'impression
-    const tempContainer = document.createElement('div');
-    tempContainer.id = 'temp-print-container';
-    tempContainer.style.position = 'absolute';
-    tempContainer.style.left = '-9999px';
+    updateDashboardStats();
+    loadRecentProducts();
+    loadInventoryTable();
+    updateAlertsBadge();
+    checkStockAlerts();
     
-    // Copier le contenu à imprimer
-    const printContent = document.getElementById('print-items').cloneNode(true);
-    tempContainer.appendChild(printContent);
-    document.body.appendChild(tempContainer);
+    // Navigation 
+    document.querySelectorAll('#sidebar .nav-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const section = this.getAttribute('data-section');
+            
+            // Montrer la section avec ajout à l'historique
+            showSection(section, true);
+            
+            // Si on est sur un écran mobile, fermer le menu
+            if (window.innerWidth < 992) {
+                document.getElementById('sidebar').classList.remove('active');
+                const menuToggleBtn = document.getElementById('menu-toggle-btn');
+                if (menuToggleBtn) {
+                    menuToggleBtn.classList.remove('active');
+                }
+            }
+        });
+    });
     
-    // Sauvegarder les styles d'origine
-    const originalBodyOverflow = document.body.style.overflow;
+    // Gestion de la navigation avec les boutons du navigateur
+    window.addEventListener('popstate', function(event) {
+        if (event.state && event.state.sectionId) {
+            showSection(event.state.sectionId, false);
+        }
+    });
+
+    // Capture des événements de touche pour la navigation
+    document.addEventListener('keydown', function(event) {
+        // Alt + Flèche gauche pour naviguer en arrière
+        if (event.altKey && event.key === 'ArrowLeft') {
+            event.preventDefault();
+            navigateBack();
+        }
+        
+        // Alt + Flèche droite pour naviguer en avant
+        if (event.altKey && event.key === 'ArrowRight') {
+            event.preventDefault();
+            navigateForward();
+        }
+        
+        // Pour les appareils mobiles qui ont une touche retour hardware
+        if (event.key === 'Backspace' && !isInputFocused()) {
+            event.preventDefault();
+            navigateBack();
+        }
+    });
     
-    // Préparer l'impression
-    document.body.style.overflow = 'visible';
+    // Bouton de toggle mobile
+    const menuToggleBtn = document.getElementById('menu-toggle-btn');
+    if (menuToggleBtn) {
+        menuToggleBtn.addEventListener('click', function() {
+            this.classList.toggle('active');
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+    }
     
-    // Déclencher l'impression
-    window.print();
+    // Voir tous les produits
+    document.getElementById('view-all-products').addEventListener('click', function() {
+        showSection('inventory');
+    });
     
-    // Restaurer les styles d'origine et nettoyer
-    setTimeout(function() {
-        document.body.style.overflow = originalBodyOverflow;
-        document.body.removeChild(tempContainer);
-    }, 1000);
+    // Bouton Ajouter dans l'inventaire
+    document.getElementById('add-product-btn').addEventListener('click', function() {
+        showSection('add-product');
+    });
+    
+    // Formulaire d'ajout de produit
+    document.getElementById('product-code-type').addEventListener('change', function() {
+        const value = this.value;
+        
+        document.getElementById('code-scan-container').style.display = value === 'scan' ? 'block' : 'none';
+        document.getElementById('code-manual-container').style.display = value === 'manual' ? 'block' : 'none';
+    });
+    
+    // Prévisualisation des codes
+    document.getElementById('product-name').addEventListener('input', updateCodePreview);
+    document.getElementById('product-price').addEventListener('input', updateCodePreview);
+    document.getElementById('product-code-manual').addEventListener('input', updateCodePreview);
+    
+    // Activation de la caméra pour le scan
+    document.getElementById('start-scan').addEventListener('click', function() {
+        const scannerContainer = document.getElementById('scanner-container');
+        scannerContainer.classList.remove('d-none');
+        initBarcodeScanner('scanner-video');
+    });
+    
+    // Activation scanner dans la section scan
+    document.getElementById('activate-scanner').addEventListener('click', function() {
+        document.getElementById('scanner-area').style.display = 'block';
+        document.getElementById('scan-result').style.display = 'none';
+        initBarcodeScanner('scanner');
+    });
+    
+    // Scanner un autre code
+    document.getElementById('scan-another').addEventListener('click', function() {
+        document.getElementById('scanner-area').style.display = 'block';
+        document.getElementById('scan-result').style.display = 'none';
+        initBarcodeScanner('scanner');
+    });
+    
+    // Soumission du formulaire d'ajout
+    document.getElementById('add-product-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        addNewProduct();
+    });
+    
+    // Réinitialisation du formulaire
+    document.getElementById('reset-form').addEventListener('click', function() {
+        document.getElementById('add-product-form').reset();
+        document.getElementById('code-preview-container').style.display = 'none';
+    });
+    
+    // Recherche dans l'inventaire
+    document.getElementById('search-inventory').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        filterInventoryTable(searchTerm);
+    });
+    
+    // Recherche pour impression
+    document.getElementById('search-print').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        filterPrintTable(searchTerm);
+    });
+    
+    // Sélectionner tous pour impression
+    document.getElementById('select-all-print').addEventListener('change', function() {
+        const isChecked = this.checked;
+        document.querySelectorAll('#print-products-table tbody input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = isChecked;
+        });
+    });
+    
+    // Générer aperçu impression
+    document.getElementById('generate-print').addEventListener('click', generatePrintPreview);
+    
+    // Imprimer
+    document.getElementById('print-generated').addEventListener('click', function() {
+        // Créer un conteneur temporaire pour l'impression
+        const tempContainer = document.createElement('div');
+        tempContainer.id = 'temp-print-container';
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = '-9999px';
+        
+        // Copier le contenu à imprimer
+        const printContent = document.getElementById('print-items').cloneNode(true);
+        tempContainer.appendChild(printContent);
+        document.body.appendChild(tempContainer);
+        
+        // Sauvegarder les styles d'origine
+        const originalBodyOverflow = document.body.style.overflow;
+        
+        // Préparer l'impression
+        document.body.style.overflow = 'visible';
+        
+        // Déclencher l'impression
+        window.print();
+        
+        // Restaurer les styles d'origine et nettoyer
+        setTimeout(function() {
+            document.body.style.overflow = originalBodyOverflow;
+            document.body.removeChild(tempContainer);
+        }, 1000);
+    });
+    
+    // Enregistrer modifications
+    document.getElementById('save-edit-product').addEventListener('click', saveEditProduct);
+    
+    // Confirmer suppression
+    document.getElementById('confirm-delete').addEventListener('click', deleteProduct);
+    
+    // Confirmer vente
+    document.getElementById('confirm-sell').addEventListener('click', sellProduct);
+    
+    // Quantité à vendre
+    document.getElementById('sell-quantity').addEventListener('input', updateSellTotal);
+    
+    // Marquer toutes les alertes comme lues
+    document.getElementById('mark-all-read').addEventListener('click', markAllAlertsAsRead);
+    
+    // Configuration des alertes
+    document.getElementById('alerts-config-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const defaultMinStock = parseInt(document.getElementById('default-min-stock').value) || 5;
+        localStorage.setItem('totalInventoryDefaultMinStock', defaultMinStock);
+        
+        const enableEmailAlerts = document.getElementById('enable-email-alerts').checked;
+        localStorage.setItem('totalInventoryEnableEmailAlerts', enableEmailAlerts);
+        
+        const alertEmail = document.getElementById('alert-email').value;
+        localStorage.setItem('totalInventoryAlertEmail', alertEmail);
+        
+        showNotification('Configuration', 'Les paramètres d\'alerte ont été enregistrés.', 'success');
+    });
+    
+    // Toggle pour les alertes email
+    document.getElementById('enable-email-alerts').addEventListener('change', function() {
+        document.getElementById('email-alerts-config').style.display = this.checked ? 'block' : 'none';
+    });
+    
+    // Export inventaire
+    document.getElementById('export-inventory').addEventListener('click', exportInventory);
+    
+    // Supprimer produit (bouton modal)
+    document.getElementById('delete-product-btn').addEventListener('click', function() {
+        const productId = document.getElementById('edit-product-id').value;
+        const product = products.find(p => p.id === productId);
+        
+        if (product) {
+            document.getElementById('delete-product-name').textContent = product.name;
+            productModal.hide();
+            deleteModal.show();
+        }
+    });
+
+    // Intercepter les événements de navigation du navigateur
+    window.addEventListener('beforeunload', function(event) {
+        // Si l'utilisateur tente de quitter la page, on peut montrer une alerte
+        // Mais on ne le fait pas ici pour ne pas perturber l'expérience
+    });
+
+    // Réagir aux événements de l'API History du navigateur
+    window.addEventListener('popstate', function(event) {
+        if (event.state && event.state.sectionId) {
+            showSection(event.state.sectionId, false);
+        }
+    });
+
+    // Initialiser l'historique du navigateur avec la première page
+    window.history.replaceState({ sectionId: 'dashboard' }, 'Dashboard');
 });
 
-
-            
-            // Enregistrer modifications
-            document.getElementById('save-edit-product').addEventListener('click', saveEditProduct);
-            
-            // Confirmer suppression
-            document.getElementById('confirm-delete').addEventListener('click', deleteProduct);
-            
-            // Confirmer vente
-            document.getElementById('confirm-sell').addEventListener('click', sellProduct);
-            
-            // Quantité à vendre
-            document.getElementById('sell-quantity').addEventListener('input', updateSellTotal);
-            
-            // Marquer toutes les alertes comme lues
-            document.getElementById('mark-all-read').addEventListener('click', markAllAlertsAsRead);
-            
-            // Configuration des alertes
-            document.getElementById('alerts-config-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const defaultMinStock = parseInt(document.getElementById('default-min-stock').value) || 5;
-                localStorage.setItem('totalInventoryDefaultMinStock', defaultMinStock);
-                
-                const enableEmailAlerts = document.getElementById('enable-email-alerts').checked;
-                localStorage.setItem('totalInventoryEnableEmailAlerts', enableEmailAlerts);
-                
-                const alertEmail = document.getElementById('alert-email').value;
-                localStorage.setItem('totalInventoryAlertEmail', alertEmail);
-                
-                showNotification('Configuration', 'Les paramètres d\'alerte ont été enregistrés.', 'success');
-            });
-            
-            // Toggle pour les alertes email
-            document.getElementById('enable-email-alerts').addEventListener('change', function() {
-                document.getElementById('email-alerts-config').style.display = this.checked ? 'block' : 'none';
-            });
-            
-            // Export inventaire
-            document.getElementById('export-inventory').addEventListener('click', exportInventory);
-            
-            // Supprimer produit (bouton modal)
-            document.getElementById('delete-product-btn').addEventListener('click', function() {
-                const productId = document.getElementById('edit-product-id').value;
-                const product = products.find(p => p.id === productId);
-                
-                if (product) {
-                    document.getElementById('delete-product-name').textContent = product.name;
-                    productModal.hide();
-                    deleteModal.show();
-                }
-            });
-        });
 
         // Initialisation de l'application
         function initApp() {
@@ -486,6 +551,20 @@ document.getElementById('print-generated').addEventListener('click', function() 
     document.getElementById('alert-email').value = alertEmail;
     
     document.getElementById('email-alerts-config').style.display = enableEmailAlerts ? 'block' : 'none';
+    
+    // Initialiser les boutons de navigation
+    const navBackBtn = document.getElementById('nav-back-btn');
+    const navForwardBtn = document.getElementById('nav-forward-btn');
+    const currentSectionIndicator = document.getElementById('current-section-indicator');
+
+    if (navBackBtn && navForwardBtn) {
+        // Gestionnaires d'événements pour les boutons de navigation
+        navBackBtn.addEventListener('click', navigateBack);
+        navForwardBtn.addEventListener('click', navigateForward);
+        
+        // Mettre à jour l'état des boutons de navigation
+        updateNavigationControls();
+    }
     
     // Initialiser les dropdowns personnalisés
     initCustomDropdowns();
@@ -504,7 +583,79 @@ document.getElementById('print-generated').addEventListener('click', function() 
     
     // Chargement de la table des produits pour impression
     loadPrintTable();
+    
+    // Ajouter la section initiale à l'historique
+    sectionHistory.push('dashboard');
+    currentHistoryIndex = 0;
+
+    // Charger l'historique depuis sessionStorage si disponible
+    const savedHistory = sessionStorage.getItem('sectionHistory');
+    const savedIndex = sessionStorage.getItem('currentHistoryIndex');
+    if (savedHistory && savedIndex) {
+        try {
+            sectionHistory = JSON.parse(savedHistory);
+            currentHistoryIndex = parseInt(savedIndex);
+            // Restaurer la dernière section active
+            if (sectionHistory.length > 0 && currentHistoryIndex >= 0) {
+                showSection(sectionHistory[currentHistoryIndex], false);
+            }
+        } catch (e) {
+            console.error("Erreur lors de la restauration de l'historique:", e);
+            // Réinitialiser en cas d'erreur
+            sectionHistory = ['dashboard'];
+            currentHistoryIndex = 0;
+        }
+    }
+    
+    // Initialiser le titre de la section active au chargement
+    if (sectionHistory.length > 0) {
+        const initialSection = sectionHistory[currentHistoryIndex] || 'dashboard';
+        updateSectionTitle(initialSection);
+    } else {
+        updateSectionTitle('dashboard');
+    }
+
+    // Intercepter tous les clics dans le document
+    document.addEventListener('click', function(event) {
+        // Vérifier si le clic pourrait ouvrir une section
+        let target = event.target;
+        
+        // Remonter jusqu'à 5 niveaux pour trouver un lien ou un bouton
+        for (let i = 0; i < 5 && target && target !== document; i++) {
+            // Vérifie si l'élément a un attribut data-section
+            const sectionId = target.getAttribute('data-section');
+            if (sectionId) {
+                // Empêcher la navigation par défaut si c'est un lien
+                if (target.tagName.toLowerCase() === 'a') {
+                    event.preventDefault();
+                }
+                
+                // Ouvrir la section et l'ajouter à l'historique
+                showSection(sectionId, true);
+                return;
+            }
+            
+            // Vérifier si l'élément a un attribut href qui pointe vers une section
+            if (target.tagName.toLowerCase() === 'a' && target.getAttribute('href')) {
+                const href = target.getAttribute('href');
+                // Vérifier si le href pointe vers une ancre qui correspond à une section
+                if (href.startsWith('#')) {
+                    const possibleSectionId = href.substring(1);
+                    if (document.getElementById(possibleSectionId) && 
+                        document.getElementById(possibleSectionId).classList.contains('content-section')) {
+                        event.preventDefault();
+                        showSection(possibleSectionId, true);
+                        return;
+                    }
+                }
+            }
+            
+            // Passer au parent
+            target = target.parentElement;
+        }
+    });
 }
+
 
         function addSampleProducts() {
     // Image par défaut pour les exemples (data URI d'une image très légère)
@@ -642,20 +793,78 @@ document.getElementById('print-generated').addEventListener('click', function() 
     updateLocalStorage();
 }
 
-        function showSection(sectionId) {
+        function showSection(sectionId, addToHistory = true) {
+    // Vérifier si la section existe
+    const sectionElement = document.getElementById(sectionId);
+    if (!sectionElement) {
+        console.error(`Section "${sectionId}" introuvable`);
+        return;
+    }
+    
     // Cacher toutes les sections
     document.querySelectorAll('.content-section').forEach(section => {
         section.style.display = 'none';
     });
     
-    // Afficher la section demandée
-    document.getElementById(sectionId).style.display = 'block';
+    // Afficher la section demandée avec une légère animation
+    sectionElement.style.opacity = 0;
+    sectionElement.style.display = 'block';
+    setTimeout(() => {
+        sectionElement.style.opacity = 1;
+        sectionElement.style.transition = 'opacity 0.3s ease';
+    }, 50);
     
     // Mettre à jour la navigation
     document.querySelectorAll('#sidebar .nav-item').forEach(item => {
         item.classList.remove('active');
     });
-    document.querySelector(`#sidebar [data-section="${sectionId}"]`).classList.add('active');
+    
+    // Essayer de mettre à jour l'élément sidebar correspondant s'il existe
+    const sidebarItem = document.querySelector(`#sidebar [data-section="${sectionId}"]`);
+    if (sidebarItem) {
+        sidebarItem.classList.add('active');
+        
+        // Faire défiler le sidebar pour montrer l'élément actif si nécessaire
+        const navContainer = document.querySelector('.nav-container');
+        if (navContainer) {
+            const itemTop = sidebarItem.offsetTop;
+            const containerScrollTop = navContainer.scrollTop;
+            const containerHeight = navContainer.clientHeight;
+            
+            if (itemTop < containerScrollTop || itemTop > containerScrollTop + containerHeight - 50) {
+                navContainer.scrollTo({
+                    top: itemTop - containerHeight / 2,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    }
+    
+    // Ajouter à l'historique si nécessaire
+    if (addToHistory) {
+        // Éviter les duplications consécutives dans l'historique
+        if (sectionHistory.length === 0 || sectionHistory[currentHistoryIndex] !== sectionId) {
+            // Si on navigue depuis un point intermédiaire de l'historique, supprimer les entrées suivantes
+            if (currentHistoryIndex < sectionHistory.length - 1) {
+                sectionHistory = sectionHistory.slice(0, currentHistoryIndex + 1);
+            }
+            
+            // Ajouter la nouvelle section à l'historique
+            sectionHistory.push(sectionId);
+            currentHistoryIndex = sectionHistory.length - 1;
+            
+            // Stocker l'historique en session pour persistance
+            sessionStorage.setItem('sectionHistory', JSON.stringify(sectionHistory));
+            sessionStorage.setItem('currentHistoryIndex', currentHistoryIndex);
+        }
+    }
+    
+    // Mettre à jour l'état du navigateur sans provoquer de doublons
+    const stateObj = { sectionId: sectionId };
+    const currentState = window.history.state;
+    if (!currentState || currentState.sectionId !== sectionId) {
+        window.history.pushState(stateObj, sectionId);
+    }
     
     // Actions spécifiques selon la section
     if (sectionId === 'inventory') {
@@ -674,7 +883,121 @@ document.getElementById('print-generated').addEventListener('click', function() 
         // Initialiser l'assistant IA
         initAiAssistant();
     }
+    
+    // Mettre à jour les contrôles de navigation
+    updateNavigationControls();
+    
+    // Mettre à jour le titre dans la barre supérieure
+    updateSectionTitle(sectionId);
+    
+    // Animation d'entrée du contenu
+    if (sectionElement.classList.contains('content-section')) {
+        sectionElement.classList.add('animate-in');
+        setTimeout(() => {
+            sectionElement.classList.remove('animate-in');
+        }, 500);
+    }
 }
+
+// Fonction pour mettre à jour le titre de la section
+function updateSectionTitle(sectionId) {
+    const titleElement = document.getElementById('current-section-title');
+    const sectionElement = document.getElementById(sectionId);
+    
+    if (!titleElement) return;
+    
+    let titleHTML = '';
+    
+    // Obtenir le titre à partir de l'élément h2 de la section
+    if (sectionElement) {
+        const h2Element = sectionElement.querySelector('h2');
+        if (h2Element) {
+            titleHTML = h2Element.innerHTML;
+            // Masquer le h2 original de la section
+            h2Element.style.display = 'none';
+        }
+    }
+    
+    // Si aucun titre n'a été trouvé, chercher un titre à partir du menu de navigation
+    if (!titleHTML) {
+        const sidebarItem = document.querySelector(`#sidebar [data-section="${sectionId}"]`);
+        if (sidebarItem) {
+            const icon = sidebarItem.querySelector('a i');
+            const text = sidebarItem.querySelector('a span').textContent;
+            
+            if (icon && text) {
+                titleHTML = `<i class="${icon.className} me-2"></i> ${text}`;
+            } else if (text) {
+                titleHTML = text;
+            }
+        }
+    }
+    
+    // Réinitialiser les animations
+    titleElement.classList.remove('active');
+    
+    // Déclencher une animation au changement de titre
+    setTimeout(() => {
+        titleElement.innerHTML = titleHTML;
+        titleElement.classList.add('active');
+    }, 50);
+}
+
+
+// Fonction pour mettre à jour l'état des boutons de navigation
+function updateNavigationControls() {
+    const navBackBtn = document.getElementById('nav-back-btn');
+    const navForwardBtn = document.getElementById('nav-forward-btn');
+    const currentSectionIndicator = document.getElementById('current-section-indicator');
+    
+    if (!navBackBtn || !navForwardBtn || !currentSectionIndicator) return;
+    
+    // Activer/désactiver les boutons selon l'historique
+    navBackBtn.disabled = currentHistoryIndex <= 0;
+    navForwardBtn.disabled = currentHistoryIndex >= sectionHistory.length - 1;
+    
+    // Afficher la position actuelle dans l'historique
+    if (sectionHistory.length > 0) {
+        const currentSection = sectionHistory[currentHistoryIndex];
+        // Trouver le nom convivial de la section
+        let sectionName = currentSection;
+        const sidebarItem = document.querySelector(`#sidebar [data-section="${currentSection}"]`);
+        if (sidebarItem) {
+            const linkText = sidebarItem.querySelector('a').textContent.trim();
+            if (linkText) {
+                sectionName = linkText;
+            }
+        }
+        
+        currentSectionIndicator.textContent = `${sectionName} (${currentHistoryIndex + 1}/${sectionHistory.length})`;
+    } else {
+        currentSectionIndicator.textContent = '';
+    }
+}
+
+
+// Fonction pour revenir en arrière dans l'historique
+function navigateBack() {
+    if (currentHistoryIndex > 0) {
+        currentHistoryIndex--;
+        showSection(sectionHistory[currentHistoryIndex], false);
+        // Mettre à jour l'index en session storage
+        sessionStorage.setItem('currentHistoryIndex', currentHistoryIndex);
+    }
+}
+
+// Fonction pour avancer dans l'historique
+function navigateForward() {
+    if (currentHistoryIndex < sectionHistory.length - 1) {
+        currentHistoryIndex++;
+        showSection(sectionHistory[currentHistoryIndex], false);
+        // Mettre à jour l'index en session storage
+        sessionStorage.setItem('currentHistoryIndex', currentHistoryIndex);
+    }
+}
+
+
+
 
         function updateDashboardStats() {
     // Compter le total des produits
@@ -3617,64 +3940,67 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
     
-    // Gestion de la première connexion
-    document.getElementById('first-login-form').addEventListener('submit', async function(e) {
-        e.preventDefault();
+// Gestion de la première connexion
+document.getElementById('first-login-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const civility = document.getElementById('admin-civility').value;
+    const username = document.getElementById('admin-username').value;
+    const password = document.getElementById('admin-password').value;
+    const passwordConfirm = document.getElementById('admin-password-confirm').value;
+    
+    // Vérification de la correspondance des mots de passe
+    if(password !== passwordConfirm) {
+        showNotification('Les mots de passe ne correspondent pas', 'danger');
+        return;
+    }
+    
+    // Vérification de la force du mot de passe
+    if(calculatePasswordStrength(password) < 80) {
+        showNotification('Veuillez utiliser un mot de passe plus fort', 'warning');
+        return;
+    }
+    
+    try {
+        // Hachage du mot de passe
+        const hashedPassword = await hashPassword(password);
         
-        const username = document.getElementById('admin-username').value;
-        const password = document.getElementById('admin-password').value;
-        const passwordConfirm = document.getElementById('admin-password-confirm').value;
-        
-        // Vérification de la correspondance des mots de passe
-        if(password !== passwordConfirm) {
-            showNotification('Les mots de passe ne correspondent pas', 'danger');
+        // Création de l'administrateur principal dans Supabase
+        const { data, error } = await supabase
+            .from('administrators')
+            .insert([
+                {
+                    civility: civility,
+                    username: username,
+                    password: hashedPassword,
+                    role: 'primary',
+                    created_at: new Date().toISOString(),
+                    last_login: new Date().toISOString(),
+                    online: true
+                }
+            ])
+            .select();
+            
+        if (error) {
+            console.error('Erreur lors de la création de l\'administrateur:', error);
+            showNotification('Erreur lors de la création du compte administrateur', 'danger');
             return;
         }
         
-        // Vérification de la force du mot de passe
-        if(calculatePasswordStrength(password) < 80) {
-            showNotification('Veuillez utiliser un mot de passe plus fort', 'warning');
-            return;
-        }
+        // Connexion de l'admin
+        currentAdmin = data[0];
+        localStorage.setItem('currentAdminId', currentAdmin.id);
         
-        try {
-            // Hachage du mot de passe
-            const hashedPassword = await hashPassword(password);
-            
-            // Création de l'administrateur principal dans Supabase
-            const { data, error } = await supabase
-                .from('administrators')
-                .insert([
-                    {
-                        username: username,
-                        password: hashedPassword,
-                        role: 'primary',
-                        created_at: new Date().toISOString(),
-                        last_login: new Date().toISOString(),
-                        online: true
-                    }
-                ])
-                .select();
-                
-            if (error) {
-                console.error('Erreur lors de la création de l\'administrateur:', error);
-                showNotification('Erreur lors de la création du compte administrateur', 'danger');
-                return;
-            }
-            
-            // Connexion de l'admin
-            currentAdmin = data[0];
-            localStorage.setItem('currentAdminId', currentAdmin.id);
-            
-            // Afficher l'interface principale
-            document.getElementById('auth-container').style.display = 'none';
-            showNotification('Compte administrateur créé avec succès!', 'success');
-            updateAdminUI();
-        } catch (err) {
-            console.error('Erreur lors de la création de l\'administrateur:', err);
-            showNotification('Une erreur est survenue', 'danger');
-        }
-    });
+        // Afficher l'interface principale
+        document.getElementById('auth-container').style.display = 'none';
+        showNotification('Compte administrateur créé avec succès!', 'success');
+        updateAdminUI();
+    } catch (err) {
+        console.error('Erreur lors de la création de l\'administrateur:', err);
+        showNotification('Une erreur est survenue', 'danger');
+    }
+});
+
     
     // Gestion de la connexion standard
     document.getElementById('login-form').addEventListener('submit', async function(e) {
@@ -3732,72 +4058,75 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
     
-    // Gestion de la création d'un nouvel administrateur
-    document.getElementById('add-admin-form').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        if(currentAdmin.role !== 'primary') {
-            showNotification('Seul l\'administrateur principal peut ajouter des administrateurs', 'danger');
+// Gestion de la création d'un nouvel administrateur
+document.getElementById('add-admin-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    if(currentAdmin.role !== 'primary') {
+        showNotification('Seul l\'administrateur principal peut ajouter des administrateurs', 'danger');
+        return;
+    }
+    
+    const civility = document.getElementById('new-admin-civility').value;
+    const username = document.getElementById('new-admin-username').value;
+    const password = document.getElementById('new-admin-password').value;
+    
+    try {
+        // Vérification si le nom d'utilisateur existe déjà
+        const { data: existingAdmin, error: checkError } = await supabase
+            .from('administrators')
+            .select('id')
+            .eq('username', username)
+            .maybeSingle();
+            
+        if (checkError) {
+            console.error('Erreur lors de la vérification du nom d\'utilisateur:', checkError);
+            showNotification('Erreur lors de la vérification du nom d\'utilisateur', 'danger');
             return;
         }
         
-        const username = document.getElementById('new-admin-username').value;
-        const password = document.getElementById('new-admin-password').value;
-        
-        try {
-            // Vérification si le nom d'utilisateur existe déjà
-            const { data: existingAdmin, error: checkError } = await supabase
-                .from('administrators')
-                .select('id')
-                .eq('username', username)
-                .maybeSingle();
-                
-            if (checkError) {
-                console.error('Erreur lors de la vérification du nom d\'utilisateur:', checkError);
-                showNotification('Erreur lors de la vérification du nom d\'utilisateur', 'danger');
-                return;
-            }
-            
-            if (existingAdmin) {
-                showNotification('Ce nom d\'utilisateur existe déjà', 'danger');
-                return;
-            }
-            
-            // Hachage du mot de passe
-            const hashedPassword = await hashPassword(password);
-            
-            // Création du nouvel administrateur
-            const { data, error } = await supabase
-                .from('administrators')
-                .insert([
-                    {
-                        username: username,
-                        password: hashedPassword,
-                        role: 'standard',
-                        created_at: new Date().toISOString(),
-                        last_login: null,
-                        online: false
-                    }
-                ]);
-                
-            if (error) {
-                console.error('Erreur lors de la création de l\'administrateur:', error);
-                showNotification('Erreur lors de la création de l\'administrateur', 'danger');
-                return;
-            }
-            
-            // Réinitialisation du formulaire
-            document.getElementById('add-admin-form').reset();
-            
-            // Mise à jour de l'interface
-            admins = await loadAdmins();
-            refreshAdminList();
-            showNotification('Administrateur ajouté avec succès!', 'success');
-        } catch (err) {
-            console.error('Erreur lors de la création de l\'administrateur:', err);
-            showNotification('Une erreur est survenue', 'danger');
+        if (existingAdmin) {
+            showNotification('Ce nom d\'utilisateur existe déjà', 'danger');
+            return;
         }
-    });
+        
+        // Hachage du mot de passe
+        const hashedPassword = await hashPassword(password);
+        
+        // Création du nouvel administrateur
+        const { data, error } = await supabase
+            .from('administrators')
+            .insert([
+                {
+                    civility: civility,
+                    username: username,
+                    password: hashedPassword,
+                    role: 'standard',
+                    created_at: new Date().toISOString(),
+                    last_login: null,
+                    online: false
+                }
+            ]);
+            
+        if (error) {
+            console.error('Erreur lors de la création de l\'administrateur:', error);
+            showNotification('Erreur lors de la création de l\'administrateur', 'danger');
+            return;
+        }
+        
+        // Réinitialisation du formulaire
+        document.getElementById('add-admin-form').reset();
+        
+        // Mise à jour de l'interface
+        admins = await loadAdmins();
+        refreshAdminList();
+        showNotification('Administrateur ajouté avec succès!', 'success');
+    } catch (err) {
+        console.error('Erreur lors de la création de l\'administrateur:', err);
+        showNotification('Une erreur est survenue', 'danger');
+    }
+});
+
     
     // Génération d'un mot de passe aléatoire
     document.getElementById('generate-password').addEventListener('click', function() {
@@ -3981,74 +4310,83 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
     
-    // Gestion de l'édition d'un administrateur
-    document.getElementById('admin-list').addEventListener('click', function(e) {
-        // Gestion du bouton d'édition
-        if(e.target.closest('.admin-btn.edit')) {
-            const adminItem = e.target.closest('.admin-item');
-            const adminId = adminItem.dataset.adminId;
+// Gestion de l'édition d'un administrateur
+document.getElementById('admin-list').addEventListener('click', function(e) {
+    // Gestion du bouton d'édition
+    if(e.target.closest('.admin-btn.edit')) {
+        const adminItem = e.target.closest('.admin-item');
+        const adminId = adminItem.dataset.adminId;
+        
+        // Recherche de l'administrateur dans la liste
+        const admin = admins.find(a => a.id === adminId);
+        if (!admin) return;
+        
+        // Ne pas permettre la modification de l'admin principal par lui-même
+        if(admin.role === 'primary' && currentAdmin.role === 'primary') {
+            document.getElementById('edit-admin-id').value = adminId;
+            document.getElementById('edit-admin-civility').value = admin.civility || 'M'; // Valeur par défaut si non définie
+            document.getElementById('edit-admin-username').value = admin.username;
             
-            // Recherche de l'administrateur dans la liste
-            const admin = admins.find(a => a.id === adminId);
-            if (!admin) return;
+            // Mettre à jour l'affichage du sélecteur de civilité
+            updateCivilitySelector('civility_edit_admin', admin.civility || 'M');
             
-            // Ne pas permettre la modification de l'admin principal par lui-même
-            if(admin.role === 'primary' && currentAdmin.role === 'primary') {
-                document.getElementById('edit-admin-id').value = adminId;
-                document.getElementById('edit-admin-username').value = admin.username;
-                
-                // Réinitialiser l'option de réinitialisation de mot de passe
-                document.getElementById('reset-admin-password').checked = false;
-                document.getElementById('reset-password-container').style.display = 'none';
-                
-                const modal = new bootstrap.Modal(document.getElementById('editAdminModal'));
-                modal.show();
-            } else if(currentAdmin.role === 'primary') {
-                // Modification d'un admin standard par l'admin principal
-                document.getElementById('edit-admin-id').value = adminId;
-                document.getElementById('edit-admin-username').value = admin.username;
-                
-                // Réinitialiser l'option de réinitialisation de mot de passe
-                document.getElementById('reset-admin-password').checked = false;
-                document.getElementById('reset-password-container').style.display = 'none';
-                
-                const modal = new bootstrap.Modal(document.getElementById('editAdminModal'));
-                modal.show();
-            } else {
-                showNotification('Vous n\'avez pas les droits pour modifier cet administrateur', 'danger');
-            }
+            // Réinitialiser l'option de réinitialisation de mot de passe
+            document.getElementById('reset-admin-password').checked = false;
+            document.getElementById('reset-password-container').style.display = 'none';
+            
+            const modal = new bootstrap.Modal(document.getElementById('editAdminModal'));
+            modal.show();
+        } else if(currentAdmin.role === 'primary') {
+            // Modification d'un admin standard par l'admin principal
+            document.getElementById('edit-admin-id').value = adminId;
+            document.getElementById('edit-admin-civility').value = admin.civility || 'M'; // Valeur par défaut si non définie
+            document.getElementById('edit-admin-username').value = admin.username;
+            
+            // Mettre à jour l'affichage du sélecteur de civilité
+            updateCivilitySelector('civility_edit_admin', admin.civility || 'M');
+            
+            // Réinitialiser l'option de réinitialisation de mot de passe
+            document.getElementById('reset-admin-password').checked = false;
+            document.getElementById('reset-password-container').style.display = 'none';
+            
+            const modal = new bootstrap.Modal(document.getElementById('editAdminModal'));
+            modal.show();
+        } else {
+            showNotification('Vous n\'avez pas les droits pour modifier cet administrateur', 'danger');
+        }
+    }
+    
+    // Gestion du bouton de suppression
+    if(e.target.closest('.admin-btn.delete')) {
+        const adminItem = e.target.closest('.admin-item');
+        const adminId = adminItem.dataset.adminId;
+        
+        // Vérifier que l'admin principal ne se supprime pas lui-même
+        if(adminId === currentAdmin.id) {
+            showNotification('Vous ne pouvez pas supprimer votre propre compte', 'danger');
+            return;
         }
         
-        // Gestion du bouton de suppression
-        if(e.target.closest('.admin-btn.delete')) {
-            const adminItem = e.target.closest('.admin-item');
-            const adminId = adminItem.dataset.adminId;
-            
-            // Vérifier que l'admin principal ne se supprime pas lui-même
-            if(adminId === currentAdmin.id) {
-                showNotification('Vous ne pouvez pas supprimer votre propre compte', 'danger');
-                return;
-            }
-            
-            // Recherche de l'administrateur dans la liste
-            const admin = admins.find(a => a.id === adminId);
-            if (!admin) return;
-            
-            // Vérifier que seul l'admin principal peut supprimer
-            if(currentAdmin.role !== 'primary') {
-                showNotification('Seul l\'administrateur principal peut supprimer des comptes', 'danger');
-                return;
-            }
-            
-            // Afficher la confirmation
-            document.getElementById('delete-admin-name').textContent = admin.username;
-            document.getElementById('delete-confirm-password').value = '';
-            
-            const modal = new bootstrap.Modal(document.getElementById('deleteAdminModal'));
-            modal.dataset.adminId = adminId;
-            modal.show();
+        // Recherche de l'administrateur dans la liste
+        const admin = admins.find(a => a.id === adminId);
+        if (!admin) return;
+        
+        // Vérifier que seul l'admin principal peut supprimer
+        if(currentAdmin.role !== 'primary') {
+            showNotification('Seul l\'administrateur principal peut supprimer des comptes', 'danger');
+            return;
         }
-    });
+        
+        // Afficher la confirmation
+        document.getElementById('delete-admin-name').textContent = admin.username;
+        document.getElementById('delete-confirm-password').value = '';
+        
+        const modal = new bootstrap.Modal(document.getElementById('deleteAdminModal'));
+        modal.dataset.adminId = adminId;
+        modal.show();
+    }
+});
+
     
     // Gestion de la réinitialisation de mot de passe
     document.getElementById('reset-admin-password').addEventListener('change', function() {
@@ -4068,75 +4406,81 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('reset-password').value = password;
     });
     
-    // Sauvegarde des modifications d'un administrateur
-    document.getElementById('save-edit-admin').addEventListener('click', async function() {
-        const adminId = document.getElementById('edit-admin-id').value;
-        const newUsername = document.getElementById('edit-admin-username').value;
-        const resetPassword = document.getElementById('reset-admin-password').checked;
-        const newPassword = document.getElementById('reset-password').value;
-        
-        try {
-            // Vérification si le nom d'utilisateur existe déjà
-            const { data: existingAdmin, error: checkError } = await supabase
-                .from('administrators')
-                .select('id')
-                .eq('username', newUsername)
-                .neq('id', adminId)
-                .maybeSingle();
-                
-            if (checkError) {
-                console.error('Erreur lors de la vérification du nom d\'utilisateur:', checkError);
-                showNotification('Erreur lors de la vérification du nom d\'utilisateur', 'danger');
-                return;
-            }
+// Sauvegarde des modifications d'un administrateur
+document.getElementById('save-edit-admin').addEventListener('click', async function() {
+    const adminId = document.getElementById('edit-admin-id').value;
+    const newCivility = document.getElementById('edit-admin-civility').value;
+    const newUsername = document.getElementById('edit-admin-username').value;
+    const resetPassword = document.getElementById('reset-admin-password').checked;
+    const newPassword = document.getElementById('reset-password').value;
+    
+    try {
+        // Vérification si le nom d'utilisateur existe déjà
+        const { data: existingAdmin, error: checkError } = await supabase
+            .from('administrators')
+            .select('id')
+            .eq('username', newUsername)
+            .neq('id', adminId)
+            .maybeSingle();
             
-            if (existingAdmin) {
-                showNotification('Ce nom d\'utilisateur existe déjà', 'danger');
-                return;
-            }
-            
-            // Préparation des données à mettre à jour
-            const updateData = { username: newUsername };
-            
-            // Si réinitialisation du mot de passe, hacher le nouveau mot de passe
-            if (resetPassword) {
-                updateData.password = await hashPassword(newPassword);
-            }
-            
-            // Mise à jour de l'administrateur
-            const { error } = await supabase
-                .from('administrators')
-                .update(updateData)
-                .eq('id', adminId);
-                
-            if (error) {
-                console.error('Erreur lors de la mise à jour de l\'administrateur:', error);
-                showNotification('Erreur lors de la mise à jour de l\'administrateur', 'danger');
-                return;
-            }
-            
-            // Mise à jour de l'admin actuel si nécessaire
-            if (currentAdmin.id === adminId) {
-                currentAdmin.username = newUsername;
-                if (resetPassword) {
-                    currentAdmin.password = updateData.password;
-                }
-            }
-            
-            // Fermer la modale
-            const modal = bootstrap.Modal.getInstance(document.getElementById('editAdminModal'));
-            modal.hide();
-            
-            // Recharger la liste des administrateurs et rafraîchir l'interface
-            admins = await loadAdmins();
-            refreshAdminList();
-            updateAdminUI();
-            showNotification('Administrateur modifié avec succès!', 'success');
-        } catch (err) {
-            console.error('Erreur lors de la modification de l\'administrateur:', err);
-            showNotification('Une erreur est survenue', 'danger');
+        if (checkError) {
+            console.error('Erreur lors de la vérification du nom d\'utilisateur:', checkError);
+            showNotification('Erreur lors de la vérification du nom d\'utilisateur', 'danger');
+            return;
         }
-    });
+        
+        if (existingAdmin) {
+            showNotification('Ce nom d\'utilisateur existe déjà', 'danger');
+            return;
+        }
+        
+        // Préparation des données à mettre à jour
+        const updateData = { 
+            username: newUsername,
+            civility: newCivility
+        };
+        
+        // Si réinitialisation du mot de passe, hacher le nouveau mot de passe
+        if (resetPassword) {
+            updateData.password = await hashPassword(newPassword);
+        }
+        
+        // Mise à jour de l'administrateur
+        const { error } = await supabase
+            .from('administrators')
+            .update(updateData)
+            .eq('id', adminId);
+            
+        if (error) {
+            console.error('Erreur lors de la mise à jour de l\'administrateur:', error);
+            showNotification('Erreur lors de la mise à jour de l\'administrateur', 'danger');
+            return;
+        }
+        
+        // Mise à jour de l'admin actuel si nécessaire
+        if (currentAdmin.id === adminId) {
+            currentAdmin.username = newUsername;
+            currentAdmin.civility = newCivility;
+            if (resetPassword) {
+                currentAdmin.password = updateData.password;
+            }
+        }
+        
+        // Fermer la modale
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editAdminModal'));
+        modal.hide();
+        
+        // Recharger la liste des administrateurs et rafraîchir l'interface
+        admins = await loadAdmins();
+        refreshAdminList();
+        updateAdminUI();
+        showNotification('Administrateur modifié avec succès!', 'success');
+    } catch (err) {
+        console.error('Erreur lors de la modification de l\'administrateur:', err);
+        showNotification('Une erreur est survenue', 'danger');
+    }
+});
+
     
     // Confirmation de suppression d'un administrateur
     document.getElementById('confirm-delete-admin').addEventListener('click', async function() {
@@ -4349,69 +4693,74 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
     
-    // Fonction pour rafraîchir la liste des administrateurs
-    function refreshAdminList() {
-        const adminList = document.getElementById('admin-list');
-        adminList.innerHTML = '';
+// Fonction pour rafraîchir la liste des administrateurs
+function refreshAdminList() {
+    const adminList = document.getElementById('admin-list');
+    adminList.innerHTML = '';
+    
+    admins.forEach(admin => {
+        const adminItem = document.createElement('div');
+        adminItem.className = 'admin-item';
+        adminItem.dataset.adminId = admin.id;
         
-        admins.forEach(admin => {
-            const adminItem = document.createElement('div');
-            adminItem.className = 'admin-item';
-            adminItem.dataset.adminId = admin.id;
+        const isPrimary = admin.role === 'primary';
+        const isCurrentAdmin = admin.id === currentAdmin.id;
+        
+        // Badge approprié selon le rôle
+        const badgeClass = isPrimary ? 'primary' : 'standard';
+        const badgeIcon = isPrimary ? 'crown' : 'user-shield';
+        const badgeText = isPrimary ? 'Principal' : 'Standard';
+        
+        // Affichage du statut en ligne
+        const onlineStatusClass = admin.online ? 'online' : 'offline';
+        const onlineStatusTitle = admin.online ? 'En ligne' : 'Hors ligne';
+        
+        // Définir la civilité avec une valeur par défaut si non définie
+        const civility = admin.civility || 'M';
+        const civilityDisplay = civility === 'M' ? 'Monsieur' : 'Madame';
+        
+        // Actions disponibles en fonction des droits
+        let actionButtons = '';
+        if(currentAdmin.role === 'primary') {
+            // L'admin principal peut éditer tous les admins
+            actionButtons += `<div class="admin-btn edit" title="Modifier"><i class="fas fa-edit"></i></div>`;
             
-            const isPrimary = admin.role === 'primary';
-            const isCurrentAdmin = admin.id === currentAdmin.id;
-            
-            // Badge approprié selon le rôle
-            const badgeClass = isPrimary ? 'primary' : 'standard';
-            const badgeIcon = isPrimary ? 'crown' : 'user-shield';
-            const badgeText = isPrimary ? 'Principal' : 'Standard';
-            
-            // Affichage du statut en ligne
-            const onlineStatusClass = admin.online ? 'online' : 'offline';
-            const onlineStatusTitle = admin.online ? 'En ligne' : 'Hors ligne';
-            
-            // Actions disponibles en fonction des droits
-            let actionButtons = '';
-            if(currentAdmin.role === 'primary') {
-                // L'admin principal peut éditer tous les admins
-                actionButtons += `<div class="admin-btn edit" title="Modifier"><i class="fas fa-edit"></i></div>`;
-                
-                // L'admin principal peut supprimer tous les admins sauf lui-même
-                if(!isCurrentAdmin) {
-                    actionButtons += `<div class="admin-btn delete" title="Supprimer"><i class="fas fa-trash"></i></div>`;
-                }
-            } else if(isCurrentAdmin) {
-                // Un admin standard peut s'éditer lui-même
-                actionButtons += `<div class="admin-btn edit" title="Modifier"><i class="fas fa-edit"></i></div>`;
+            // L'admin principal peut supprimer tous les admins sauf lui-même
+            if(!isCurrentAdmin) {
+                actionButtons += `<div class="admin-btn delete" title="Supprimer"><i class="fas fa-trash"></i></div>`;
             }
-            
-            adminItem.innerHTML = `
-                <div class="admin-header">
-                    <div class="admin-info">
-                        <span class="admin-name">${admin.username}</span>
-                        <span class="admin-badge ${badgeClass}">
-                            <i class="fas fa-${badgeIcon}"></i> ${badgeText}
-                        </span>
-                        <span class="online-status ${onlineStatusClass}" title="${onlineStatusTitle}"></span>
-                    </div>
-                    <div class="admin-actions">
-                        ${actionButtons}
-                    </div>
+        } else if(isCurrentAdmin) {
+            // Un admin standard peut s'éditer lui-même
+            actionButtons += `<div class="admin-btn edit" title="Modifier"><i class="fas fa-edit"></i></div>`;
+        }
+        
+        adminItem.innerHTML = `
+            <div class="admin-header">
+                <div class="admin-info">
+                    <span class="admin-name">${civilityDisplay} ${admin.username}</span>
+                    <span class="admin-badge ${badgeClass}">
+                        <i class="fas fa-${badgeIcon}"></i> ${badgeText}
+                    </span>
+                    <span class="online-status ${onlineStatusClass}" title="${onlineStatusTitle}"></span>
                 </div>
-                <div class="admin-details">
-                    <div class="admin-detail">
-                        <i class="fas fa-clock"></i> Dernière connexion: ${formatLastLogin(admin.last_login)}
-                    </div>
-                    <div class="admin-detail">
-                        <i class="fas fa-calendar-alt"></i> Créé le: ${new Date(admin.created_at).toLocaleDateString('fr-FR')}
-                    </div>
+                <div class="admin-actions">
+                    ${actionButtons}
                 </div>
-            `;
-            
-            adminList.appendChild(adminItem);
-        });
-    }
+            </div>
+            <div class="admin-details">
+                <div class="admin-detail">
+                    <i class="fas fa-clock"></i> Dernière connexion: ${formatLastLogin(admin.last_login)}
+                </div>
+                <div class="admin-detail">
+                    <i class="fas fa-calendar-alt"></i> Créé le: ${new Date(admin.created_at).toLocaleDateString('fr-FR')}
+                </div>
+            </div>
+        `;
+        
+        adminList.appendChild(adminItem);
+    });
+}
+
     
     // Fonction pour mettre à jour l'interface selon l'admin connecté
     function updateAdminUI() {
@@ -4556,6 +4905,7 @@ function initThemeLangMode() {
     setupDarkModeButton();
     setupLanguageButton();
     setupAdvancedButton();
+    setupModernUIButton(); // Nouvelle fonction
     
     // Initialisation des boutons et popups de l'authentification
     setupAuthSettings();
@@ -4622,6 +4972,17 @@ function setupAuthSettings() {
         });
     }
     
+    // Configuration du toggle Modern UI dans le popup d'authentification
+    const authModernUIToggle = document.getElementById('auth-ThemeLangMode_modernUIToggle');
+    if (authModernUIToggle) {
+        const isModernUI = document.documentElement.getAttribute('data-modern-ui') === 'true';
+        authModernUIToggle.checked = isModernUI;
+        
+        authModernUIToggle.addEventListener('change', function() {
+            toggleModernUI();
+        });
+    }
+    
     // Mise à jour de la fonction closeAllPopups pour inclure les popups d'authentification
     const originalCloseAllPopups = closeAllPopups;
     closeAllPopups = function() {
@@ -4641,6 +5002,9 @@ function loadPreferences() {
     
     // Chargement du mode sombre/clair
     const darkMode = localStorage.getItem('darkMode') === 'true';
+    
+    // Chargement du mode Modern UI
+    const modernUI = localStorage.getItem('modernUI') === 'true';
     
     // Mise à jour des boutons principaux
     const darkModeBtn = document.getElementById('ThemeLangMode_darkModeBtn');
@@ -4664,6 +5028,13 @@ function loadPreferences() {
         }
     }
     
+    // Application du mode Modern UI si activé
+    if (modernUI) {
+        document.documentElement.setAttribute('data-modern-ui', 'true');
+    } else {
+        document.documentElement.removeAttribute('data-modern-ui');
+    }
+    
     // Mise à jour des toggles pour le mode sombre
     const darkModeToggle = document.getElementById('ThemeLangMode_darkModeToggle');
     const authDarkModeToggle = document.getElementById('auth-ThemeLangMode_darkModeToggle');
@@ -4672,6 +5043,16 @@ function loadPreferences() {
     }
     if (authDarkModeToggle) {
         authDarkModeToggle.checked = darkMode;
+    }
+    
+    // Mise à jour des toggles pour le mode Modern UI
+    const modernUIToggle = document.getElementById('ThemeLangMode_modernUIToggle');
+    const authModernUIToggle = document.getElementById('auth-ThemeLangMode_modernUIToggle');
+    if (modernUIToggle) {
+        modernUIToggle.checked = modernUI;
+    }
+    if (authModernUIToggle) {
+        authModernUIToggle.checked = modernUI;
     }
     
     // Sélection du thème dans l'UI
@@ -4697,6 +5078,41 @@ function loadPreferences() {
             item.classList.remove('active');
         }
     });
+}
+
+function setupModernUIButton() {
+    const modernUIToggle = document.getElementById('ThemeLangMode_modernUIToggle');
+    const authModernUIToggle = document.getElementById('auth-ThemeLangMode_modernUIToggle');
+    
+    if (modernUIToggle) {
+        modernUIToggle.addEventListener('change', function() {
+            toggleModernUI();
+        });
+    }
+    
+    if (authModernUIToggle) {
+        authModernUIToggle.addEventListener('change', function() {
+            toggleModernUI();
+        });
+    }
+}
+
+function toggleModernUI() {
+    const isModernUI = document.documentElement.getAttribute('data-modern-ui') === 'true';
+    const modernUIToggle = document.getElementById('ThemeLangMode_modernUIToggle');
+    const authModernUIToggle = document.getElementById('auth-ThemeLangMode_modernUIToggle');
+    
+    if (isModernUI) {
+        document.documentElement.removeAttribute('data-modern-ui');
+        localStorage.setItem('modernUI', 'false');
+        if (modernUIToggle) modernUIToggle.checked = false;
+        if (authModernUIToggle) authModernUIToggle.checked = false;
+    } else {
+        document.documentElement.setAttribute('data-modern-ui', 'true');
+        localStorage.setItem('modernUI', 'true');
+        if (modernUIToggle) modernUIToggle.checked = true;
+        if (authModernUIToggle) authModernUIToggle.checked = true;
+    }
 }
 
 
@@ -11744,18 +12160,520 @@ function captureEditorPhoto() {
 /*══════════════════════════════╗
   🟡 JS PARTIE 11
   ═════════════════════════════╝*/
+// Initialisation des sélecteurs de civilité personnalisés
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser tous les sélecteurs de civilité
+    initCivilitySelector('civility_first_login', 'admin-civility');
+    initCivilitySelector('civility_new_admin', 'new-admin-civility');
+    initCivilitySelector('civility_edit_admin', 'edit-admin-civility');
+    
+    // Pour la modal d'édition, mettre à jour le sélecteur quand la modal s'ouvre
+    document.getElementById('editAdminModal').addEventListener('show.bs.modal', function() {
+        const civilityValue = document.getElementById('edit-admin-civility').value;
+        updateCivilitySelector('civility_edit_admin', civilityValue);
+    });
+});
+
+// Fonction d'initialisation d'un sélecteur de civilité
+function initCivilitySelector(selectorId, inputId) {
+    const selector = document.getElementById(`${selectorId}_selector`);
+    const dropdown = document.getElementById(`${selectorId}_dropdown`);
+    const options = dropdown.querySelectorAll('.civility-option');
+    const hiddenInput = document.getElementById(inputId);
+    
+    // Ouvrir/fermer le dropdown
+    selector.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        selector.classList.toggle('civility-selector-active');
+        dropdown.classList.toggle('civility-dropdown-open');
+    });
+    
+    // Focus/blur pour l'accessibilité
+    selector.addEventListener('focus', function() {
+        selector.classList.add('civility-selector-active');
+    });
+    
+    selector.addEventListener('blur', function() {
+        setTimeout(() => {
+            if (!selector.contains(document.activeElement)) {
+                selector.classList.remove('civility-selector-active');
+                dropdown.classList.remove('civility-dropdown-open');
+            }
+        }, 100);
+    });
+    
+    // Navigation au clavier
+    selector.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            dropdown.classList.toggle('civility-dropdown-open');
+        } else if (e.key === 'Escape') {
+            dropdown.classList.remove('civility-dropdown-open');
+        } else if (e.key === 'ArrowDown' && dropdown.classList.contains('civility-dropdown-open')) {
+            e.preventDefault();
+            options[0].focus();
+        }
+    });
+    
+    // Sélection d'une option
+    options.forEach(option => {
+        option.addEventListener('click', function() {
+            const value = this.dataset.value;
+            const text = this.textContent.trim();
+            const icon = this.querySelector('.civility-icon').cloneNode(true);
+            
+            // Mettre à jour le texte et l'icône du sélecteur
+            const selectorText = selector.querySelector('.civility-selector-text');
+            selectorText.innerHTML = '';
+            selectorText.appendChild(icon);
+            selectorText.appendChild(document.createTextNode(text));
+            
+            // Mettre à jour l'entrée cachée
+            hiddenInput.value = value;
+            
+            // Mettre à jour la classe selected
+            options.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            // Fermer le dropdown
+            dropdown.classList.remove('civility-dropdown-open');
+            selector.classList.remove('civility-selector-active');
+            
+            // Déclencher l'événement de changement pour le champ caché
+            const event = new Event('change', { bubbles: true });
+            hiddenInput.dispatchEvent(event);
+        });
+        
+        // Navigation au clavier dans les options
+        option.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.click();
+            } else if (e.key === 'Escape') {
+                dropdown.classList.remove('civility-dropdown-open');
+                selector.focus();
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const nextOption = this.nextElementSibling;
+                if (nextOption) nextOption.focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prevOption = this.previousElementSibling;
+                if (prevOption) prevOption.focus();
+                else selector.focus();
+            }
+        });
+        
+        // Permettre le focus sur les options
+        option.setAttribute('tabindex', '0');
+    });
+    
+    // Fermer le dropdown si on clique ailleurs
+    document.addEventListener('click', function(e) {
+        if (!selector.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.remove('civility-dropdown-open');
+            selector.classList.remove('civility-selector-active');
+        }
+    });
+}
+
+// Fonction pour mettre à jour un sélecteur de civilité avec une valeur spécifique
+function updateCivilitySelector(selectorId, value) {
+    if (!value) return;
+    
+    const selector = document.getElementById(`${selectorId}_selector`);
+    const dropdown = document.getElementById(`${selectorId}_dropdown`);
+    const option = dropdown.querySelector(`.civility-option[data-value="${value}"]`);
+    
+    if (option) {
+        const text = option.textContent.trim();
+        const icon = option.querySelector('.civility-icon').cloneNode(true);
+        
+        // Mettre à jour le texte et l'icône du sélecteur
+        const selectorText = selector.querySelector('.civility-selector-text');
+        selectorText.innerHTML = '';
+        selectorText.appendChild(icon);
+        selectorText.appendChild(document.createTextNode(text));
+        
+        // Mettre à jour la classe selected
+        dropdown.querySelectorAll('.civility-option').forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+    }
+}
 
 /*══════════════════════════════╗
   🟢 JS PARTIE 12
   ═════════════════════════════╝*/
+// Ajouter au JS des dropdowns pour le comportement amélioré sur mobile
+function civility_initCustomSelects() {
+    const customSelects = document.querySelectorAll('.civility_custom-select');
+    
+    customSelects.forEach(select => {
+        const selected = select.querySelector('.civility_selected');
+        const dropdown = select.querySelector('.civility_dropdown');
+        const options = select.querySelectorAll('.civility_option');
+        const hiddenInput = select.querySelector('input[type="hidden"]');
+        
+        // Ajouter la barre de tirage sur mobile si Modern UI est activé
+        if (window.innerWidth <= 576 && document.documentElement.getAttribute('data-modern-ui') === 'true') {
+            if (!dropdown.querySelector('.civility_drag-handle')) {
+                dropdown.insertAdjacentHTML('afterbegin', '<div class="civility_drag-handle"></div>');
+            }
+        }
+        
+        // Gestionnaire pour ouvrir/fermer le dropdown
+        selected.addEventListener('click', () => {
+            const isOpen = dropdown.classList.contains('show');
+            
+            // Fermer tous les autres dropdowns
+            document.querySelectorAll('.civility_dropdown.show').forEach(dd => {
+                if (dd !== dropdown) {
+                    dd.classList.remove('show');
+                    dd.closest('.civility_custom-select').querySelector('.civility_selected').classList.remove('active');
+                }
+            });
+            
+            // Toggle ce dropdown
+            dropdown.classList.toggle('show');
+            selected.classList.toggle('active');
+            
+            // Gestion du backdrop sur mobile
+            if (window.innerWidth <= 576) {
+                if (!isOpen) {
+                    civility_backdrop.classList.add('show');
+                } else {
+                    civility_backdrop.classList.remove('show');
+                }
+            }
+        });
+        
+        // Reste du code inchangé...
+        // Gestionnaire pour chaque option
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                const value = option.dataset.value;
+                const text = option.querySelector('span').textContent;
+                const icon = option.querySelector('i').cloneNode(true);
+                
+                // Mettre à jour l'élément sélectionné
+                const selectedContent = `
+                    ${icon.outerHTML}
+                    <span class="civility_selected-text">${text}</span>
+                `;
+                selected.innerHTML = selectedContent + '<i class="fas fa-chevron-down civility_arrow"></i>';
+                
+                // Mettre à jour l'input caché
+                hiddenInput.value = value;
+                
+                // Déclencher l'événement change
+                const changeEvent = new Event('change', { bubbles: true });
+                hiddenInput.dispatchEvent(changeEvent);
+                
+                // Marquer cette option comme sélectionnée
+                options.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                
+                // Fermer le dropdown
+                dropdown.classList.remove('show');
+                selected.classList.remove('active');
+                civility_backdrop.classList.remove('show');
+            });
+        });
+    });
+    
+    // Fermer les dropdowns quand on clique ailleurs
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.civility_custom-select')) {
+            document.querySelectorAll('.civility_dropdown.show').forEach(dropdown => {
+                dropdown.classList.remove('show');
+                dropdown.closest('.civility_custom-select').querySelector('.civility_selected').classList.remove('active');
+            });
+            civility_backdrop.classList.remove('show');
+        }
+    });
+    
+    // Fermer les dropdowns avec la touche Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.civility_dropdown.show').forEach(dropdown => {
+                dropdown.classList.remove('show');
+                dropdown.closest('.civility_custom-select').querySelector('.civility_selected').classList.remove('active');
+            });
+            civility_backdrop.classList.remove('show');
+        }
+    });
+    
+    // Gestion du backdrop pour fermer le dropdown sur mobile
+    civility_backdrop.addEventListener('click', () => {
+        document.querySelectorAll('.civility_dropdown.show').forEach(dropdown => {
+            dropdown.classList.remove('show');
+            dropdown.closest('.civility_custom-select').querySelector('.civility_selected').classList.remove('active');
+        });
+        civility_backdrop.classList.remove('show');
+    });
+}
+
 
 /*══════════════════════════════╗
   🔵 JS PARTIE 13
   ═════════════════════════════╝*/
+// Gestionnaire du burger menu moderne
+document.addEventListener('DOMContentLoaded', function() {
+    // Définir un index pour chaque élément du menu pour l'animation
+    document.querySelectorAll('#sidebar .nav-item').forEach((item, index) => {
+        item.style.setProperty('--item-index', index);
+    });
+
+    // Ajouter l'overlay pour le sidebar s'il n'existe pas déjà
+    if (!document.querySelector('.sidebar-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        document.body.appendChild(overlay);
+    }
+    
+// Gestionnaire pour le bouton d'ouverture du menu
+const menuToggleBtn = document.getElementById('menu-toggle-btn');
+if (menuToggleBtn) {
+    menuToggleBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        this.classList.add('active');
+        
+        // Activer le sidebar
+        document.getElementById('sidebar').classList.add('active');
+        document.querySelector('.sidebar-overlay').classList.add('active');
+        document.body.style.overflow = 'hidden'; // Empêcher le défilement
+        
+        // Activer aussi le bouton de fermeture du sidebar avec une légère attente
+        // pour simuler le mouvement du bouton d'un endroit à l'autre
+        setTimeout(() => {
+            const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+            if (closeSidebarBtn) {
+                closeSidebarBtn.classList.add('active', 'button-appeared');
+            }
+        }, 150);
+        
+        // Appliquer l'animation de façon séquentielle aux éléments du menu
+        setTimeout(() => {
+            document.querySelectorAll('#sidebar .nav-item').forEach(item => {
+                item.style.opacity = 1;
+            });
+        }, 300);
+    });
+}
+
+    
+    // Gestionnaire pour le bouton de fermeture du menu dans le sidebar
+    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+    if (closeSidebarBtn) {
+        closeSidebarBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeSidebar();
+        });
+    }
+    
+    // Fermer le sidebar quand on clique sur l'overlay
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (overlay) {
+        overlay.addEventListener('click', closeSidebar);
+    }
+    
+    // Fermer le sidebar quand on clique sur un lien du menu (sur mobile)
+    document.querySelectorAll('#sidebar .nav-item a').forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Ajouter l'effet de vague au clic
+            this.classList.add('ripple');
+            setTimeout(() => {
+                this.classList.remove('ripple');
+            }, 600);
+
+            if (window.innerWidth < 992) {
+                setTimeout(closeSidebar, 300); // Délai pour voir l'animation
+            }
+        });
+    });
+    
+    // Écouter les changements de taille d'écran
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 992) {
+            document.querySelector('.sidebar-overlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+    
+    // Initialisation des touches clavier pour fermer le sidebar
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeSidebar();
+        }
+    });
+    
+// Fonction pour fermer le sidebar
+function closeSidebar() {
+    const menuToggleBtn = document.getElementById('menu-toggle-btn');
+    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+    
+    if (menuToggleBtn) {
+        menuToggleBtn.classList.remove('active');
+    }
+    
+    // Disparition progressive du X dans le sidebar
+    if (closeSidebarBtn) {
+        closeSidebarBtn.classList.remove('active');
+        // L'animation de retour commence
+        closeSidebarBtn.classList.add('reverse-transform');
+    }
+    
+    // On attend que l'animation du bouton se termine avant de fermer le sidebar
+    setTimeout(() => {
+        document.getElementById('sidebar').classList.remove('active');
+        document.querySelector('.sidebar-overlay').classList.remove('active');
+        document.body.style.overflow = ''; // Réactiver le défilement
+        
+        // Réinitialiser l'état du bouton après la fermeture
+        if (closeSidebarBtn) {
+            closeSidebarBtn.classList.remove('reverse-transform');
+        }
+    }, 300);
+}
+
+    
+    // Double-clic sur la barre supérieure pour épingler/désépingler le sidebar sur desktop
+    document.querySelector('.top-nav-bar').addEventListener('dblclick', function(e) {
+        if (window.innerWidth >= 993) {
+            document.body.classList.toggle('sidebar-pinned');
+            
+            // Enregistrer la préférence dans localStorage
+            if (document.body.classList.contains('sidebar-pinned')) {
+                localStorage.setItem('sidebarPinned', 'true');
+                document.getElementById('sidebar').classList.add('active');
+            } else {
+                localStorage.setItem('sidebarPinned', 'false');
+                document.getElementById('sidebar').classList.remove('active');
+            }
+        }
+    });
+    
+    // Charger la préférence de sidebar épinglé au chargement
+    if (localStorage.getItem('sidebarPinned') === 'true' && window.innerWidth >= 993) {
+        document.body.classList.add('sidebar-pinned');
+        document.getElementById('sidebar').classList.add('active');
+    }
+    
+    // Synchroniser les boutons burger menu (celui du top-nav et celui du sidebar)
+    function syncBurgerMenus(isOpen) {
+        const menuToggleBtn = document.getElementById('menu-toggle-btn');
+        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+        
+        if (isOpen) {
+            if (menuToggleBtn) menuToggleBtn.classList.add('active');
+            if (closeSidebarBtn) closeSidebarBtn.classList.add('active');
+        } else {
+            if (menuToggleBtn) menuToggleBtn.classList.remove('active');
+            if (closeSidebarBtn) closeSidebarBtn.classList.remove('active');
+        }
+    }
+    
+    // Mettre à jour les badges d'alerte
+    function updateAlertBadges() {
+        // Exemple de logique pour mettre à jour le nombre d'alertes
+        // Vous pouvez adapter cette fonction selon votre logique existante
+        const alertCount = document.querySelectorAll('.alert-item:not(.read)').length;
+        const alertBadge = document.querySelector('.alert-badge');
+        
+        if (alertBadge) {
+            alertBadge.textContent = alertCount;
+            alertBadge.style.display = alertCount > 0 ? 'inline-block' : 'none';
+        }
+    }
+    
+    // Appeler cette fonction au chargement et après toute action qui modifie les alertes
+    updateAlertBadges();
+    
+    // Mode mini-sidebar (expérimental)
+    document.querySelector('.user-info').addEventListener('dblclick', function() {
+        document.body.classList.toggle('sidebar-mini');
+    });
+});
+
+ // Fonction pour synchroniser l'état des boutons de menu
+function syncMenuButtons(isActive) {
+    const menuToggleBtn = document.getElementById('menu-toggle-btn');
+    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+    
+    if (isActive) {
+        if (menuToggleBtn) menuToggleBtn.classList.add('active');
+        if (closeSidebarBtn) closeSidebarBtn.classList.add('active');
+    } else {
+        if (menuToggleBtn) menuToggleBtn.classList.remove('active');
+        if (closeSidebarBtn) closeSidebarBtn.classList.remove('active');
+    }
+}
+
+
+
 
 /*══════════════════════════════╗
   🟣 JS PARTIE 14
   ═════════════════════════════╝*/
+// Function to handle brand name formatting
+function formatBrandName() {
+    const brandNameElement = document.getElementById('brandName');
+    const brandName = brandNameElement.textContent;
+    
+    // Reset all classes
+    brandNameElement.classList.remove('long-text', 'very-long-text', 'has-spaces', 'has-hyphens');
+    
+    // Check for spaces
+    if (brandName.includes(' ')) {
+        brandNameElement.classList.add('has-spaces');
+    }
+    
+    // Check for hyphens
+    if (brandName.includes('-')) {
+        brandNameElement.classList.add('has-hyphens');
+    }
+    
+    // Check length
+    if (brandName.length > 12) {
+        brandNameElement.classList.add('long-text');
+    }
+    
+    if (brandName.length > 18) {
+        brandNameElement.classList.add('very-long-text');
+    }
+}
+
+// Call on page load
+document.addEventListener('DOMContentLoaded', function() {
+    formatBrandName();
+    
+    // Demo for changing the brand name for testing (optional)
+    // Uncomment to test different brand name scenarios
+    /*
+    setTimeout(() => {
+        document.getElementById('brandName').textContent = "Azertyqwertyzonerouge";
+        formatBrandName();
+    }, 3000);
+    
+    setTimeout(() => {
+        document.getElementById('brandName').textContent = "MonMag Pharma Business";
+        formatBrandName();
+    }, 6000);
+    
+    setTimeout(() => {
+        document.getElementById('brandName').textContent = "MonMag-Pharma-Business";
+        formatBrandName();
+    }, 9000);
+    */
+});
+
+// Function to update brand name
+function updateBrandName(newName) {
+    document.getElementById('brandName').textContent = newName;
+    formatBrandName();
+}
 
 /*══════════════════════════════╗
   🟤 JS PARTIE 15

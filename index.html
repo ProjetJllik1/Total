@@ -6,6 +6,7 @@
     <title>Total - Gestion d'Inventaire</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -237,72 +238,97 @@
             </div>
         </div>
         
-        <!-- Formulaire de première connexion -->
-        <div id="first-login" class="auth-body">
-            <h5 class="auth-title">Première connexion</h5>
-            <form id="first-login-form" class="auth-form">
-                <div class="mb-3">
-                    <label for="admin-username" class="form-label">Nom d'utilisateur</label>
-                    <input type="text" class="form-control" id="admin-username" required>
-                </div>
-                
-                <div class="mb-3 password-field">
-                    <label for="admin-password" class="form-label">Mot de passe</label>
-                    <input type="password" class="form-control" id="admin-password" required>
-                    <span class="password-toggle" onclick="togglePasswordVisibility('admin-password', this)">
-                        <i class="fas fa-eye"></i>
-                    </span>
-                    
-                    <div class="password-strength">
-                        <div class="password-strength-bar" id="password-strength-bar"></div>
-                    </div>
-                    
-                    <div class="password-feedback">
-                        <span id="password-strength-text">Force: Faible</span>
-                        <span id="password-length">0/12</span>
-                    </div>
-                    
-                    <div class="password-rules">
-                        <div class="password-rule" id="rule-length">
-                            <span class="rule-icon"><i class="fas fa-times-circle text-danger"></i></span>
-                            Au moins 12 caractères
-                        </div>
-                        <div class="password-rule" id="rule-uppercase">
-                            <span class="rule-icon"><i class="fas fa-times-circle text-danger"></i></span>
-                            Au moins une majuscule
-                        </div>
-                        <div class="password-rule" id="rule-lowercase">
-                            <span class="rule-icon"><i class="fas fa-times-circle text-danger"></i></span>
-                            Au moins une minuscule
-                        </div>
-                        <div class="password-rule" id="rule-number">
-                            <span class="rule-icon"><i class="fas fa-times-circle text-danger"></i></span>
-                            Au moins un chiffre
-                        </div>
-                        <div class="password-rule" id="rule-special">
-                            <span class="rule-icon"><i class="fas fa-times-circle text-danger"></i></span>
-                            Au moins un caractère spécial
-                        </div>
-                    </div>
-                    
-                    <div class="password-tip">
-                        <i class="fas fa-lightbulb"></i> Astuce: Utilisez une phrase mémorable avec des chiffres et symboles. Par exemple: "J'aime14café!tous-les-matins"
-                    </div>
-                </div>
-                
-                <div class="mb-3 password-field">
-                    <label for="admin-password-confirm" class="form-label">Confirmer le mot de passe</label>
-                    <input type="password" class="form-control" id="admin-password-confirm" required>
-                    <span class="password-toggle" onclick="togglePasswordVisibility('admin-password-confirm', this)">
-                        <i class="fas fa-eye"></i>
-                    </span>
-                </div>
-                
-                <button type="submit" class="btn btn-primary w-100 auth-btn mt-4">
-                    Créer le compte administrateur
-                </button>
-            </form>
+<!-- Formulaire de première connexion -->
+<div id="first-login" class="auth-body">
+    <h5 class="auth-title">Première connexion</h5>
+    <form id="first-login-form" class="auth-form">
+<div class="mb-3">
+    <label for="admin-civility" class="form-label">Civilité</label>
+    <div class="civility-selector-container" id="civility_first_login_container">
+        <div class="civility-selector" id="civility_first_login_selector" tabindex="0">
+            <span class="civility-selector-text">
+                <span>Sélectionnez une civilité</span>
+            </span>
+            <i class="fas fa-chevron-down"></i>
         </div>
+        <div class="civility-dropdown" id="civility_first_login_dropdown">
+            <div class="civility-option" data-value="M">
+                <span class="civility-icon"><i class="fas fa-male"></i></span>
+                <span>Monsieur</span>
+            </div>
+            <div class="civility-option" data-value="Mme">
+                <span class="civility-icon"><i class="fas fa-female"></i></span>
+                <span>Madame</span>
+            </div>
+        </div>
+        <input type="hidden" id="admin-civility" name="admin-civility" value="" required>
+    </div>
+</div>
+
+        
+        <div class="mb-3">
+            <label for="admin-username" class="form-label">Nom d'utilisateur</label>
+            <input type="text" class="form-control" id="admin-username" required>
+        </div>
+        
+        <div class="mb-3 password-field">
+            <label for="admin-password" class="form-label">Mot de passe</label>
+            <input type="password" class="form-control" id="admin-password" required>
+            <span class="password-toggle" onclick="togglePasswordVisibility('admin-password', this)">
+                <i class="fas fa-eye"></i>
+            </span>
+            
+            <div class="password-strength">
+                <div class="password-strength-bar" id="password-strength-bar"></div>
+            </div>
+            
+            <div class="password-feedback">
+                <span id="password-strength-text">Force: Faible</span>
+                <span id="password-length">0/12</span>
+            </div>
+            
+            <div class="password-rules">
+                <div class="password-rule" id="rule-length">
+                    <span class="rule-icon"><i class="fas fa-times-circle text-danger"></i></span>
+                    Au moins 12 caractères
+                </div>
+                <div class="password-rule" id="rule-uppercase">
+                    <span class="rule-icon"><i class="fas fa-times-circle text-danger"></i></span>
+                    Au moins une majuscule
+                </div>
+                <div class="password-rule" id="rule-lowercase">
+                    <span class="rule-icon"><i class="fas fa-times-circle text-danger"></i></span>
+                    Au moins une minuscule
+                </div>
+                <div class="password-rule" id="rule-number">
+                    <span class="rule-icon"><i class="fas fa-times-circle text-danger"></i></span>
+                    Au moins un chiffre
+                </div>
+                <div class="password-rule" id="rule-special">
+                    <span class="rule-icon"><i class="fas fa-times-circle text-danger"></i></span>
+                    Au moins un caractère spécial
+                </div>
+            </div>
+            
+            <div class="password-tip">
+                <i class="fas fa-lightbulb"></i> Astuce: Utilisez une phrase mémorable avec des chiffres et symboles. Par exemple: "J'aime14café!tous-les-matins"
+            </div>
+        </div>
+        
+        <div class="mb-3 password-field">
+            <label for="admin-password-confirm" class="form-label">Confirmer le mot de passe</label>
+            <input type="password" class="form-control" id="admin-password-confirm" required>
+            <span class="password-toggle" onclick="togglePasswordVisibility('admin-password-confirm', this)">
+                <i class="fas fa-eye"></i>
+            </span>
+        </div>
+        
+        <button type="submit" class="btn btn-primary w-100 auth-btn mt-4">
+            Créer le compte administrateur
+        </button>
+    </form>
+</div>
+
         
         <!-- Formulaire de connexion standard -->
         <div id="login" class="auth-body" style="display: none;">
@@ -348,6 +374,19 @@
                     </label>
                 </div>
             </div>
+            <!-- Et similairement dans auth-ThemeLangMode_themePopup -->
+<div class="ThemeLangMode_option-group">
+    <div class="ThemeLangMode_toggle-group">
+        <div class="ThemeLangMode_toggle-label">
+            <i class="fas fa-paint-brush ThemeLangMode_toggle-icon"></i>
+            Mode Modern UI
+        </div>
+        <label class="ThemeLangMode_toggle-switch">
+            <input type="checkbox" id="auth-ThemeLangMode_modernUIToggle">
+            <span class="ThemeLangMode_toggle-slider"></span>
+        </label>
+    </div>
+</div>
             <div class="ThemeLangMode_option-group">
                 <label class="ThemeLangMode_option-label">Couleurs du thème</label>
                 <div class="ThemeLangMode_themes">
@@ -435,14 +474,55 @@
 </div>
 
 
-    <button id="mobile-toggle-btn">
-        <i class="fas fa-bars"></i>
-    </button>
+<div id="app-container">
+    <!-- Nouvelle barre de navigation supérieure -->
+    <div class="top-nav-bar">
+        <div class="top-nav-left">
+            <button id="menu-toggle-btn" class="menu-toggle-btn" title="Afficher/Masquer le menu">
+                <div class="menu-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+            <div class="nav-controls">
+                <button id="nav-back-btn" class="nav-control-btn" title="Retour à la section précédente (Alt+←)">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button id="nav-forward-btn" class="nav-control-btn" title="Aller à la section suivante (Alt+→)">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        <div class="top-nav-center" id="current-section-title"></div>
+        <div class="top-nav-right">
+            <div class="current-section-display">
+                <i class="fas fa-map-marker-alt"></i>
+                <span id="current-section-indicator"></span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-content-wrapper">
 
-    <div id="app-container">
- <nav id="sidebar">
+<nav id="sidebar">
     <div class="sidebar-header">
-        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNDAgNjAiPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik01NS40IDE1LjVoMTI5LjJjNi43IDAgMTIuMiA1LjQgMTIuMiAxMi4xdjQuOGMwIDYuNy01LjQgMTIuMS0xMi4yIDEyLjFINTUuNGMtNi43IDAtMTIuMi01LjQtMTIuMi0xMi4xdi00LjhjMC02LjcgNS41LTEyLjEgMTIuMi0xMi4xem0xNi41IDkuOGMtMy4zIDAtNiAyLjctNiA2cy0yLjcgNi02IDZoLTIuMmMwLTYuNiA1LjQtMTIgMTItMTJoMi4yYzAgMy4zIDIuNyA2IDYgNnMyLjcgNiA2IDZoMmMtLjEgMi44LTIuMiA1LjEtNSA1LjloLS4xYy0uOC4yLTEuNi4zLTIuNS4zaC0xNS41Yy0zLjMgMC02LTIuNy02LTZIMzljMy4zIDAgNi0yLjcgNi02czIuNy02IDYtNmgxNi45YzAtMy4zIDIuNy02IDYtNnY2em0zMC42IDBjMy4zIDAgNi0yLjcgNi02aDEzLjRjMy4zIDAgNiAyLjcgNiA2cy0yLjcgNi02IDZoLTYuN2MwIDMuMy0yLjcgNi02IDZoLTEzLjRWMTkuM2g2Ljd6bTQ1LjggMGMzLjMgMCA2LTIuNyA2LTZoMTMuNGMzLjMgMCA2IDIuNyA2IDZzLTIuNyA2LTYgNmgtNi43YzAgMy4zLTIuNyA2LTYgNmgtMTMuNFYxOS4zaDYuN3ptNDUuOSAwYzMuMyAwIDYtMi43IDYtNmgxMy40YzMuMyAwIDYgMi43IDYgNnMtMi43IDYtNiA2aC02LjdjMCAzLjMtMi43IDYtNiA2aC0xMy40VjE5LjNoNi43eiIvPjwvc3ZnPg==" alt="Total Logo">
+<div class="logo-container">
+    <div class="logo-text">
+        <div class="brand-name" id="brandName">Total</div>
+        <div class="app-type" id="appType">MonStock</div>
+    </div>
+    <button id="close-sidebar-btn" class="menu-toggle-btn" title="Fermer le menu">
+        <div class="menu-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </button>
+</div>
+
         <div id="ThemeLangMode_settings">
             <div class="settings-label">Paramètres</div>
             <div class="settings-buttons-container">
@@ -465,47 +545,84 @@
             </div>
         </div>
     </div>
+    <div class="user-info">
+        <div class="user-avatar">
+            <i class="fas fa-user-circle"></i>
+        </div>
+        <div class="user-details">
+            <div class="user-name">Utilisateur</div>
+            <div class="user-role">Administrateur</div>
+        </div>
+    </div>
     <div class="nav-container">
-        <ul class="nav flex-column">
-            <li class="nav-item active" data-section="dashboard">
-                <a href="#"><i class="fas fa-tachometer-alt"></i> Tableau de bord</a>
-            </li>
-<li class="nav-item" data-section="ai-assistant">
-    <a href="#"><i class="fas fa-robot"></i> Assistant IA</a>
-</li>
-            <li class="nav-item" data-section="inventory">
-                <a href="#"><i class="fas fa-box-open"></i> Inventaire</a>
-            </li>
-            <li class="nav-item" data-section="add-product">
-                <a href="#"><i class="fas fa-plus-circle"></i> Ajouter un produit</a>
-            </li>
-            <li class="nav-item" data-section="scan">
-                <a href="#"><i class="fas fa-barcode"></i> Scanner un code</a>
-            </li>
-            <li class="nav-item" data-section="newonInventSalesPoint">
-                <a href="#"><i class="fas fa-cash-register"></i> Point de Vente</a>
-            </li>
-            <li class="nav-item" data-section="print-codes">
-                <a href="#"><i class="fas fa-print"></i> Imprimer des codes</a>
-            </li>
-            <li class="nav-item" data-section="alerts">
-                <a href="#"><i class="fas fa-bell"></i> Alertes</a>
-            </li>
-            <li class="nav-item" data-section="admin-management">
-                <a href="#"><i class="fas fa-users-cog"></i> Gestion Admin</a>
-            </li>
-            <li class="nav-item" data-section="currency-settings">
-                <a href="#"><i class="fas fa-money-bill-wave"></i> Gestion des devises</a>
-            </li>
-            <li class="nav-item" data-section="History_Inventory_section">
-                <a href="#"><i class="fas fa-history"></i> Historique</a>
-            </li>
-            <li class="nav-item" data-section="about">
-                <a href="#"><i class="fas fa-info-circle"></i> À propos</a>
-            </li>
-        </ul>
+        <div class="nav-group">
+            <div class="nav-group-title">Principal</div>
+            <ul class="nav flex-column">
+                <li class="nav-item active" data-section="dashboard">
+                    <a href="#"><i class="fas fa-tachometer-alt"></i> <span>Tableau de bord</span></a>
+                </li>
+                <li class="nav-item" data-section="ai-assistant">
+                    <a href="#"><i class="fas fa-robot"></i> <span>Assistant IA</span></a>
+                </li>
+                <li class="nav-item" data-section="inventory">
+                    <a href="#"><i class="fas fa-box-open"></i> <span>Inventaire</span></a>
+                </li>
+            </ul>
+        </div>
+        <div class="nav-group">
+            <div class="nav-group-title">Gestion</div>
+            <ul class="nav flex-column">
+                <li class="nav-item" data-section="add-product">
+                    <a href="#"><i class="fas fa-plus-circle"></i> <span>Ajouter un produit</span></a>
+                </li>
+                <li class="nav-item" data-section="scan">
+                    <a href="#"><i class="fas fa-barcode"></i> <span>Scanner un code</span></a>
+                </li>
+                <li class="nav-item" data-section="newonInventSalesPoint">
+                    <a href="#"><i class="fas fa-cash-register"></i> <span>Point de Vente</span></a>
+                </li>
+                <li class="nav-item" data-section="print-codes">
+                    <a href="#"><i class="fas fa-print"></i> <span>Imprimer des codes</span></a>
+                </li>
+            </ul>
+        </div>
+        <div class="nav-group">
+            <div class="nav-group-title">Administration</div>
+            <ul class="nav flex-column">
+                <li class="nav-item" data-section="alerts">
+                    <a href="#">
+                        <i class="fas fa-bell"></i> 
+                        <span>Alertes</span>
+                        <span class="alert-badge">3</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-section="admin-management">
+                    <a href="#"><i class="fas fa-users-cog"></i> <span>Gestion Admin</span></a>
+                </li>
+                <li class="nav-item" data-section="currency-settings">
+                    <a href="#"><i class="fas fa-money-bill-wave"></i> <span>Gestion des devises</span></a>
+                </li>
+                <li class="nav-item" data-section="History_Inventory_section">
+                    <a href="#"><i class="fas fa-history"></i> <span>Historique</span></a>
+                </li>
+            </ul>
+        </div>
+        <div class="nav-group">
+            <div class="nav-group-title">Aide</div>
+            <ul class="nav flex-column">
+                <li class="nav-item" data-section="about">
+                    <a href="#"><i class="fas fa-info-circle"></i> <span>À propos</span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="sidebar-footer">
+        <div class="app-version">v1.2.3</div>
+        <button class="logout-btn"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
     </div>
 </nav>
+
+
 
         <div id="content">
             <!-- Dashboard Section -->
@@ -1672,39 +1789,64 @@
                 </div>
             </div>
             
-            <!-- Ajout d'un nouvel administrateur -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <i class="fas fa-user-plus me-2"></i> Ajouter un administrateur
-                </div>
-                <div class="card-body">
-                    <form id="add-admin-form">
-                        <div class="mb-3">
-                            <label for="new-admin-username" class="form-label">Nom d'utilisateur</label>
-                            <input type="text" class="form-control" id="new-admin-username" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="new-admin-password" class="form-label">Mot de passe temporaire</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="new-admin-password" required>
-                                <button class="btn btn-outline-secondary" type="button" id="generate-password">
-                                    <i class="fas fa-dice"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="temp-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            N'oubliez pas de supprimer les comptes administrateurs temporaires après utilisation.
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100 mt-3">
-                            <i class="fas fa-plus-circle me-2"></i> Ajouter l'administrateur
-                        </button>
-                    </form>
+<!-- Ajout d'un nouvel administrateur -->
+<div class="card mt-4">
+    <div class="card-header">
+        <i class="fas fa-user-plus me-2"></i> Ajouter un administrateur
+    </div>
+    <div class="card-body">
+        <form id="add-admin-form">
+<div class="mb-3">
+    <label for="new-admin-civility" class="form-label">Civilité</label>
+    <div class="civility-selector-container" id="civility_new_admin_container">
+        <div class="civility-selector" id="civility_new_admin_selector" tabindex="0">
+            <span class="civility-selector-text">
+                <span>Sélectionnez une civilité</span>
+            </span>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="civility-dropdown" id="civility_new_admin_dropdown">
+            <div class="civility-option" data-value="M">
+                <span class="civility-icon"><i class="fas fa-male"></i></span>
+                <span>Monsieur</span>
+            </div>
+            <div class="civility-option" data-value="Mme">
+                <span class="civility-icon"><i class="fas fa-female"></i></span>
+                <span>Madame</span>
+            </div>
+        </div>
+        <input type="hidden" id="new-admin-civility" name="new-admin-civility" value="" required>
+    </div>
+</div>
+
+            
+            <div class="mb-3">
+                <label for="new-admin-username" class="form-label">Nom d'utilisateur</label>
+                <input type="text" class="form-control" id="new-admin-username" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="new-admin-password" class="form-label">Mot de passe temporaire</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="new-admin-password" required>
+                    <button class="btn btn-outline-secondary" type="button" id="generate-password">
+                        <i class="fas fa-dice"></i>
+                    </button>
                 </div>
             </div>
+            
+            <div class="temp-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                N'oubliez pas de supprimer les comptes administrateurs temporaires après utilisation.
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 mt-3">
+                <i class="fas fa-plus-circle me-2"></i> Ajouter l'administrateur
+            </button>
+        </form>
+    </div>
+</div>
+
         </div>
         
         <!-- Liste des administrateurs -->
@@ -3446,7 +3588,9 @@
 </div>
         
         </div>
-    
+   
+
+
     
     <!-- Modales pour les réglages de thème/langue -->
 <div id="ThemeLangMode_themePopup" class="ThemeLangMode_popup">
@@ -3468,6 +3612,22 @@
                 </label>
             </div>
         </div>
+        <!-- Dans ThemeLangMode_themePopup -->
+<div class="ThemeLangMode_option-group">
+    <div class="ThemeLangMode_toggle-group">
+        <div class="ThemeLangMode_toggle-label">
+            <i class="fas fa-paint-brush ThemeLangMode_toggle-icon"></i>
+            Mode Modern UI
+        </div>
+        <label class="ThemeLangMode_toggle-switch">
+            <input type="checkbox" id="ThemeLangMode_modernUIToggle">
+            <span class="ThemeLangMode_toggle-slider"></span>
+        </label>
+    </div>
+</div>
+
+
+
         <div class="ThemeLangMode_option-group">
             <label class="ThemeLangMode_option-label">Couleurs du thème</label>
             <div class="ThemeLangMode_themes">
@@ -3553,7 +3713,9 @@
     </div>
 </div>
     
-    </div>
+        </div>
+</div>
+
 
     <!-- Notification Center -->
     <div id="notification-center"></div>
@@ -3929,6 +4091,31 @@
             <div class="modal-body">
                 <form id="edit-admin-form">
                     <input type="hidden" id="edit-admin-id">
+                    
+<div class="mb-3">
+    <label for="edit-admin-civility" class="form-label">Civilité</label>
+    <div class="civility-selector-container" id="civility_edit_admin_container">
+        <div class="civility-selector" id="civility_edit_admin_selector" tabindex="0">
+            <span class="civility-selector-text">
+                <span>Sélectionnez une civilité</span>
+            </span>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="civility-dropdown" id="civility_edit_admin_dropdown">
+            <div class="civility-option" data-value="M">
+                <span class="civility-icon"><i class="fas fa-male"></i></span>
+                <span>Monsieur</span>
+            </div>
+            <div class="civility-option" data-value="Mme">
+                <span class="civility-icon"><i class="fas fa-female"></i></span>
+                <span>Madame</span>
+            </div>
+        </div>
+        <input type="hidden" id="edit-admin-civility" name="edit-admin-civility" value="" required>
+    </div>
+</div>
+
+                    
                     <div class="mb-3">
                         <label for="edit-admin-username" class="form-label">Nom d'utilisateur</label>
                         <input type="text" class="form-control" id="edit-admin-username" required>
@@ -3962,6 +4149,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- Modale de confirmation de suppression d'admin -->
 <div class="modal fade" id="deleteAdminModal" tabindex="-1" aria-hidden="true">
